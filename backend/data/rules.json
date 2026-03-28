@@ -1,0 +1,12 @@
+{
+  "_note": "Replace this file with your actual rules.json",
+  "version": "1.0",
+  "categories": {
+    "logo_rules": [],
+    "color_rules": [],
+    "typography_rules": [],
+    "gradient_rules": [],
+    "background_rules": [],
+    "regulatory_rules": []
+  }
+}
