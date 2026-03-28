@@ -20,6 +20,7 @@ import { getRules } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { RulesSkeleton } from "@/components/Skeletons";
 
 type RuleItem = {
   id?: string;
@@ -127,12 +128,7 @@ export default function RulesPage() {
           </div>
         </div>
 
-        {loading && (
-          <div className="flex items-center gap-3 text-sm text-muted-foreground py-12 justify-center">
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Loading compliance rules...
-          </div>
-        )}
+        {loading && <RulesSkeleton />}
 
         {error && (
           <Card className="border-red-500/30 bg-red-500/5">

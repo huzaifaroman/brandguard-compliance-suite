@@ -8,7 +8,7 @@ Evaluates marketing images against 62 ZONNIC brand compliance rules using a mult
 - **Frontend**: Next.js 15 (App Router, TypeScript, Turbopack) on port 5000 (webview)
 - **AI Services**: Azure Computer Vision 4.0 + Azure OpenAI GPT-4.1
 - **Storage**: Azure Blob Storage (images), PostgreSQL (analyses/history/chat), Upstash Redis (caching)
-- **UI Framework**: shadcn/ui + Tailwind CSS + Framer Motion, dark-first theme
+- **UI Framework**: shadcn/ui + Tailwind CSS + Framer Motion + Recharts, dark-first theme with light mode toggle
 
 ## Project Structure
 ```
@@ -20,30 +20,32 @@ backend/
   data/rules.json      # ZONNIC brand rules (62 rules, 10 categories + checklist)
   models/schemas.py    # Pydantic models (ComplianceResult, Violation with bbox/evidence/fix_suggestion)
   routers/
-    compliance.py      # POST /api/analyze — single image analysis
-    batch.py           # POST /api/batch — parallel multi-image analysis (up to 10)
+    compliance.py      # POST /api/analyze — single image analysis (20MB limit, MIME validation)
+    batch.py           # POST /api/batch — parallel multi-image analysis (up to 10, per-file validation)
     rules.py           # GET /api/rules — returns loaded brand rules (Redis-cached)
-    history.py         # GET /api/history — paginated analysis audit log (Redis-cached)
-    chat.py            # GET/POST /api/chat/{session_id} — streaming AI chat follow-up
+    history.py         # GET /api/history — paginated analysis audit log (Redis-cached, error handling)
+    chat.py            # GET/POST /api/chat/{session_id} — streaming AI chat follow-up (error handling)
   services/
-    vision_service.py  # Azure Vision 4.0 (captions, dense_captions, tags, objects, OCR)
+    vision_service.py  # Azure Vision 4.0 (captions, dense_captions, tags, objects, OCR) with retries
     llm_service.py     # GPT-4.1 compliance reasoning (strict JSON schema, temp=0, seed=42) + streaming chat
     blob_service.py    # Azure Blob Storage upload with PIL dimensions
     compliance_engine.py # Orchestrates: hash → cache check → blob upload → vision → LLM → DB persist → cache
 frontend/
   app/
     page.tsx           # Redirects to /analyze
-    analyze/page.tsx   # Hero feature: drag-drop, bounding box overlay, verdict banner, chat panel
-    batch/page.tsx     # Multi-image upload, parallel analysis, summary dashboard
-    rules/page.tsx     # Categorized rule browser with search, severity badges
-    history/page.tsx   # Audit log with consistency verification, hash grouping
-    layout.tsx         # Root layout with sidebar, dark theme, TooltipProvider
-    globals.css        # Premium dark theme (oklch colors, glass utilities, brand colors)
+    analyze/page.tsx   # Drag-drop upload, Recharts radial confidence arc, bounding box SVG overlay, verdict with spring animation, chat panel with streaming
+    batch/page.tsx     # Multi-image upload, Recharts donut chart summary, expandable results table, CSV/PDF export
+    rules/page.tsx     # Categorized rule browser with search, severity badges, collapsible sections
+    history/page.tsx   # Audit log with consistency verification, hash grouping, empty states
+    layout.tsx         # Root layout with sidebar, dark theme, TooltipProvider, ErrorBoundary
+    globals.css        # Premium oklch dark/light theme, glass utilities, brand colors, custom scrollbars
   components/
-    Sidebar.tsx        # Navigation with service health indicators (Vision, GPT, DB, Cache)
-    ui/                # shadcn/ui components (button, card, badge, progress, tabs, etc.)
+    Sidebar.tsx        # Navigation with descriptions, theme toggle, service health indicators
+    ThemeToggle.tsx     # Dark/light mode toggle
+    ErrorBoundary.tsx   # React error boundary with retry button
+    ui/                # shadcn/ui components (button, card, badge, progress, tabs, dialog, etc.)
   lib/
-    api.ts             # Fetch-based API client (analyze, batch, rules, history, chat streaming)
+    api.ts             # Fetch-based API client (analyze, batch, rules, history, chat streaming via SSE)
     types.ts           # TypeScript interfaces (Violation, ComplianceResult, ChatMessage, etc.)
   next.config.ts       # Rewrites /api/* → backend:8000, Azure Blob image remotePatterns
 ```
@@ -72,3 +74,16 @@ frontend/
 - Bounding boxes are pixel coordinates from Azure Vision, rendered as SVG overlay on the image
 - Chat sessions are linked to analysis records via chat_sessions table
 - All timestamps use TIMESTAMPTZ (PostgreSQL) for timezone awareness
+- Only successful analyses (confidence > 0) are cached to prevent error caching
+- File validation enforced on both single and batch endpoints (20MB, MIME types)
+- DB operations in chat/history have try/except with graceful degradation
+
+## Frontend Features
+- Recharts radial arc meter for confidence display on analyze page
+- Recharts donut chart for batch summary (pass/fail/warning distribution)
+- CSV and PDF export for batch results (jsPDF for PDF generation)
+- Dark/light mode toggle in sidebar
+- Framer Motion spring-physics animations on verdict badges and chat messages
+- ErrorBoundary wrapping all page content
+- Empty states on all pages
+- Interactive bounding box overlay with hover cross-highlighting between violation list and image

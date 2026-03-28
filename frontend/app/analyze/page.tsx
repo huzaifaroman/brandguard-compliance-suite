@@ -15,8 +15,8 @@ import {
   Zap,
   Eye,
   MessageSquare,
-  X,
 } from "lucide-react";
+import { RadialBarChart, RadialBar, PolarAngleAxis } from "recharts";
 import { analyzeImage, getChatMessages, streamChatMessage } from "@/lib/api";
 import type { ComplianceResult, Violation, ChatMessage } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
@@ -39,9 +39,9 @@ const severityConfig = {
 };
 
 const verdictConfig = {
-  PASS: { icon: ShieldCheck, color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/30", glow: "shadow-[0_0_30px_rgba(34,197,94,0.15)]", label: "Compliant" },
-  FAIL: { icon: ShieldAlert, color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/30", glow: "shadow-[0_0_30px_rgba(239,68,68,0.15)]", label: "Non-Compliant" },
-  WARNING: { icon: ShieldQuestion, color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/30", glow: "shadow-[0_0_30px_rgba(245,158,11,0.15)]", label: "Needs Review" },
+  PASS: { icon: ShieldCheck, color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/30", glow: "shadow-[0_0_30px_rgba(34,197,94,0.15)]", label: "Compliant", fill: "#22c55e" },
+  FAIL: { icon: ShieldAlert, color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/30", glow: "shadow-[0_0_30px_rgba(239,68,68,0.15)]", label: "Non-Compliant", fill: "#ef4444" },
+  WARNING: { icon: ShieldQuestion, color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/30", glow: "shadow-[0_0_30px_rgba(245,158,11,0.15)]", label: "Needs Review", fill: "#f59e0b" },
 };
 
 export default function AnalyzePage() {
@@ -357,19 +357,52 @@ export default function AnalyzePage() {
                 {(() => {
                   const vc = verdictConfig[result.verdict];
                   const VIcon = vc.icon;
+                  const chartData = [{ value: result.confidence, fill: vc.fill }];
                   return (
                     <Card className={`${vc.border} ${vc.glow} overflow-hidden`}>
                       <CardContent className="p-0">
                         <div className={`flex items-center gap-4 p-5 ${vc.bg}`}>
-                          <div className={`p-3 rounded-xl ${vc.bg}`}>
-                            <VIcon className={`w-7 h-7 ${vc.color}`} />
+                          <div className="relative flex-shrink-0">
+                            <RadialBarChart
+                              width={80}
+                              height={80}
+                              cx={40}
+                              cy={40}
+                              innerRadius={28}
+                              outerRadius={38}
+                              barSize={8}
+                              data={chartData}
+                              startAngle={90}
+                              endAngle={-270}
+                            >
+                              <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
+                              <RadialBar
+                                dataKey="value"
+                                cornerRadius={4}
+                                background={{ fill: "rgba(255,255,255,0.08)" }}
+                              />
+                            </RadialBarChart>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className={`text-sm font-bold ${vc.color}`}>{result.confidence}%</span>
+                            </div>
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-3 mb-1">
-                              <span className={`text-lg font-bold ${vc.color}`}>{vc.label}</span>
-                              <Badge variant="outline" className={`${vc.color} ${vc.border} text-xs`}>
-                                {result.confidence}% confidence
-                              </Badge>
+                              <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                              >
+                                <VIcon className={`w-6 h-6 ${vc.color}`} />
+                              </motion.div>
+                              <motion.span
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.1 }}
+                                className={`text-lg font-bold ${vc.color}`}
+                              >
+                                {vc.label}
+                              </motion.span>
                               {result.cached && (
                                 <Badge variant="outline" className="text-blue-400 border-blue-500/30 text-xs gap-1">
                                   <Zap className="w-3 h-3" /> Cached
@@ -452,22 +485,27 @@ export default function AnalyzePage() {
                                   </p>
                                 </div>
                               )}
-                              {chatMessages.map((msg, i) => (
-                                <div
-                                  key={i}
-                                  className={`mb-3 ${msg.role === "user" ? "text-right" : ""}`}
-                                >
-                                  <div
-                                    className={`inline-block max-w-[85%] px-3 py-2 rounded-lg text-sm ${
-                                      msg.role === "user"
-                                        ? "bg-primary text-primary-foreground"
-                                        : "bg-muted text-foreground"
-                                    }`}
+                              <AnimatePresence initial={false}>
+                                {chatMessages.map((msg, i) => (
+                                  <motion.div
+                                    key={i}
+                                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                                    className={`mb-3 ${msg.role === "user" ? "text-right" : ""}`}
                                   >
-                                    <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
-                                  </div>
-                                </div>
-                              ))}
+                                    <div
+                                      className={`inline-block max-w-[85%] px-3 py-2 rounded-lg text-sm ${
+                                        msg.role === "user"
+                                          ? "bg-primary text-primary-foreground"
+                                          : "bg-muted text-foreground"
+                                      }`}
+                                    >
+                                      <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                                    </div>
+                                  </motion.div>
+                                ))}
+                              </AnimatePresence>
                               <div ref={chatEndRef} />
                             </ScrollArea>
                             <div className="flex gap-2">

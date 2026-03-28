@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { HistorySkeleton } from "@/components/Skeletons";
 import {
   Tooltip,
   TooltipContent,
@@ -86,12 +87,7 @@ export default function HistoryPage() {
           </div>
         </motion.div>
 
-        {loading && items.length === 0 && (
-          <div className="flex items-center gap-3 text-sm text-muted-foreground py-12 justify-center">
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Loading history...
-          </div>
-        )}
+        {loading && items.length === 0 && <HistorySkeleton />}
 
         {error && (
           <Card className="border-red-500/30 bg-red-500/5">

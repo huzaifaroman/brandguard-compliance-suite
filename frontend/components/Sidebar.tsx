@@ -14,6 +14,7 @@ import {
   Activity,
   CircleDot,
 } from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const navItems = [
   { href: "/analyze", label: "Analyze", icon: Scan, description: "Single image" },
@@ -81,6 +82,10 @@ export default function Sidebar() {
           );
         })}
       </nav>
+
+      <div className="px-3 pb-2">
+        <ThemeToggle />
+      </div>
 
       <div className="p-4 border-t border-border">
         <div className="flex items-center gap-2 mb-2">

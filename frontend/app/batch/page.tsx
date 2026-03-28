@@ -14,7 +14,10 @@ import {
   ShieldQuestion,
   X,
   RotateCcw,
+  Download,
+  FileText,
 } from "lucide-react";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
 import { batchAnalyze } from "@/lib/api";
 import type { BatchResult } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +27,7 @@ import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const MAX_FILES = 10;
+const DONUT_COLORS = { passed: "#22c55e", failed: "#ef4444", warnings: "#f59e0b" };
 
 export default function BatchPage() {
   const [files, setFiles] = useState<File[]>([]);
@@ -84,6 +88,67 @@ export default function BatchPage() {
     setExpandedRows(new Set());
   };
 
+  const exportCSV = () => {
+    if (!result) return;
+    const headers = ["Image", "Verdict", "Confidence", "Violations", "Rule IDs", "Issues"];
+    const rows = result.results.map((r) => [
+      r.image_name,
+      r.verdict,
+      String(r.confidence),
+      String(r.violations.length),
+      r.violations.map((v) => v.rule_id).join("; "),
+      r.violations.map((v) => v.issue).join("; "),
+    ]);
+    const csv = [headers, ...rows].map((row) => row.map((c) => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `compliance-batch-${result.batch_id.slice(0, 8)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportPDF = async () => {
+    if (!result) return;
+    const { jsPDF } = await import("jspdf");
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text("Compliance Batch Report", 14, 20);
+    doc.setFontSize(10);
+    doc.text(`Batch ID: ${result.batch_id}`, 14, 30);
+    doc.text(`Total: ${result.total_images} | Passed: ${result.summary.passed} | Failed: ${result.summary.failed} | Warnings: ${result.summary.warnings}`, 14, 38);
+
+    let y = 50;
+    result.results.forEach((r, i) => {
+      if (y > 260) {
+        doc.addPage();
+        y = 20;
+      }
+      doc.setFontSize(12);
+      doc.text(`${i + 1}. ${r.image_name} — ${r.verdict} (${r.confidence}%)`, 14, y);
+      y += 8;
+      if (r.violations.length > 0) {
+        doc.setFontSize(9);
+        r.violations.forEach((v) => {
+          if (y > 270) {
+            doc.addPage();
+            y = 20;
+          }
+          doc.text(`  [${v.rule_id}] ${v.severity}: ${v.issue}`, 18, y);
+          y += 6;
+          if (v.fix_suggestion) {
+            doc.text(`    Fix: ${v.fix_suggestion}`, 22, y);
+            y += 6;
+          }
+        });
+      }
+      y += 4;
+    });
+
+    doc.save(`compliance-batch-${result.batch_id.slice(0, 8)}.pdf`);
+  };
+
   const verdictIcon = (v: string) => {
     if (v === "PASS") return <ShieldCheck className="w-4 h-4 text-green-400" />;
     if (v === "FAIL") return <ShieldAlert className="w-4 h-4 text-red-400" />;
@@ -92,6 +157,14 @@ export default function BatchPage() {
 
   const verdictColor = (v: string) =>
     v === "PASS" ? "text-green-400" : v === "FAIL" ? "text-red-400" : "text-amber-400";
+
+  const donutData = result
+    ? [
+        { name: "Passed", value: result.summary.passed, color: DONUT_COLORS.passed },
+        { name: "Failed", value: result.summary.failed, color: DONUT_COLORS.failed },
+        { name: "Warnings", value: result.summary.warnings, color: DONUT_COLORS.warnings },
+      ].filter((d) => d.value > 0)
+    : [];
 
   return (
     <div className="min-h-screen p-6 lg:p-8">
@@ -201,14 +274,48 @@ export default function BatchPage() {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6"
           >
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card className="md:row-span-1">
+                <CardContent className="p-4 flex items-center justify-center">
+                  <div className="w-[140px] h-[140px] relative">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={donutData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={40}
+                          outerRadius={60}
+                          paddingAngle={3}
+                          dataKey="value"
+                          strokeWidth={0}
+                        >
+                          {donutData.map((entry, idx) => (
+                            <Cell key={idx} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <RechartsTooltip
+                          contentStyle={{ background: "rgba(23,23,30,0.95)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "8px", fontSize: "12px" }}
+                          itemStyle={{ color: "#e5e5e5" }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-center">
+                        <p className="text-xl font-bold">{result.total_images}</p>
+                        <p className="text-[10px] text-muted-foreground">images</p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
               {[
                 { label: "Passed", count: result.summary.passed, color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/20" },
                 { label: "Failed", count: result.summary.failed, color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/20" },
                 { label: "Warnings", count: result.summary.warnings, color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
               ].map(({ label, count, color, bg, border }) => (
                 <Card key={label} className={`${border} ${bg}`}>
-                  <CardContent className="p-5 text-center">
+                  <CardContent className="p-5 text-center flex flex-col items-center justify-center h-full">
                     <p className={`text-3xl font-bold ${color}`}>{count}</p>
                     <p className={`text-xs mt-1 ${color}`}>{label}</p>
                   </CardContent>
@@ -217,6 +324,21 @@ export default function BatchPage() {
             </div>
 
             <Card>
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm">Results</CardTitle>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={exportCSV} className="gap-1.5 h-8 text-xs">
+                      <Download className="w-3.5 h-3.5" />
+                      CSV
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={exportPDF} className="gap-1.5 h-8 text-xs">
+                      <FileText className="w-3.5 h-3.5" />
+                      PDF
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
               <CardContent className="p-0">
                 <ScrollArea className="max-h-[600px]">
                   <table className="w-full text-sm">
@@ -272,7 +394,11 @@ export default function BatchPage() {
                           {expandedRows.has(i) && r.violations.length > 0 && (
                             <tr>
                               <td colSpan={5} className="p-4 bg-muted/10">
-                                <div className="space-y-2">
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: "auto" }}
+                                  className="space-y-2"
+                                >
                                   {r.violations.map((v, j) => (
                                     <div
                                       key={j}
@@ -280,17 +406,26 @@ export default function BatchPage() {
                                     >
                                       <div className="flex items-center gap-2 mb-1">
                                         <code className="text-xs font-mono font-bold text-primary">{v.rule_id}</code>
-                                        <Badge variant="outline" className="text-[10px] px-1.5">
+                                        <Badge variant="outline" className={`text-[10px] px-1.5 ${
+                                          v.severity === "critical" ? "text-red-400 border-red-500/30"
+                                          : v.severity === "high" ? "text-orange-400 border-orange-500/30"
+                                          : "text-yellow-400 border-yellow-500/30"
+                                        }`}>
                                           {v.severity}
                                         </Badge>
                                       </div>
                                       <p className="text-sm mb-1">{v.issue}</p>
+                                      {v.evidence && (
+                                        <p className="text-xs text-muted-foreground mb-1">
+                                          <span className="font-medium">Evidence:</span> {v.evidence}
+                                        </p>
+                                      )}
                                       {v.fix_suggestion && (
                                         <p className="text-xs text-green-400/80">Fix: {v.fix_suggestion}</p>
                                       )}
                                     </div>
                                   ))}
-                                </div>
+                                </motion.div>
                               </td>
                             </tr>
                           )}
