@@ -1,6 +1,9 @@
+import logging
 from fastapi import APIRouter
 from backend.models.schemas import HistoryResponse, HistoryItem
 from backend import database, redis_client
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api", tags=["history"])
 
@@ -18,19 +21,23 @@ async def get_history(limit: int = 50, offset: int = 0):
     if pool is None:
         return HistoryResponse(items=[], total=0)
 
-    async with pool.acquire() as conn:
-        rows = await conn.fetch(
-            """
-            SELECT id, image_hash, blob_url, verdict, confidence,
-                   jsonb_array_length(violations_json) as violations_count,
-                   session_id, timestamp
-            FROM analyses
-            ORDER BY timestamp DESC
-            LIMIT $1 OFFSET $2
-            """,
-            limit, offset,
-        )
-        total = await conn.fetchval("SELECT COUNT(*) FROM analyses")
+    try:
+        async with pool.acquire() as conn:
+            rows = await conn.fetch(
+                """
+                SELECT id, image_hash, blob_url, verdict, confidence,
+                       jsonb_array_length(violations_json) as violations_count,
+                       session_id, timestamp
+                FROM analyses
+                ORDER BY timestamp DESC
+                LIMIT $1 OFFSET $2
+                """,
+                limit, offset,
+            )
+            total = await conn.fetchval("SELECT COUNT(*) FROM analyses")
+    except Exception as e:
+        logger.error(f"History DB query error: {e}")
+        return HistoryResponse(items=[], total=0)
 
     items = [
         HistoryItem(

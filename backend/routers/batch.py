@@ -33,7 +33,32 @@ async def batch_analyze(
 
     async def process_one(file: UploadFile) -> BatchImageResult:
         try:
+            if file.content_type and file.content_type not in ALLOWED_TYPES:
+                return BatchImageResult(
+                    image_name=file.filename or "image.png",
+                    verdict="WARNING",
+                    confidence=0,
+                    error=f"Unsupported file type: {file.content_type}",
+                )
+
             file_bytes = await file.read()
+
+            if len(file_bytes) == 0:
+                return BatchImageResult(
+                    image_name=file.filename or "image.png",
+                    verdict="WARNING",
+                    confidence=0,
+                    error="Empty file",
+                )
+
+            if len(file_bytes) > MAX_FILE_SIZE:
+                return BatchImageResult(
+                    image_name=file.filename or "image.png",
+                    verdict="WARNING",
+                    confidence=0,
+                    error="File too large (max 20MB)",
+                )
+
             result = await analyze_single_image(file_bytes, file.filename or "image.png", rules)
             return BatchImageResult(
                 image_name=file.filename or "image.png",
