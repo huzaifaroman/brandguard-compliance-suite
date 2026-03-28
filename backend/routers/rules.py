@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request
-from models.schemas import RulesResponse
+from backend.models.schemas import RulesResponse
 
 router = APIRouter(prefix="/api", tags=["rules"])
 

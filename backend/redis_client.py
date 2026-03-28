@@ -1,7 +1,7 @@
 import json
 from typing import Optional
 import redis.asyncio as aioredis
-from config import settings
+from backend.config import settings
 
 _client = None
 

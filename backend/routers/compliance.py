@@ -1,9 +1,8 @@
 from fastapi import APIRouter, UploadFile, File, Form, Request
-from fastapi.responses import StreamingResponse
 from typing import Optional
 
-from models.schemas import ComplianceResult
-from services.compliance_engine import analyze_single_image
+from backend.models.schemas import ComplianceResult
+from backend.services.compliance_engine import analyze_single_image
 
 router = APIRouter(prefix="/api", tags=["compliance"])
 

@@ -1,13 +1,12 @@
 import hashlib
 import uuid
+import json
 from typing import Optional
-from fastapi import UploadFile
 
-from services.blob_service import upload_image
-from services.vision_service import analyze_image
-from services.llm_service import analyze_compliance
-import redis_client
-import database
+from backend.services.blob_service import upload_image
+from backend.services.vision_service import analyze_image
+from backend.services.llm_service import analyze_compliance
+from backend import redis_client, database
 
 
 async def analyze_single_image(
@@ -28,9 +27,7 @@ async def analyze_single_image(
         return cached
 
     blob_url, width, height = await upload_image(file_bytes, f"{image_hash[:16]}_{filename}")
-
     vision_signals = await analyze_image(file_bytes)
-
     llm_result = await analyze_compliance(vision_signals, rules, prompt)
 
     session_id = str(uuid.uuid4())
@@ -60,24 +57,16 @@ async def analyze_single_image(
                 VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10)
                 RETURNING id
                 """,
-                image_hash,
-                blob_url,
-                width,
-                height,
-                result["verdict"],
-                result["confidence"],
-                str(result["violations"]).replace("'", '"'),
-                result["checks_passed"],
-                prompt,
-                session_id,
+                image_hash, blob_url, width, height,
+                result["verdict"], result["confidence"],
+                json.dumps(result["violations"]),
+                result["checks_passed"], prompt, session_id,
             )
             analysis_id = row["id"]
             await conn.execute(
                 "INSERT INTO chat_sessions (session_id, analysis_id) VALUES ($1, $2)",
-                session_id,
-                analysis_id,
+                session_id, analysis_id,
             )
 
     await redis_client.cache_analysis(image_hash, result)
-
     return result

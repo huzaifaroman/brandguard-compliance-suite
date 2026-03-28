@@ -1,5 +1,5 @@
 import asyncpg
-from config import settings
+from backend.config import settings
 
 _pool = None
 
@@ -34,9 +34,7 @@ async def init_db():
                 timestamp TIMESTAMPTZ DEFAULT NOW()
             )
         """)
-        await conn.execute("""
-            CREATE INDEX IF NOT EXISTS idx_analyses_hash ON analyses(image_hash)
-        """)
+        await conn.execute("CREATE INDEX IF NOT EXISTS idx_analyses_hash ON analyses(image_hash)")
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS batches (
                 id SERIAL PRIMARY KEY,
@@ -64,9 +62,7 @@ async def init_db():
                 timestamp TIMESTAMPTZ DEFAULT NOW()
             )
         """)
-        await conn.execute("""
-            CREATE INDEX IF NOT EXISTS idx_chat_messages_session ON chat_messages(session_id)
-        """)
+        await conn.execute("CREATE INDEX IF NOT EXISTS idx_chat_messages_session ON chat_messages(session_id)")
     print("Database initialized successfully")
 
 

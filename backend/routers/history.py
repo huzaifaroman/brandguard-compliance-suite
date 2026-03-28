@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 from typing import List
 
-from models.schemas import HistoryResponse, HistoryItem
-import database
+from backend.models.schemas import HistoryResponse, HistoryItem
+from backend import database
 
 router = APIRouter(prefix="/api", tags=["history"])
 
@@ -23,8 +23,7 @@ async def get_history(limit: int = 50, offset: int = 0):
             ORDER BY timestamp DESC
             LIMIT $1 OFFSET $2
             """,
-            limit,
-            offset,
+            limit, offset,
         )
         total = await conn.fetchval("SELECT COUNT(*) FROM analyses")
 

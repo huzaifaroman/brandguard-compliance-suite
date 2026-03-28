@@ -5,17 +5,17 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from config import settings
-import database
-import redis_client
-from routers import compliance, batch, rules, history, chat
+from backend.config import settings
+from backend import database, redis_client
+from backend.routers import compliance, batch, rules, history, chat
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     rules_path = settings.rules_file_path
     if not os.path.isabs(rules_path):
-        rules_path = os.path.join(os.path.dirname(__file__), "..", rules_path)
+        base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        rules_path = os.path.join(base, rules_path)
         rules_path = os.path.normpath(rules_path)
 
     try:
@@ -23,7 +23,7 @@ async def lifespan(app: FastAPI):
             app.state.rules = json.load(f)
         print(f"Rules loaded from {rules_path}")
     except FileNotFoundError:
-        local_path = os.path.join(os.path.dirname(__file__), "data", "rules.json")
+        local_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "rules.json")
         try:
             with open(local_path, "r") as f:
                 app.state.rules = json.load(f)

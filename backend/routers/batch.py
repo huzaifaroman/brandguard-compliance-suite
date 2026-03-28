@@ -4,9 +4,9 @@ import json
 from fastapi import APIRouter, UploadFile, File, Request
 from typing import List
 
-from models.schemas import BatchResult, BatchSummary, BatchImageResult
-from services.compliance_engine import analyze_single_image
-import database
+from backend.models.schemas import BatchResult, BatchSummary, BatchImageResult
+from backend.services.compliance_engine import analyze_single_image
+from backend import database
 
 router = APIRouter(prefix="/api", tags=["batch"])
 
@@ -68,9 +68,7 @@ async def batch_analyze(
                         analysis_ids.append(row["id"])
             await conn.execute(
                 "INSERT INTO batches (batch_id, analysis_ids, summary_json) VALUES ($1, $2, $3::jsonb)",
-                batch_id,
-                analysis_ids,
-                json.dumps(summary.model_dump()),
+                batch_id, analysis_ids, json.dumps(summary.model_dump()),
             )
 
     return BatchResult(

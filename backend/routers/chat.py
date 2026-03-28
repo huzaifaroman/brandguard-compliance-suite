@@ -3,10 +3,9 @@ from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 from typing import List
 
-from models.schemas import ChatMessage, ChatRequest
-from services.llm_service import chat_followup
-import database
-import redis_client
+from backend.models.schemas import ChatMessage, ChatRequest
+from backend.services.llm_service import chat_followup
+from backend import database, redis_client
 
 router = APIRouter(prefix="/api", tags=["chat"])
 
