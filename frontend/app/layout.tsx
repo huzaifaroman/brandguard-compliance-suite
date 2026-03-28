@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Sidebar from "@/components/Sidebar";
-import ErrorBoundary from "@/components/ErrorBoundary";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import ClientShell from "@/components/ClientShell";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,20 +25,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
-      <head>
-        <script src="/ext-filter.js" />
-      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
-        <TooltipProvider>
-          <div className="flex min-h-screen">
-            <Sidebar />
-            <main className="flex-1 overflow-auto" style={{ marginLeft: "var(--sidebar-width)" }}>
-              <ErrorBoundary>
-                {children}
-              </ErrorBoundary>
-            </main>
-          </div>
-        </TooltipProvider>
+        <ClientShell>{children}</ClientShell>
       </body>
     </html>
   );
