@@ -22,6 +22,10 @@ args = "Backend API"
 task = "workflow.run"
 args = "Start application"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "URL Proxy"
+
 [[workflows.workflow]]
 name = "Backend API"
 author = "agent"
@@ -46,13 +50,21 @@ task = "shell.exec"
 args = "cd frontend && npm run dev"
 waitForPort = 5000
 
+[[workflows.workflow]]
+name = "URL Proxy"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node proxy3000.js"
+waitForPort = 3000
+
+[workflows.workflow.metadata]
+outputType = "console"
+
 [[ports]]
 localPort = 3000
 externalPort = 3000
-
-[[ports]]
-localPort = 5000
-externalPort = 5000
 
 [[ports]]
 localPort = 8000
