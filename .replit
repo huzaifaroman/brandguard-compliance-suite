@@ -47,9 +47,9 @@ args = "cd frontend && npm run dev"
 waitForPort = 3000
 
 [[ports]]
-localPort = 8000
-externalPort = 8000
-
-[[ports]]
 localPort = 3000
 externalPort = 3000
+
+[[ports]]
+localPort = 8000
+externalPort = 8000

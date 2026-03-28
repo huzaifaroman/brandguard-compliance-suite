@@ -6,8 +6,8 @@ _pool = None
 
 async def get_pool():
     global _pool
-    if _pool is None and settings.postgres_url:
-        _pool = await asyncpg.create_pool(settings.postgres_url)
+    if _pool is None and settings.database_url:
+        _pool = await asyncpg.create_pool(settings.database_url)
     return _pool
 
 

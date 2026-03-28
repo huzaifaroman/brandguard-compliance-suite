@@ -76,6 +76,6 @@ async def health():
         "azure_openai_configured": bool(settings.azure_openai_endpoint),
         "azure_vision_configured": bool(settings.azure_vision_endpoint),
         "azure_blob_configured": bool(settings.azure_blob_connection_string),
-        "postgres_configured": bool(settings.postgres_url),
+        "postgres_configured": bool(settings.database_url),
         "redis_configured": bool(settings.upstash_redis_url),
     }

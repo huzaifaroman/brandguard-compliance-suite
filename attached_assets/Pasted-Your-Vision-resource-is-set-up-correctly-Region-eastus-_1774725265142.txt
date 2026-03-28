@@ -1,0 +1,70 @@
+Your Vision resource is set up correctly. Region eastus, endpoint ready, keys available. Now let me check the exact API version and features you need.Your resource setup is correct. Here's exactly what you have and what you'll use:
+
+**Your resource:**
+- Name: Azurevision-test132121
+- Type: Computer Vision (correct)
+- Region: eastus (correct)
+- Endpoint: `https://azurevision-test132121.cognitiveservices.azure.com/`
+
+**The API you'll use: Image Analysis 4.0 (GA)**
+
+This is the latest generally available version. It's powered by Florence (Microsoft's vision foundation model). One single API call gives you everything you need for compliance checking.
+
+**The Python SDK package:**
+```
+pip install azure-ai-vision-imageanalysis
+```
+
+**The features you'll use from one `analyze()` call:**
+
+| Feature | What it gives you | Why you need it |
+|---|---|---|
+| `CAPTION` | "A marketing poster with ZONNIC logo on green gradient" | Understands the overall image context |
+| `DENSE_CAPTIONS` | Descriptions of 10 regions + bounding boxes | Identifies what's in each area of the image |
+| `TAGS` | ["logo", "text", "gradient", "product", "green"] | Quick signals for rule matching |
+| `OBJECTS` | Detected objects + bounding boxes | Locates logo, product, shapes |
+| `READ` (OCR) | All text found + bounding polygons per word | Finds "ZONNIC", warning text, 18+ icon text |
+
+**Here's exactly how your backend will call it:**
+
+```python
+from azure.ai.vision.imageanalysis import ImageAnalysisClient
+from azure.ai.vision.imageanalysis.models import VisualFeatures
+from azure.core.credentials import AzureKeyCredential
+
+client = ImageAnalysisClient(
+    endpoint="https://azurevision-test132121.cognitiveservices.azure.com/",
+    credential=AzureKeyCredential("your-key-here")
+)
+
+# Single call — gets everything
+result = client.analyze(
+    image_data=image_bytes,  # raw bytes of uploaded image
+    visual_features=[
+        VisualFeatures.CAPTION,
+        VisualFeatures.DENSE_CAPTIONS,
+        VisualFeatures.TAGS,
+        VisualFeatures.OBJECTS,
+        VisualFeatures.READ,
+    ]
+)
+
+# What you get back:
+# result.caption.text → "A marketing image with ZONNIC branding on green gradient"
+# result.caption.confidence → 0.89
+
+# result.dense_captions.list → [{text: "logo in center", bbox: {x,y,w,h}}, ...]
+
+# result.tags.list → [{name: "logo", confidence: 0.95}, {name: "gradient", confidence: 0.88}]
+
+# result.objects.list → [{tags: [{name: "text"}], bounding_box: {x,y,w,h}}]
+
+# result.read.blocks[0].lines → [{text: "ZONNIC", bounding_polygon: [...]}]
+# result.read.blocks[0].lines → [{text: "WARNING:", bounding_polygon: [...]}]
+```
+
+**One important thing about eastus region:** Caption and Dense Captions features in Image Analysis 4.0 are only supported in specific regions. Eastus IS supported, so you're good. If it wasn't, you'd only get tags/objects/OCR but no captions.
+
+**What happens after this Vision call:** You take all the extracted signals (caption text, tags, OCR text, detected objects with bounding boxes, dominant colors) and package them into a structured dict. Then you send that dict + your rules JSON to GPT-4.1, which does the actual compliance reasoning. The Vision API is the "eyes" — GPT is the "brain."
+
+Now you need to set up the Azure OpenAI resource with GPT-4.1 deployed. Have you done that already or should I guide you through it?
