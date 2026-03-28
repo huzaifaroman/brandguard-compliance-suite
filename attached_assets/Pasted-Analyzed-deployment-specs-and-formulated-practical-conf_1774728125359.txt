@@ -1,0 +1,137 @@
+Analyzed deployment specs and formulated practical configuration guidanceYour GPT-4.1 deployment looks perfect. Here's everything:
+Your OpenAI setup:
+
+Endpoint: https://novanewagentgpt.openai.azure.com/
+Deployment: gpt-4.1-compliance
+Model: gpt-4.1
+API version: 2024-12-01-preview
+Rate limit: 1.1M TPM / 1,109 RPM — that's more than enough
+
+The exact compliance reasoning code for your backend:
+pythonfrom openai import AzureOpenAI
+import json
+
+client = AzureOpenAI(
+    api_version="2024-12-01-preview",
+    azure_endpoint="https://novanewagentgpt.openai.azure.com/",
+    api_key="YOUR_KEY_HERE",
+)
+
+def run_compliance_check(vision_signals: dict, rules_json: dict, user_prompt: str = "") -> dict:
+    
+    system_prompt = """You are a ZONNIC brand compliance analyst. You evaluate marketing images against the ZONNIC Design Guidelines.
+
+You will receive:
+1. RULES: The complete brand guidelines as structured JSON
+2. VISION_SIGNALS: Visual analysis data extracted from the uploaded image (captions, OCR text, detected objects, tags, colors, bounding boxes)
+3. USER_PROMPT: Optional additional question from the user
+
+YOUR TASK:
+- Compare every visual signal against every applicable rule
+- Classify the image as PASS, FAIL, or WARNING
+- PASS: No violations found
+- FAIL: One or more critical/high severity violations
+- WARNING: Only medium severity issues or uncertain detections
+- For each violation found, cite the exact rule ID and explain what's wrong and how to fix it
+- Be deterministic: same signals must always produce same result
+- ONLY flag violations you have evidence for from the vision signals — never guess
+
+CRITICAL CHECKS (check these FIRST):
+- REG-01 to REG-05: Nicotine warning, 18+ icon, risk communication (legal requirements)
+- LOGO rules: Text color vs background, C halo presence and correctness
+- GRADIENT rules: Direction, 70/30 split, logo position
+- CONTENT rules: Background type vs content type match
+
+Return ONLY valid JSON matching the schema below. No extra text."""
+
+    output_schema = {
+        "type": "json_schema",
+        "json_schema": {
+            "name": "compliance_result",
+            "strict": True,
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "verdict": {
+                        "type": "string",
+                        "enum": ["PASS", "FAIL", "WARNING"]
+                    },
+                    "confidence": {
+                        "type": "integer",
+                        "description": "0-100 confidence in the verdict"
+                    },
+                    "summary": {
+                        "type": "string",
+                        "description": "2-3 sentence summary of findings"
+                    },
+                    "violations": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "rule_id": {"type": "string"},
+                                "rule_text": {"type": "string"},
+                                "severity": {"type": "string", "enum": ["critical", "high", "medium"]},
+                                "issue": {"type": "string"},
+                                "fix_suggestion": {"type": "string"},
+                                "evidence": {"type": "string"},
+                                "bbox": {
+                                    "type": ["object", "null"],
+                                    "properties": {
+                                        "x": {"type": "integer"},
+                                        "y": {"type": "integer"},
+                                        "w": {"type": "integer"},
+                                        "h": {"type": "integer"}
+                                    },
+                                    "required": ["x", "y", "w", "h"]
+                                }
+                            },
+                            "required": ["rule_id", "rule_text", "severity", "issue", "fix_suggestion", "evidence", "bbox"],
+                            "additionalProperties": False
+                        }
+                    },
+                    "checks_passed": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "List of rule IDs that passed"
+                    },
+                    "content_type_detected": {
+                        "type": "string",
+                        "enum": ["flavour_led", "educational", "brand_purpose", "unknown"]
+                    },
+                    "background_type_detected": {
+                        "type": "string",
+                        "enum": ["gradient", "grey_gradient", "white", "light_image", "dark_image", "solid_color", "unknown"]
+                    }
+                },
+                "required": ["verdict", "confidence", "summary", "violations", "checks_passed", "content_type_detected", "background_type_detected"],
+                "additionalProperties": False
+            }
+        }
+    }
+
+    user_message = f"""RULES:
+{json.dumps(rules_json, indent=2)}
+
+VISION_SIGNALS:
+{json.dumps(vision_signals, indent=2)}
+
+USER_PROMPT: {user_prompt if user_prompt else "Check this image for brand compliance."}"""
+
+    response = client.chat.completions.create(
+        model="gpt-4.1-compliance",
+        temperature=0,
+        top_p=0.1,
+        seed=42,
+        response_format=output_schema,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_message}
+        ]
+    )
+
+    return json.loads(response.choices[0].message.content)
+Key configuration choices and why:
+temperature=0 + top_p=0.1 + seed=42 — maximum determinism. Same image always gets same result. GPT-4.1 supports all of these unlike GPT-5.2.
+response_format with strict JSON schema — the model MUST return this exact structure. No hallucinated fields, no missing fields, no format variation.
+The bbox field in violations is nullable — if the violation is about something missing (like missing warning text), there's no bounding box to show. If it's about something wrong (like navy logo on dark background), the bbox comes from the Vision signals so the frontend can draw the red box.

@@ -21,7 +21,7 @@ backend/
   routers/             # API endpoints (compliance, batch, rules, history, chat)
   services/
     vision_service.py  # Azure Vision Image Analysis 4.0 integration
-    llm_service.py     # Azure OpenAI GPT-4.1 compliance reasoning (stub)
+    llm_service.py     # Azure OpenAI GPT-4.1 compliance reasoning + chat followup
     blob_service.py    # Azure Blob Storage upload (stub)
     compliance_engine.py # Orchestrates full pipeline
 frontend/
@@ -32,10 +32,10 @@ frontend/
 ```
 
 ## Environment Configuration
-- Uses `.env` file (pydantic-settings auto-loads)
-- `.env.example` documents all required variables
-- Key vars: AZURE_VISION_ENDPOINT, AZURE_VISION_KEY, AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_KEY, DATABASE_URL, UPSTASH_REDIS_URL
+- Config via pydantic-settings (reads env vars, supports .env file)
+- Key vars: AZURE_VISION_ENDPOINT, AZURE_VISION_KEY, AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_KEY, AZURE_OPENAI_DEPLOYMENT, DATABASE_URL, UPSTASH_REDIS_URL, UPSTASH_REDIS_TOKEN, CORS_ALLOWED_ORIGINS
 - Services gracefully degrade when credentials missing (return placeholder data)
+- Redis uses upstash-redis package (HTTPS REST API, not standard redis protocol)
 
 ## Workflows
 - **Backend API**: `uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000`
@@ -44,6 +44,6 @@ frontend/
 ## Implementation Status
 - [x] Project scaffold (backend + frontend structure)
 - [x] Azure Vision service (real Image Analysis 4.0 integration)
-- [ ] Azure OpenAI GPT-4.1 compliance reasoning
+- [x] Azure OpenAI GPT-4.1 compliance reasoning (structured JSON output, deterministic, streaming chat)
 - [ ] Azure Blob Storage upload
 - [ ] Premium frontend UI (bounding boxes, confidence gauges, chat)

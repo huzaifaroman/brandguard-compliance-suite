@@ -12,9 +12,11 @@ class BoundingBox(BaseModel):
 
 class Violation(BaseModel):
     rule_id: str
+    rule_text: str = ""
+    severity: str = "medium"
     issue: str
-    suggestion: str
-    severity: str = "error"
+    fix_suggestion: str = ""
+    evidence: str = ""
     bbox: Optional[BoundingBox] = None
 
 
@@ -25,10 +27,13 @@ class ComplianceResult(BaseModel):
     verdict: str
     confidence: float
     violations: List[Violation] = []
-    checks_passed: int = 0
+    checks_passed: Any = 0
     summary: str = ""
+    content_type_detected: str = "unknown"
+    background_type_detected: str = "unknown"
     session_id: Optional[str] = None
     cached: bool = False
+    image_hash: Optional[str] = None
     timestamp: Optional[datetime] = None
 
 
@@ -37,7 +42,7 @@ class BatchImageResult(BaseModel):
     verdict: str
     confidence: float
     violations: List[Violation] = []
-    checks_passed: int = 0
+    checks_passed: Any = 0
     image_url: Optional[str] = None
     image_width: Optional[int] = None
     image_height: Optional[int] = None
