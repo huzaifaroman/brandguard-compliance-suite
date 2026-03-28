@@ -1,0 +1,125 @@
+**Azure Blob Storage — why do we need it?**
+
+When a user uploads an image, your FastAPI backend receives it as raw bytes in memory. The problem is: once the API request finishes, those bytes are gone. You need to store the image somewhere persistent for three reasons.
+
+First, **the frontend needs to display the image.** After analysis is done, the user sees their uploaded image alongside the results. The frontend needs a URL to load that image from. You can't keep it in FastAPI memory.
+
+Second, **consistency verification.** Remember the requirement — same image should produce same results. You store each image with a hash. Next time someone uploads the same image, you check the hash, find it already exists, and return the cached result instead of running the pipeline again. This proves consistency AND saves money.
+
+Third, **history.** User wants to go back and see "what did I analyze last week?" You need the images stored somewhere to show them again.
+
+**The flow is:**
+
+```
+User uploads image
+       ↓
+FastAPI receives bytes
+       ↓
+Upload to Azure Blob → gets a URL like:
+https://yourstorage.blob.core.windows.net/compliance-uploads/abc123.png
+       ↓
+Run Vision + GPT pipeline
+       ↓
+Save result to database with that blob URL
+       ↓
+Return to frontend: { image_url: "https://..../abc123.png", violations: [...] }
+       ↓
+Frontend loads image from that URL using a normal <img> tag
+```
+
+**However — for your interview project, you can skip Azure Blob entirely.** Just convert the uploaded image to base64 and return it inline with the result. Simpler, no extra Azure resource needed, works perfectly for a demo. You'd only need Blob in production with thousands of users.
+
+```python
+import base64
+
+image_base64 = base64.b64encode(file_bytes).decode('utf-8')
+# Return in response:
+{"image_data": f"data:image/png;base64,{image_base64}", "violations": [...]}
+```
+
+Frontend displays it with `<img src={result.image_data} />`. Done. No Blob needed.
+
+---
+
+**Bounding box — how the frontend draws boxes on the image:**
+
+You're NOT sending the image back "marked up." You're sending two things separately: the original image + a list of box coordinates. The frontend draws the boxes on top using CSS.
+
+**Step 1: Azure Vision returns coordinates**
+
+When your backend calls Azure Vision OCR, it returns where each text element is in the image:
+
+```json
+{
+  "text": "ZONNIC",
+  "bounding_box": {"x": 340, "y": 120, "width": 280, "height": 85}
+}
+```
+
+**Step 2: Your GPT analysis identifies which elements are violations**
+
+GPT says: "The ZONNIC text at position (340, 120) is navy blue on a dark background — violation LOGOBG-DONT-06."
+
+**Step 3: Your backend returns both the image AND the violation coordinates**
+
+```json
+{
+  "image_data": "data:image/png;base64,.....",
+  "image_width": 1080,
+  "image_height": 1920,
+  "violations": [
+    {
+      "rule_id": "LOGOBG-DONT-06",
+      "message": "Navy logo on dark background",
+      "bbox": {"x": 340, "y": 120, "w": 280, "h": 85}
+    }
+  ]
+}
+```
+
+**Step 4: Frontend overlays boxes using CSS positioning**
+
+```jsx
+function AnnotatedImage({ result }) {
+  return (
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      {/* The original image */}
+      <img src={result.image_data} style={{ width: '100%' }} />
+      
+      {/* Red boxes drawn ON TOP of the image */}
+      {result.violations.map(v => (
+        <div
+          key={v.rule_id}
+          style={{
+            position: 'absolute',
+            left: `${(v.bbox.x / result.image_width) * 100}%`,
+            top: `${(v.bbox.y / result.image_height) * 100}%`,
+            width: `${(v.bbox.w / result.image_width) * 100}%`,
+            height: `${(v.bbox.h / result.image_height) * 100}%`,
+            border: '3px solid red',
+            backgroundColor: 'rgba(255,0,0,0.15)',
+          }}
+        >
+          <span style={{ 
+            position: 'absolute', top: -20,
+            background: 'red', color: 'white', 
+            fontSize: 11, padding: '2px 6px' 
+          }}>
+            {v.rule_id}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+**What the user sees:** Their original image with red semi-transparent boxes highlighting exactly where each problem is. Each box has a small label like "LOGOBG-DONT-06" and when they click it, they see the full explanation.
+
+The image itself is never modified. The boxes are just CSS divs positioned absolutely on top of it using percentage-based coordinates. This is the same technique Google Maps uses to overlay markers on a map image.
+
+**To summarize:**
+- Azure Blob = skip for interview, use base64 inline instead
+- Bounding boxes = Azure Vision gives you coordinates, frontend draws CSS boxes on top of the image, image itself stays untouched
+
+Ready to start building?
