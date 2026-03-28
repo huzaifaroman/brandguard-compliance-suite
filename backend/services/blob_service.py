@@ -8,7 +8,7 @@ from azure.storage.blob import BlobServiceClient, ContentSettings
 
 from backend.config import settings
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("backend.services.blob")
 
 _blob_client = None
 

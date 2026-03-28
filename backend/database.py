@@ -1,5 +1,9 @@
+import logging
+
 import asyncpg
 from backend.config import settings
+
+logger = logging.getLogger("backend.database")
 
 _pool = None
 
@@ -14,7 +18,7 @@ async def get_pool():
 async def init_db():
     pool = await get_pool()
     if pool is None:
-        print("No DATABASE_URL configured — skipping DB init")
+        logger.warning("No DATABASE_URL configured — skipping DB init")
         return
 
     async with pool.acquire() as conn:
@@ -63,7 +67,7 @@ async def init_db():
             )
         """)
         await conn.execute("CREATE INDEX IF NOT EXISTS idx_chat_messages_session ON chat_messages(session_id)")
-    print("Database initialized successfully")
+    logger.info("Database initialized — 4 tables ready")
 
 
 async def close_pool():

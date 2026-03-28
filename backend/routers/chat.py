@@ -8,15 +8,17 @@ from backend.models.schemas import ChatMessage, ChatRequest
 from backend.services.llm_service import chat_followup
 from backend import database, redis_client
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("backend.routers.chat")
 
 router = APIRouter(prefix="/api", tags=["chat"])
 
 
 @router.get("/chat/{session_id}/messages", response_model=List[ChatMessage])
 async def get_messages(session_id: str):
+    logger.info("GET /api/chat/%s/messages", session_id[:8])
     cached = await redis_client.get_cached_chat_messages(session_id)
     if cached:
+        logger.info("Chat cache hit — %d messages", len(cached))
         return cached
 
     pool = await database.get_pool()
@@ -46,6 +48,7 @@ async def get_messages(session_id: str):
 
 @router.post("/chat/{session_id}/message")
 async def send_message(session_id: str, body: ChatRequest):
+    logger.info("POST /api/chat/%s/message — %s", session_id[:8], body.message[:80])
     pool = await database.get_pool()
 
     compliance_result = {}

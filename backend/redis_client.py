@@ -6,7 +6,7 @@ from upstash_redis.asyncio import Redis
 
 from backend.config import settings
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("backend.redis")
 
 _client = None
 

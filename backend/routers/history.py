@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from backend.models.schemas import HistoryResponse, HistoryItem
 from backend import database, redis_client
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("backend.routers.history")
 
 router = APIRouter(prefix="/api", tags=["history"])
 
@@ -12,9 +12,11 @@ HISTORY_CACHE_TTL = 60
 
 @router.get("/history", response_model=HistoryResponse)
 async def get_history(limit: int = 50, offset: int = 0):
+    logger.info("GET /api/history — limit=%d offset=%d", limit, offset)
     cache_key = f"history:{limit}:{offset}"
     cached = await redis_client.cache_get(cache_key)
     if cached:
+        logger.info("History cache hit — %d items", len(cached.get("items", [])))
         return HistoryResponse(**cached)
 
     pool = await database.get_pool()
@@ -56,4 +58,5 @@ async def get_history(limit: int = 50, offset: int = 0):
     response = HistoryResponse(items=items, total=total)
     await redis_client.cache_set(cache_key, response.model_dump(mode="json"), ttl=HISTORY_CACHE_TTL)
 
+    logger.info("History loaded — %d items (total %d)", len(items), total)
     return response

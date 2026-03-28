@@ -8,7 +8,7 @@ from azure.core.exceptions import HttpResponseError, ServiceRequestError
 
 from backend.config import settings
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("backend.services.vision")
 
 VISION_TIMEOUT_SECONDS = 30
 MAX_RETRIES = 2

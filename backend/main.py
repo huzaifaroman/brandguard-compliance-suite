@@ -1,17 +1,24 @@
 import json
+import logging
 import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from backend.logging_config import setup_logging
 from backend.config import settings
 from backend import database, redis_client
 from backend.routers import compliance, batch, rules, history, chat
 
+setup_logging()
+logger = logging.getLogger("backend.main")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    logger.info("Starting AI Marketing Compliance Engine")
+
     rules_path = settings.rules_file_path
     if not os.path.isabs(rules_path):
         base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -21,22 +28,39 @@ async def lifespan(app: FastAPI):
     try:
         with open(rules_path, "r") as f:
             app.state.rules = json.load(f)
-        print(f"Rules loaded from {rules_path}")
+        rule_count = sum(len(v) if isinstance(v, list) else 1 for v in app.state.rules.values())
+        logger.info("Rules loaded: %d rules from %s", rule_count, rules_path)
     except FileNotFoundError:
         local_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "rules.json")
         try:
             with open(local_path, "r") as f:
                 app.state.rules = json.load(f)
-            print(f"Rules loaded from {local_path}")
+            rule_count = sum(len(v) if isinstance(v, list) else 1 for v in app.state.rules.values())
+            logger.info("Rules loaded: %d rules from %s", rule_count, local_path)
         except Exception as e:
             app.state.rules = {}
-            print(f"Warning: Could not load rules file: {e}")
+            logger.warning("Could not load rules file: %s", e)
 
     await redis_client.cache_rules(app.state.rules)
     await database.init_db()
 
+    svc = []
+    if settings.azure_openai_endpoint:
+        svc.append("Azure OpenAI")
+    if settings.azure_vision_endpoint:
+        svc.append("Azure Vision")
+    if settings.azure_blob_connection_string:
+        svc.append("Azure Blob")
+    if settings.database_url:
+        svc.append("PostgreSQL")
+    if settings.upstash_redis_url:
+        svc.append("Redis")
+    logger.info("Services connected: %s", ", ".join(svc) if svc else "none")
+    logger.info("Server ready — listening on port 8000")
+
     yield
 
+    logger.info("Shutting down — closing connections")
     await database.close_pool()
 
 

@@ -7,7 +7,7 @@ from openai import AzureOpenAI
 
 from backend.config import settings
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("backend.services.llm")
 
 LLM_TIMEOUT_SECONDS = 60
 
