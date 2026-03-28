@@ -108,9 +108,10 @@ export function streamChatMessage(
         try {
           const data = JSON.parse(buffer.trim().slice(6));
           if (data.content) onChunk(data.content);
-          if (data.done) onDone();
+          if (data.done) { onDone(); return; }
         } catch {}
       }
+      onDone();
     })
     .catch(onError);
 }

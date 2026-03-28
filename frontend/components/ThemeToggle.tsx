@@ -7,18 +7,29 @@ export default function ThemeToggle() {
   const [dark, setDark] = useState(true);
 
   useEffect(() => {
-    const root = document.documentElement;
-    setDark(root.classList.contains("dark"));
+    const saved = localStorage.getItem("theme");
+    if (saved === "light") {
+      document.documentElement.classList.remove("dark");
+      setDark(false);
+    } else if (saved === "dark") {
+      document.documentElement.classList.add("dark");
+      setDark(true);
+    } else {
+      setDark(document.documentElement.classList.contains("dark"));
+    }
   }, []);
 
   const toggle = () => {
     const root = document.documentElement;
-    if (dark) {
-      root.classList.remove("dark");
-    } else {
+    const next = !dark;
+    if (next) {
       root.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      root.classList.remove("dark");
+      localStorage.setItem("theme", "light");
     }
-    setDark(!dark);
+    setDark(next);
   };
 
   return (
