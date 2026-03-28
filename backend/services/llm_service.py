@@ -180,7 +180,7 @@ async def analyze_compliance(
         )
 
         result = json.loads(response.choices[0].message.content)
-        logger.info(f"GPT-4.1 verdict: {result.get('verdict')} (confidence: {result.get('confidence')}%)")
+        logger.info("GPT verdict: %s (%s%%)", result.get("verdict"), result.get("confidence"))
         return result
 
     except asyncio.TimeoutError:

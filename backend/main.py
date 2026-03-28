@@ -1,10 +1,12 @@
 import json
 import logging
 import os
+import time
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from backend.logging_config import setup_logging
 from backend.config import settings
@@ -86,6 +88,38 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+req_logger = logging.getLogger("backend.http")
+
+class RequestLogMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        path = request.url.path
+        if path == "/health":
+            return await call_next(request)
+
+        method = request.method
+        start = time.time()
+        status = 500
+        try:
+            response = await call_next(request)
+            status = response.status_code
+            return response
+        except Exception:
+            raise
+        finally:
+            ms = (time.time() - start) * 1000
+            if status < 300:
+                color = "\033[32m"
+            elif status < 400:
+                color = "\033[33m"
+            else:
+                color = "\033[31m"
+            req_logger.info(
+                "%s %s → %s%d\033[0m  %.0fms",
+                method, path, color, status, ms
+            )
+
+app.add_middleware(RequestLogMiddleware)
 
 app.include_router(compliance.router)
 app.include_router(batch.router)

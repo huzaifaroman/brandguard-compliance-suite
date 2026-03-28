@@ -19,24 +19,25 @@ async def analyze_single_image(
     prompt: Optional[str] = None,
 ) -> dict:
     image_hash = hashlib.sha256(file_bytes).hexdigest()
-    logger.info("Engine start — file=%s hash=%s size=%dKB",
-                filename, image_hash[:12], len(file_bytes) // 1024)
+    short_hash = image_hash[:8]
 
     cached = await redis_client.get_cached_analysis(image_hash)
     if cached:
         cached["cached"] = True
-        logger.info("Cache hit — returning cached result for %s", image_hash[:12])
+        logger.info("[%s] Cache HIT", short_hash)
         return cached
 
-    logger.info("Cache miss — running full pipeline")
+    logger.info("[%s] Pipeline START — %s (%dKB)", short_hash, filename, len(file_bytes) // 1024)
+
     blob_url, width, height = await upload_image(file_bytes, f"{image_hash[:16]}_{filename}")
-    logger.info("Blob upload done — %dx%d url=%s", width or 0, height or 0, "yes" if blob_url else "no")
+    logger.info("[%s] ├─ Blob uploaded (%dx%d)", short_hash, width or 0, height or 0)
 
     vision_signals = await analyze_image(file_bytes)
-    logger.info("Vision analysis done — %d signals extracted", len(vision_signals) if isinstance(vision_signals, dict) else 0)
+    signal_count = len(vision_signals) if isinstance(vision_signals, dict) else 0
+    logger.info("[%s] ├─ Vision done (%d signals)", short_hash, signal_count)
 
     llm_result = await analyze_compliance(vision_signals, rules, prompt)
-    logger.info("LLM analysis done — verdict=%s confidence=%s%%",
+    logger.info("[%s] └─ LLM done → %s %s%%", short_hash,
                 llm_result.get("verdict"), llm_result.get("confidence"))
 
     session_id = str(uuid.uuid4())

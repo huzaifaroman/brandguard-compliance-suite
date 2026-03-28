@@ -23,17 +23,14 @@ async def batch_analyze(
     request: Request,
     files: List[UploadFile] = File(...),
 ):
-    logger.info("POST /api/batch — %d file(s) received", len(files))
+    logger.info("Batch: %d file(s)", len(files))
 
     if len(files) > MAX_BATCH_SIZE:
-        logger.warning("Rejected: too many files (%d > %d)", len(files), MAX_BATCH_SIZE)
+        logger.warning("Rejected — too many files: %d", len(files))
         raise HTTPException(status_code=400, detail=f"Maximum {MAX_BATCH_SIZE} files allowed")
     if len(files) == 0:
-        logger.warning("Rejected: no files provided")
+        logger.warning("Rejected — no files")
         raise HTTPException(status_code=400, detail="No files provided")
-
-    for f in files:
-        logger.info("  → %s (%s)", f.filename, f.content_type)
 
     rules = getattr(request.app.state, "rules", {})
     batch_id = str(uuid.uuid4())
@@ -89,7 +86,7 @@ async def batch_analyze(
 
     results = await asyncio.gather(*[process_one(f) for f in files])
 
-    logger.info("Batch %s complete — %d images processed", batch_id[:8], len(results))
+    logger.info("Batch %s done — %d images", batch_id[:8], len(results))
 
     summary = BatchSummary(
         passed=sum(1 for r in results if r.verdict == "PASS"),
@@ -126,6 +123,6 @@ async def batch_analyze(
 
     await redis_client.cache_set(f"batch:{batch_id}", batch_result.model_dump(), ttl=86400)
 
-    logger.info("Batch %s — pass=%d fail=%d warn=%d",
+    logger.info("Batch %s summary: pass=%d fail=%d warn=%d",
                 batch_id[:8], summary.passed, summary.failed, summary.warnings)
     return batch_result

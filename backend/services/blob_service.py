@@ -65,7 +65,7 @@ async def upload_image(image_bytes: bytes, filename: str) -> Tuple[Optional[str]
         )
 
         blob_url = blob.url
-        logger.info(f"Image uploaded to Azure Blob: {filename}")
+        logger.info("Blob: uploaded %s", filename)
         return blob_url, width, height
 
     except Exception as e:
