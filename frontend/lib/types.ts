@@ -7,9 +7,11 @@ export interface BoundingBox {
 
 export interface Violation {
   rule_id: string;
+  rule_text: string;
+  severity: "critical" | "high" | "medium";
   issue: string;
-  suggestion: string;
-  severity: "error" | "warning" | "info";
+  fix_suggestion: string;
+  evidence: string;
   bbox: BoundingBox | null;
 }
 
@@ -20,10 +22,13 @@ export interface ComplianceResult {
   verdict: "PASS" | "FAIL" | "WARNING";
   confidence: number;
   violations: Violation[];
-  checks_passed: number;
+  checks_passed: string[] | number;
   summary: string;
+  content_type_detected: string;
+  background_type_detected: string;
   session_id: string | null;
   cached: boolean;
+  image_hash: string | null;
   timestamp?: string;
 }
 
@@ -32,7 +37,7 @@ export interface BatchImageResult {
   verdict: "PASS" | "FAIL" | "WARNING";
   confidence: number;
   violations: Violation[];
-  checks_passed: number;
+  checks_passed: string[] | number;
   image_url: string | null;
   image_width: number | null;
   image_height: number | null;
@@ -56,7 +61,7 @@ export interface BatchResult {
 export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
-  message_type: string;
+  message_type?: string;
   timestamp?: string;
 }
 
@@ -74,4 +79,34 @@ export interface HistoryItem {
 export interface HistoryResponse {
   items: HistoryItem[];
   total: number;
+}
+
+export interface RuleMeta {
+  document: string;
+  source: string;
+  pages: number;
+  brand: string;
+  company: string;
+  classification: string;
+  total_rules: number;
+}
+
+export interface RuleItem {
+  id: string;
+  category?: string;
+  rule: string;
+  severity: string;
+  legal_requirement?: boolean;
+  visual_description?: string;
+  [key: string]: unknown;
+}
+
+export interface HealthStatus {
+  status: string;
+  rules_loaded: boolean;
+  azure_openai_configured: boolean;
+  azure_vision_configured: boolean;
+  azure_blob_configured: boolean;
+  postgres_configured: boolean;
+  redis_configured: boolean;
 }

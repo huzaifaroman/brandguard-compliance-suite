@@ -1,9 +1,30 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { History, Loader2, ImageIcon } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  Clock,
+  Loader2,
+  ImageIcon,
+  ShieldCheck,
+  ShieldAlert,
+  ShieldQuestion,
+  Fingerprint,
+  ExternalLink,
+  RefreshCw,
+} from "lucide-react";
 import { getHistory } from "@/lib/api";
 import type { HistoryItem } from "@/lib/types";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function HistoryPage() {
   const [items, setItems] = useState<HistoryItem[]>([]);
@@ -11,14 +32,20 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadHistory = () => {
+    setLoading(true);
     getHistory()
       .then((res) => {
         setItems(res.items);
         setTotal(res.total);
+        setError(null);
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadHistory();
   }, []);
 
   const hashGroups = items.reduce<Record<string, HistoryItem[]>>((acc, item) => {
@@ -27,116 +54,151 @@ export default function HistoryPage() {
     return acc;
   }, {});
 
+  const verdictIcon = (v: string) => {
+    if (v === "PASS") return <ShieldCheck className="w-4 h-4 text-green-400" />;
+    if (v === "FAIL") return <ShieldAlert className="w-4 h-4 text-red-400" />;
+    return <ShieldQuestion className="w-4 h-4 text-amber-400" />;
+  };
+
   const verdictColor = (v: string) =>
-    v === "PASS" ? "#22c55e" : v === "FAIL" ? "#ef4444" : "#f59e0b";
+    v === "PASS" ? "text-green-400" : v === "FAIL" ? "text-red-400" : "text-amber-400";
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold" style={{ color: "var(--foreground)" }}>
-          Analysis History
-        </h1>
-        <p className="mt-1 text-sm" style={{ color: "var(--muted-foreground)" }}>
-          {total} analyses stored · same image hash = consistency verified
-        </p>
-      </div>
-
-      {loading && (
-        <div className="flex items-center gap-3 text-sm" style={{ color: "var(--muted-foreground)" }}>
-          <Loader2 size={16} className="animate-spin" />
-          Loading history...
-        </div>
-      )}
-
-      {error && (
-        <div className="rounded-xl px-4 py-3 text-sm" style={{ background: "rgba(239,68,68,0.08)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}>
-          {error}
-        </div>
-      )}
-
-      {!loading && items.length === 0 && !error && (
-        <div
-          className="rounded-xl p-12 text-center"
-          style={{ background: "var(--card)", border: "1px solid var(--border)" }}
-        >
-          <History size={32} className="mx-auto mb-3" style={{ color: "var(--muted-foreground)" }} />
-          <p className="text-sm" style={{ color: "var(--muted-foreground)" }}>
-            No analyses yet. Run your first compliance check on the Analyze page.
-          </p>
-        </div>
-      )}
-
-      {!loading && items.length > 0 && (
-        <div className="space-y-4">
-          {Object.values(hashGroups).map((group) => {
-            const isMultiple = group.length > 1;
-            return (
-              <div
-                key={group[0].image_hash}
-                className="rounded-xl overflow-hidden"
-                style={{
-                  border: isMultiple ? "1px solid rgba(59,130,246,0.3)" : "1px solid var(--border)",
-                  background: isMultiple ? "rgba(59,130,246,0.04)" : "var(--card)",
-                }}
-              >
-                {isMultiple && (
-                  <div
-                    className="px-4 py-2 text-xs font-medium flex items-center gap-2"
-                    style={{ background: "rgba(59,130,246,0.1)", borderBottom: "1px solid rgba(59,130,246,0.2)", color: "#60a5fa" }}
-                  >
-                    ⚡ Consistency verified — same image analyzed {group.length} times
-                  </div>
-                )}
-                <div className={isMultiple ? "grid grid-cols-2 divide-x" : ""} style={isMultiple ? { borderColor: "rgba(59,130,246,0.2)" } : {}}>
-                  {group.map((item, i) => (
-                    <div key={item.id} className="p-4 flex gap-4">
-                      <div
-                        className="w-14 h-14 rounded-lg flex items-center justify-center flex-shrink-0"
-                        style={{ background: "var(--muted)" }}
-                      >
-                        {item.blob_url ? (
-                          <img
-                            src={item.blob_url}
-                            alt="Analysis"
-                            className="w-full h-full object-cover rounded-lg"
-                          />
-                        ) : (
-                          <ImageIcon size={20} style={{ color: "var(--muted-foreground)" }} />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-sm font-semibold" style={{ color: verdictColor(item.verdict) }}>
-                            {item.verdict}
-                          </span>
-                          <span className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                            {item.confidence.toFixed(0)}% confidence
-                          </span>
-                          {isMultiple && (
-                            <span className="text-xs ml-auto" style={{ color: "var(--muted-foreground)" }}>
-                              Run {i + 1}
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-xs" style={{ color: "var(--muted-foreground)" }}>
-                          {item.violations_count} violation{item.violations_count !== 1 ? "s" : ""} ·{" "}
-                          {new Date(item.timestamp).toLocaleString()}
-                        </div>
-                        <div
-                          className="text-xs mt-1 font-mono truncate"
-                          style={{ color: "var(--muted-foreground)", opacity: 0.5 }}
-                        >
-                          {item.image_hash.slice(0, 16)}...
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+    <div className="min-h-screen p-6 lg:p-8">
+      <div className="max-w-5xl mx-auto">
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Clock className="w-5 h-5 text-primary" />
               </div>
-            );
-          })}
-        </div>
-      )}
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight">Analysis History</h1>
+                <p className="text-sm text-muted-foreground">
+                  {total} analyses stored with consistency verification
+                </p>
+              </div>
+            </div>
+            <Button variant="outline" size="sm" onClick={loadHistory} className="gap-2">
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+              Refresh
+            </Button>
+          </div>
+        </motion.div>
+
+        {loading && items.length === 0 && (
+          <div className="flex items-center gap-3 text-sm text-muted-foreground py-12 justify-center">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Loading history...
+          </div>
+        )}
+
+        {error && (
+          <Card className="border-red-500/30 bg-red-500/5">
+            <CardContent className="p-4">
+              <p className="text-sm text-red-400">{error}</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {!loading && items.length === 0 && !error && (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <Clock className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+              <p className="text-sm font-medium mb-1">No analyses yet</p>
+              <p className="text-xs text-muted-foreground">
+                Run your first compliance check on the Analyze page.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {!loading && items.length > 0 && (
+          <ScrollArea className="max-h-[calc(100vh-200px)]">
+            <div className="space-y-3">
+              {Object.values(hashGroups).map((group) => {
+                const isMultiple = group.length > 1;
+                const allSameVerdict = group.every((g) => g.verdict === group[0].verdict);
+
+                return (
+                  <motion.div
+                    key={group[0].image_hash}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    <Card className={isMultiple ? "border-blue-500/30" : ""}>
+                      {isMultiple && (
+                        <div className="flex items-center gap-2 px-4 py-2.5 bg-blue-500/5 border-b border-blue-500/20">
+                          <Fingerprint className="w-3.5 h-3.5 text-blue-400" />
+                          <span className="text-xs font-medium text-blue-400">
+                            Consistency {allSameVerdict ? "verified" : "check"} — analyzed {group.length} times
+                            {allSameVerdict ? " with same result" : ""}
+                          </span>
+                        </div>
+                      )}
+                      <CardContent className="p-0">
+                        <div className={isMultiple ? "divide-y divide-blue-500/10" : ""}>
+                          {group.map((item) => (
+                            <div key={item.id} className="flex items-center gap-4 p-4 hover:bg-accent/20 transition-colors">
+                              <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                {item.blob_url ? (
+                                  <img
+                                    src={item.blob_url}
+                                    alt="Analysis"
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <ImageIcon className="w-5 h-5 text-muted-foreground" />
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  {verdictIcon(item.verdict)}
+                                  <span className={`text-sm font-semibold ${verdictColor(item.verdict)}`}>
+                                    {item.verdict}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {item.confidence}%
+                                  </span>
+                                  <Badge variant="outline" className="text-[10px] ml-auto">
+                                    {item.violations_count} violation{item.violations_count !== 1 ? "s" : ""}
+                                  </Badge>
+                                </div>
+                                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                  <span>{new Date(item.timestamp).toLocaleString()}</span>
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <code className="font-mono text-[10px] opacity-60">
+                                        {item.image_hash.slice(0, 12)}...
+                                      </code>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p className="text-xs font-mono">{item.image_hash}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                  {item.session_id && (
+                                    <a
+                                      href={`/analyze?session=${item.session_id}`}
+                                      className="flex items-center gap-1 text-primary hover:underline"
+                                    >
+                                      <ExternalLink className="w-3 h-3" />
+                                      View
+                                    </a>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </ScrollArea>
+        )}
+      </div>
     </div>
   );
 }

@@ -75,5 +75,6 @@ async def analyze_single_image(
         except Exception as e:
             logger.error(f"Database insert error: {e}")
 
-    await redis_client.cache_analysis(image_hash, result)
+    if result["confidence"] > 0:
+        await redis_client.cache_analysis(image_hash, result)
     return result
