@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     upstash_redis_url: str = os.getenv("UPSTASH_REDIS_URL", "")
     upstash_redis_token: str = os.getenv("UPSTASH_REDIS_TOKEN", "")
 
+    cors_allowed_origins: str = os.getenv("CORS_ALLOWED_ORIGINS", "")
     rules_file_path: str = "backend/data/rules.json"
 
     class Config:
