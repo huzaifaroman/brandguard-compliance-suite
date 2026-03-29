@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import { RadialBarChart, RadialBar, PolarAngleAxis } from "recharts";
 import { analyzeImage, getChatMessages, streamChatMessage } from "@/lib/api";
-import type { ComplianceResult, Violation, ChatMessage } from "@/lib/types";
+import type { ComplianceResult, Violation, ChatMessage, PassedDetail } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -194,11 +194,14 @@ export default function AnalyzePage() {
     setChatMessages([]);
   };
 
-  const checksPassedCount = Array.isArray(result?.checks_passed)
-    ? result.checks_passed.length
-    : typeof result?.checks_passed === "number"
-    ? result.checks_passed
-    : 0;
+  const passedDetails = result?.passed_details || [];
+  const checksPassedCount = passedDetails.length;
+
+  const passedByCategory = passedDetails.reduce<Record<string, PassedDetail[]>>((acc, pd) => {
+    if (!acc[pd.category]) acc[pd.category] = [];
+    acc[pd.category].push(pd);
+    return acc;
+  }, {});
 
   return (
     <div className="min-h-screen p-6 lg:p-8">
@@ -585,6 +588,50 @@ export default function AnalyzePage() {
                                 isHovered={hoveredViolation === i}
                                 onHover={(h) => setHoveredViolation(h ? i : null)}
                               />
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
+
+                {checksPassedCount > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.45 }}
+                  >
+                    <Card className="border-green-500/20">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-sm flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-green-500" />
+                          <span className="text-green-400">Passed Checks ({checksPassedCount})</span>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <ScrollArea className="max-h-[350px]">
+                          <div className="space-y-3">
+                            {Object.entries(passedByCategory).map(([category, items]) => (
+                              <div key={category}>
+                                <p className="text-xs font-semibold text-green-500/80 uppercase tracking-wider mb-1.5">{category}</p>
+                                <div className="space-y-1">
+                                  {items.map((pd, i) => (
+                                    <motion.div
+                                      key={`${pd.rule_id}-${i}`}
+                                      initial={{ opacity: 0, x: -8 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      transition={{ delay: 0.5 + i * 0.03 }}
+                                      className="flex items-start gap-2 rounded-md px-3 py-2 bg-green-500/5 border border-green-500/10"
+                                    >
+                                      <Badge variant="outline" className="mt-0.5 shrink-0 text-[10px] border-green-500/30 text-green-500">
+                                        {pd.rule_id}
+                                      </Badge>
+                                      <p className="text-xs text-muted-foreground leading-relaxed">{pd.detail}</p>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </div>
                             ))}
                           </div>
                         </ScrollArea>

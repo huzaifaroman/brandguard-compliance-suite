@@ -69,7 +69,7 @@ async def batch_analyze(
                 verdict=result["verdict"],
                 confidence=result["confidence"],
                 violations=result.get("violations", []),
-                checks_passed=result.get("checks_passed", []),
+                passed_details=result.get("passed_details", []),
                 image_url=result.get("image_url"),
                 image_width=result.get("image_width"),
                 image_height=result.get("image_height"),

@@ -33,12 +33,17 @@ async def init_db():
                 confidence FLOAT,
                 violations_json JSONB DEFAULT '[]',
                 checks_passed INTEGER DEFAULT 0,
+                passed_details_json JSONB DEFAULT '[]',
                 prompt TEXT,
                 session_id TEXT,
                 timestamp TIMESTAMPTZ DEFAULT NOW()
             )
         """)
         await conn.execute("CREATE INDEX IF NOT EXISTS idx_analyses_hash ON analyses(image_hash)")
+        try:
+            await conn.execute("ALTER TABLE analyses ADD COLUMN IF NOT EXISTS passed_details_json JSONB DEFAULT '[]'")
+        except Exception:
+            pass
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS batches (
                 id SERIAL PRIMARY KEY,

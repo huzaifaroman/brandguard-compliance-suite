@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Literal
 from datetime import datetime
 
 
@@ -20,6 +20,12 @@ class Violation(BaseModel):
     bbox: Optional[BoundingBox] = None
 
 
+class PassedDetail(BaseModel):
+    rule_id: str
+    category: Literal["Regulatory", "Logo", "Gradient", "Colors", "Typography", "Content"] = "Content"
+    detail: str
+
+
 class ComplianceResult(BaseModel):
     image_url: Optional[str] = None
     image_width: Optional[int] = None
@@ -27,7 +33,8 @@ class ComplianceResult(BaseModel):
     verdict: str
     confidence: float
     violations: List[Violation] = []
-    checks_passed: Any = 0
+    passed_details: List[PassedDetail] = []
+    checks_passed: Any = Field(default=0, exclude=True)
     summary: str = ""
     content_type_detected: str = "unknown"
     background_type_detected: str = "unknown"
@@ -42,7 +49,7 @@ class BatchImageResult(BaseModel):
     verdict: str
     confidence: float
     violations: List[Violation] = []
-    checks_passed: Any = 0
+    passed_details: List[PassedDetail] = []
     image_url: Optional[str] = None
     image_width: Optional[int] = None
     image_height: Optional[int] = None

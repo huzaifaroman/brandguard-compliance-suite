@@ -18,7 +18,7 @@ backend/
   database.py          # asyncpg pool, schema migration (analyses, batches, chat_sessions, chat_messages)
   redis_client.py      # Upstash Redis async cache (analysis, rules, chat, history, batch)
   data/rules.json      # ZONNIC brand rules (62 rules, 10 categories + checklist)
-  models/schemas.py    # Pydantic models (ComplianceResult, Violation with bbox/evidence/fix_suggestion)
+  models/schemas.py    # Pydantic models (ComplianceResult, Violation with bbox/evidence/fix_suggestion, PassedDetail with rule_id/category/detail)
   routers/
     compliance.py      # POST /api/analyze — single image analysis (20MB limit, MIME validation)
     batch.py           # POST /api/batch — parallel multi-image analysis (up to 10, per-file validation)
@@ -27,7 +27,7 @@ backend/
     chat.py            # GET/POST /api/chat/{session_id} — streaming AI chat follow-up (error handling)
   services/
     vision_service.py  # Azure Vision 4.0 (captions, dense_captions, tags, objects, OCR) with retries
-    llm_service.py     # GPT-4.1 compliance reasoning (strict JSON schema, temp=0, seed=42) + streaming chat
+    llm_service.py     # GPT-4.1 compliance reasoning (strict JSON schema with passed_details, temp=0, seed=42) + streaming chat
     blob_service.py    # Azure Blob Storage upload with PIL dimensions
     compliance_engine.py # Orchestrates: hash → cache check → blob upload → vision → LLM → DB persist → cache
 frontend/
@@ -46,7 +46,7 @@ frontend/
     ui/                # shadcn/ui components (button, card, badge, progress, tabs, dialog, etc.)
   lib/
     api.ts             # Fetch-based API client (analyze, batch, rules, history, chat streaming via SSE)
-    types.ts           # TypeScript interfaces (Violation, ComplianceResult, ChatMessage, etc.)
+    types.ts           # TypeScript interfaces (Violation, PassedDetail, ComplianceResult, ChatMessage, etc.)
   next.config.ts       # Rewrites /api/* → backend:8000, Azure Blob image remotePatterns
 ```
 

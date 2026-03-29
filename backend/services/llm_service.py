@@ -62,6 +62,14 @@ EVALUATION ORDER (mandatory):
 3. MEDIUM PRIORITY: CHECK-08 to CHECK-10 (background type, gradient compliance, content-background match)
 4. STANDARD: CHECK-11 to CHECK-15 (colour palette, typography, grey gradient, safety zone, background don'ts)
 
+REPORTING RULES:
+- For EVERY check you perform, report what you FOUND and whether it's correct or not
+- passed_details must contain human-readable explanations of what was detected and verified as compliant
+- Group passed_details by category: Regulatory, Logo, Gradient, Colors, Typography, Content
+- Be specific: don't say "Logo is correct" — say "ZONNIC text detected in navy blue (#242c65) on grey gradient background — compliant with LOGO-06"
+- If you detect the brand name, logo elements, colors, typography, background type — STATE what you found even if the overall verdict is FAIL
+- The user needs to know exactly what is RIGHT and what is WRONG — not just what is wrong
+
 Return ONLY valid JSON matching the schema below. No extra text."""
 
 COMPLIANCE_SCHEMA = {
@@ -116,10 +124,25 @@ COMPLIANCE_SCHEMA = {
                         "additionalProperties": False
                     }
                 },
-                "checks_passed": {
+                "passed_details": {
                     "type": "array",
-                    "items": {"type": "string"},
-                    "description": "List of rule IDs that passed"
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "rule_id": {"type": "string"},
+                            "category": {
+                                "type": "string",
+                                "enum": ["Regulatory", "Logo", "Gradient", "Colors", "Typography", "Content"]
+                            },
+                            "detail": {
+                                "type": "string",
+                                "description": "Human-readable explanation of what was detected and why it passes"
+                            }
+                        },
+                        "required": ["rule_id", "category", "detail"],
+                        "additionalProperties": False
+                    },
+                    "description": "Detailed list of all checks that passed with human-readable explanations"
                 },
                 "content_type_detected": {
                     "type": "string",
@@ -130,7 +153,7 @@ COMPLIANCE_SCHEMA = {
                     "enum": ["gradient", "grey_gradient", "white", "light_image", "dark_image", "solid_color", "unknown"]
                 }
             },
-            "required": ["verdict", "confidence", "summary", "violations", "checks_passed", "content_type_detected", "background_type_detected"],
+            "required": ["verdict", "confidence", "summary", "violations", "passed_details", "content_type_detected", "background_type_detected"],
             "additionalProperties": False
         }
     }
@@ -252,7 +275,7 @@ def _placeholder_result(message: str = "") -> dict:
         "confidence": 0,
         "summary": summary,
         "violations": [],
-        "checks_passed": [],
+        "passed_details": [],
         "content_type_detected": "unknown",
         "background_type_detected": "unknown",
     }

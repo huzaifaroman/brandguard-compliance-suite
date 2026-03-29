@@ -24,6 +24,14 @@ async def analyze_single_image(
     cached = await redis_client.get_cached_analysis(image_hash)
     if cached:
         cached["cached"] = True
+        if "passed_details" not in cached and "checks_passed" in cached:
+            old = cached.pop("checks_passed", [])
+            if isinstance(old, list):
+                cached["passed_details"] = [
+                    {"rule_id": rid, "category": "Content", "detail": f"Rule {rid} passed (legacy)"} for rid in old
+                ]
+            else:
+                cached["passed_details"] = []
         logger.info("[%s] Cache HIT", short_hash)
         return cached
 
@@ -42,8 +50,8 @@ async def analyze_single_image(
 
     session_id = str(uuid.uuid4())
 
-    checks_passed = llm_result.get("checks_passed", [])
-    checks_passed_count = len(checks_passed) if isinstance(checks_passed, list) else checks_passed
+    passed_details = llm_result.get("passed_details", [])
+    passed_count = len(passed_details) if isinstance(passed_details, list) else 0
 
     result = {
         "image_url": blob_url,
@@ -52,7 +60,7 @@ async def analyze_single_image(
         "verdict": llm_result.get("verdict", "WARNING"),
         "confidence": llm_result.get("confidence", 0),
         "summary": llm_result.get("summary", ""),
-        "checks_passed": checks_passed,
+        "passed_details": passed_details,
         "violations": llm_result.get("violations", []),
         "content_type_detected": llm_result.get("content_type_detected", "unknown"),
         "background_type_detected": llm_result.get("background_type_detected", "unknown"),
@@ -69,14 +77,15 @@ async def analyze_single_image(
                     """
                     INSERT INTO analyses
                         (image_hash, blob_url, image_width, image_height, verdict,
-                         confidence, violations_json, checks_passed, prompt, session_id)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9, $10)
+                         confidence, violations_json, checks_passed, passed_details_json, prompt, session_id)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9::jsonb, $10, $11)
                     RETURNING id
                     """,
                     image_hash, blob_url, width, height,
                     result["verdict"], result["confidence"],
                     json.dumps(result["violations"]),
-                    checks_passed_count, prompt, session_id,
+                    passed_count, json.dumps(passed_details),
+                    prompt, session_id,
                 )
                 analysis_id = row["id"]
                 await conn.execute(

@@ -1,0 +1,84 @@
+Yes I understand exactly. Right now the system says "here's what's wrong" but stays silent about what's correct. You want it to say BOTH — like a full inspection report:
+
+"I detected the ZONNIC logo in navy blue — correct. C halo has gradient — correct. Background is grey gradient — correct. BUT nicotine warning is missing, 18+ icon is missing, risk text is missing."
+
+Here's the updated system prompt and schema. Two changes needed:
+
+**Change 1 — Add to SYSTEM_PROMPT after the EVALUATION ORDER section:**
+
+```
+REPORTING RULES:
+- For EVERY check you perform, report what you FOUND and whether it's correct or not
+- passed_details must contain human-readable explanations of what was detected and verified as compliant
+- Group passed_details by category: Regulatory, Logo, Gradient, Colors, Typography, Content
+- Be specific: don't say "Logo is correct" — say "ZONNIC text detected in navy blue (#242c65) on grey gradient background — compliant with LOGO-06"
+- If you detect the brand name, logo elements, colors, typography, background type — STATE what you found even if the overall verdict is FAIL
+- The user needs to know exactly what is RIGHT and what is WRONG — not just what is wrong
+```
+
+**Change 2 — Add `passed_details` to the schema, replace `checks_passed`:**
+
+Replace this in your COMPLIANCE_SCHEMA:
+
+```python
+"checks_passed": {
+    "type": "array",
+    "items": {"type": "string"},
+    "description": "List of rule IDs that passed"
+},
+```
+
+With this:
+
+```python
+"passed_details": {
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            "rule_id": {"type": "string"},
+            "category": {
+                "type": "string",
+                "enum": ["Regulatory", "Logo", "Gradient", "Colors", "Typography", "Content"]
+            },
+            "detail": {
+                "type": "string",
+                "description": "Human-readable explanation of what was detected and why it passes"
+            }
+        },
+        "required": ["rule_id", "category", "detail"],
+        "additionalProperties": False
+    },
+    "description": "Detailed list of all checks that passed with human-readable explanations"
+},
+```
+
+Also update the `required` array at the bottom to replace `checks_passed` with `passed_details`.
+
+**So the full output for your ZONNIC grey gradient logo image would now look like:**
+
+```json
+{
+  "verdict": "FAIL",
+  "confidence": 95,
+  "summary": "The ZONNIC logo is correctly rendered on grey gradient with proper navy blue text and C halo gradient. However, all required regulatory elements are missing.",
+  "passed_details": [
+    {"rule_id": "LOGO-01", "category": "Logo", "detail": "ZONNIC logo detected — navy blue typographic text with circular halo on C"},
+    {"rule_id": "LOGO-06", "category": "Logo", "detail": "ZONNIC text is navy blue (#242c65) on grey gradient background — correct per guidelines"},
+    {"rule_id": "LOGO-05", "category": "Logo", "detail": "C halo uses full gradient with both primary (grey) and secondary (teal) colours"},
+    {"rule_id": "LOGO-13", "category": "Logo", "detail": "Logo is unmodified — no distortion, no outlines, correct proportions"},
+    {"rule_id": "LOGO-DONT-01", "category": "Logo", "detail": "C halo is present — not missing"},
+    {"rule_id": "GRAD-01", "category": "Gradient", "detail": "Background gradient flows top-to-bottom, dark grey to light teal — correct direction"},
+    {"rule_id": "TYPO-01", "category": "Typography", "detail": "No non-Santral typography detected in the image"}
+  ],
+  "violations": [
+    {"rule_id": "REG-01", "severity": "critical", "issue": "No nicotine warning banner at top", "...": "..."},
+    {"rule_id": "REG-02", "severity": "critical", "issue": "No 18+ icon detected", "...": "..."},
+    {"rule_id": "REG-03", "severity": "critical", "issue": "No risk communication text at bottom", "...": "..."}
+  ]
+}
+```
+
+On your frontend, render it as two clear sections — green checks first, then red violations. The user instantly sees "ok logo is perfect, gradient is perfect, I just need to add the regulatory text." That's the professional compliance report they're looking for.
+
+Go update the `rules_prompt.py` and the schema in your Replit project with these changes.

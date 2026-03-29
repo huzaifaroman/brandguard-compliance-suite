@@ -15,6 +15,12 @@ export interface Violation {
   bbox: BoundingBox | null;
 }
 
+export interface PassedDetail {
+  rule_id: string;
+  category: "Regulatory" | "Logo" | "Gradient" | "Colors" | "Typography" | "Content";
+  detail: string;
+}
+
 export interface ComplianceResult {
   image_url: string | null;
   image_width: number | null;
@@ -22,7 +28,8 @@ export interface ComplianceResult {
   verdict: "PASS" | "FAIL" | "WARNING";
   confidence: number;
   violations: Violation[];
-  checks_passed: string[] | number;
+  passed_details: PassedDetail[];
+  checks_passed?: string[] | number;
   summary: string;
   content_type_detected: string;
   background_type_detected: string;
@@ -37,7 +44,7 @@ export interface BatchImageResult {
   verdict: "PASS" | "FAIL" | "WARNING";
   confidence: number;
   violations: Violation[];
-  checks_passed: string[] | number;
+  passed_details: PassedDetail[];
   image_url: string | null;
   image_width: number | null;
   image_height: number | null;
