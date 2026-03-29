@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { checkHealth } from "@/lib/api";
+import { checkHealth, prefetchRoute } from "@/lib/api";
 import type { HealthStatus } from "@/lib/types";
 import {
   Scan,
@@ -71,6 +71,8 @@ export default function Sidebar() {
               href={item.href}
               prefetch={true}
               className="relative block"
+              onMouseEnter={() => prefetchRoute(item.href)}
+              onFocus={() => prefetchRoute(item.href)}
             >
               <motion.div
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors duration-200 group relative z-10 ${

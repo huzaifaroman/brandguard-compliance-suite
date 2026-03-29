@@ -4,8 +4,13 @@ import type {
   ChatMessage,
   HistoryResponse,
 } from "./types";
+import { cacheGet, cacheSet, cacheInvalidatePrefix } from "./cache";
 
 const API_BASE = "";
+
+const RULES_TTL = 5 * 60 * 1000;
+const HISTORY_TTL = 30 * 1000;
+const HEALTH_TTL = 15 * 1000;
 
 export async function analyzeImage(
   file: File,
@@ -20,7 +25,9 @@ export async function analyzeImage(
     body: formData,
   });
   if (!res.ok) throw new Error(`Analysis failed: ${res.statusText}`);
-  return res.json();
+  const result = await res.json();
+  cacheInvalidatePrefix("history:");
+  return result;
 }
 
 export function streamAnalysis(
@@ -42,24 +49,37 @@ export async function batchAnalyze(files: File[]): Promise<BatchResult> {
     body: formData,
   });
   if (!res.ok) throw new Error(`Batch analysis failed: ${res.statusText}`);
-  return res.json();
+  const result = await res.json();
+  cacheInvalidatePrefix("history:");
+  return result;
 }
 
 export async function getRules(): Promise<{ rules: unknown }> {
+  const cached = cacheGet<{ rules: unknown }>("rules");
+  if (cached) return cached;
+
   const res = await fetch(`${API_BASE}/api/rules`);
   if (!res.ok) throw new Error("Failed to fetch rules");
-  return res.json();
+  const data = await res.json();
+  cacheSet("rules", data, RULES_TTL);
+  return data;
 }
 
 export async function getHistory(
   limit = 50,
   offset = 0
 ): Promise<HistoryResponse> {
+  const key = `history:${limit}:${offset}`;
+  const cached = cacheGet<HistoryResponse>(key);
+  if (cached) return cached;
+
   const res = await fetch(
     `${API_BASE}/api/history?limit=${limit}&offset=${offset}`
   );
   if (!res.ok) throw new Error("Failed to fetch history");
-  return res.json();
+  const data = await res.json();
+  cacheSet(key, data, HISTORY_TTL);
+  return data;
 }
 
 export async function getChatMessages(
@@ -117,7 +137,35 @@ export function streamChatMessage(
 }
 
 export async function checkHealth() {
+  const cached = cacheGet<unknown>("health");
+  if (cached) return cached;
+
   const res = await fetch(`${API_BASE}/health`);
   if (!res.ok) throw new Error("Backend not reachable");
-  return res.json();
+  const data = await res.json();
+  cacheSet("health", data, HEALTH_TTL);
+  return data;
+}
+
+const prefetchPromises = new Map<string, Promise<void>>();
+
+export function prefetchRoute(route: string): void {
+  if (prefetchPromises.has(route)) return;
+
+  let promise: Promise<void>;
+  switch (route) {
+    case "/rules":
+      promise = getRules().then(() => {});
+      break;
+    case "/history":
+      promise = getHistory().then(() => {});
+      break;
+    default:
+      return;
+  }
+
+  prefetchPromises.set(route, promise);
+  promise.finally(() => {
+    setTimeout(() => prefetchPromises.delete(route), 5000);
+  });
 }
