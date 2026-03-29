@@ -69,6 +69,7 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
+              prefetch={true}
               className="relative block"
             >
               <motion.div
