@@ -44,18 +44,17 @@ export default function Sidebar() {
       className="fixed left-0 top-0 h-screen flex flex-col glass-strong z-50"
       style={{ width: "var(--sidebar-width)" }}
     >
-      <div className="p-5 border-b border-border/50">
+      <div className="p-5 border-b border-[oklch(1_0_0_/_0.06)]">
         <div className="flex items-center gap-2.5">
           <motion.div
-            className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center relative"
+            className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center relative animate-glow-pulse"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             <Shield className="w-5 h-5 text-primary" />
-            <div className="absolute inset-0 rounded-lg bg-primary/5 animate-pulse-glow" />
           </motion.div>
           <div>
-            <h1 className="text-sm font-semibold tracking-tight text-foreground">ComplianceAI</h1>
+            <h1 className="text-sm font-semibold tracking-tight gradient-text">ComplianceAI</h1>
             <p className="text-[10px] text-muted-foreground tracking-wider uppercase">Marketing Engine</p>
           </div>
         </div>
@@ -88,7 +87,7 @@ export default function Sidebar() {
                   {isActive && (
                     <motion.div
                       layoutId="sidebar-active"
-                      className="absolute inset-0 rounded-lg bg-primary/10 border border-primary/20"
+                      className="absolute inset-0 rounded-lg bg-primary/8 border border-primary/20 shadow-[0_0_20px_oklch(0.55_0.25_264_/_0.08)]"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
@@ -118,7 +117,7 @@ export default function Sidebar() {
         <ThemeToggle />
       </div>
 
-      <div className="p-4 border-t border-border/50">
+      <div className="p-4 border-t border-[oklch(1_0_0_/_0.06)]">
         <div className="flex items-center gap-2 mb-2.5">
           <Activity className="w-3.5 h-3.5 text-muted-foreground" />
           <span className="text-[11px] text-muted-foreground uppercase tracking-wider">System</span>
@@ -149,7 +148,7 @@ export default function Sidebar() {
             )}
           </AnimatePresence>
         </div>
-        <div className="mt-3 pt-3 border-t border-border/50">
+        <div className="mt-3 pt-3 border-t border-[oklch(1_0_0_/_0.06)]">
           <div className="flex items-center justify-between">
             <p className="text-[10px] text-muted-foreground">{servicesUp}/4 services active</p>
             <div className="flex gap-0.5">

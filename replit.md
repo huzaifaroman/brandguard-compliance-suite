@@ -8,7 +8,7 @@ Evaluates marketing images against 62 ZONNIC brand compliance rules using a mult
 - **Frontend**: Next.js 15 (App Router, TypeScript, Turbopack) on port 5000 (webview)
 - **AI Services**: Azure Computer Vision 4.0 + Azure OpenAI GPT-4.1
 - **Storage**: Azure Blob Storage (images), PostgreSQL (analyses/history/chat), Upstash Redis (caching)
-- **UI Framework**: shadcn/ui + Tailwind CSS + Framer Motion + Recharts, dark-first theme with light mode toggle
+- **UI Framework**: shadcn/ui + Tailwind CSS + Framer Motion + Recharts, premium dark-first theme with aurora animated background, glassmorphism cards, gradient text headings, light mode toggle
 
 ## Project Structure
 ```
@@ -38,9 +38,11 @@ frontend/
     rules/page.tsx     # Categorized rule browser with search, severity badges, collapsible sections
     history/page.tsx   # Audit log with consistency verification, hash grouping, empty states
     layout.tsx         # Root layout with sidebar, dark theme, TooltipProvider, ErrorBoundary
-    globals.css        # Premium oklch dark/light theme, glass utilities, brand colors, custom scrollbars
+    globals.css        # Premium oklch dark/light theme, aurora orbs, glass utilities, gradient-text, glow animations, responsive mobile optimization, reduced-motion support
   components/
-    Sidebar.tsx        # Navigation with descriptions, theme toggle, service health indicators
+    AuroraBackground.tsx # Animated gradient orb background (CSS-only, dark mode only, mobile-optimized)
+    ClientShell.tsx    # Client layout shell with aurora background layer + sidebar
+    Sidebar.tsx        # Navigation with gradient text, theme toggle, service health indicators
     ThemeToggle.tsx     # Dark/light mode toggle
     ErrorBoundary.tsx   # React error boundary with retry button
     ui/                # shadcn/ui components (button, card, badge, progress, tabs, dialog, etc.)

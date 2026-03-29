@@ -41,13 +41,14 @@ export default function BatchPage() {
 
   const onDrop = useCallback(
     (accepted: File[]) => {
+      previews.forEach((url) => URL.revokeObjectURL(url));
       const combined = [...files, ...accepted].slice(0, MAX_FILES);
       setFiles(combined);
       setPreviews(combined.map((f) => URL.createObjectURL(f)));
       setResult(null);
       setError(null);
     },
-    [files]
+    [files, previews]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -61,6 +62,10 @@ export default function BatchPage() {
     setFiles((prev) => prev.filter((_, idx) => idx !== i));
     setPreviews((prev) => prev.filter((_, idx) => idx !== i));
   };
+
+  useEffect(() => {
+    return () => { previews.forEach((url) => URL.revokeObjectURL(url)); };
+  }, []);
 
   useEffect(() => {
     if (!loading) { setBatchProgress(0); return; }
@@ -179,11 +184,11 @@ export default function BatchPage() {
       <div className="max-w-6xl mx-auto">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <div className="flex items-center gap-3 mb-1">
-            <div className="p-2 rounded-lg bg-primary/10">
+            <div className="p-2 rounded-xl bg-primary/10 animate-glow-pulse">
               <Layers className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Batch Analysis</h1>
+              <h1 className="text-2xl font-bold tracking-tight gradient-text">Batch Analysis</h1>
               <p className="text-sm text-muted-foreground">
                 Upload up to {MAX_FILES} images for parallel compliance checking
               </p>

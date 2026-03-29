@@ -213,11 +213,11 @@ export default function AnalyzePage() {
           className="mb-8"
         >
           <div className="flex items-center gap-3 mb-1">
-            <div className="p-2 rounded-lg bg-primary/10">
+            <div className="p-2 rounded-xl bg-primary/10 animate-glow-pulse">
               <Sparkles className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Analyze Image</h1>
+              <h1 className="text-2xl font-bold tracking-tight gradient-text">Analyze Image</h1>
               <p className="text-sm text-muted-foreground">
                 Upload a marketing asset for AI-powered compliance review against 62 brand rules
               </p>
@@ -231,7 +231,7 @@ export default function AnalyzePage() {
             className={`${result ? "xl:col-span-5" : "xl:col-span-6 xl:col-start-4"} space-y-4`}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           >
-            <Card className="overflow-hidden border-border/50 card-hover">
+            <Card className="overflow-hidden glass-card">
               <CardContent className="p-0">
                 <div
                   {...getRootProps()}
