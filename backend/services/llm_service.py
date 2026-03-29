@@ -4,6 +4,10 @@ import logging
 from typing import Optional, AsyncIterator
 
 from openai import AzureOpenAI
+from openai.types.chat import (
+    ChatCompletionSystemMessageParam,
+    ChatCompletionUserMessageParam,
+)
 
 from backend.config import settings
 
@@ -30,7 +34,7 @@ def _get_client() -> AzureOpenAI:
 SYSTEM_PROMPT = """You are a ZONNIC brand compliance analyst. You evaluate marketing images against the ZONNIC Design Guidelines.
 
 You will receive:
-1. RULES: The complete brand guidelines as structured JSON, including brand_colors, regulatory_rules, logo_rules, logo_donts, gradient_rules, color_application_rules, content_type_rules, content_donts, typography_rules, and an ai_evaluation_checklist
+1. RULES: The complete brand guidelines as structured JSON
 2. VISION_SIGNALS: Visual analysis data extracted from the uploaded image (captions, dense_captions with bounding boxes, OCR text with bounding polygons, detected objects with bounding boxes, tags with confidence scores)
 3. USER_PROMPT: Optional additional question from the user
 
@@ -92,15 +96,20 @@ COMPLIANCE_SCHEMA = {
                             "fix_suggestion": {"type": "string"},
                             "evidence": {"type": "string"},
                             "bbox": {
-                                "type": ["object", "null"],
-                                "properties": {
-                                    "x": {"type": "integer"},
-                                    "y": {"type": "integer"},
-                                    "w": {"type": "integer"},
-                                    "h": {"type": "integer"}
-                                },
-                                "required": ["x", "y", "w", "h"],
-                                "additionalProperties": False
+                                "anyOf": [
+                                    {
+                                        "type": "object",
+                                        "properties": {
+                                            "x": {"type": "integer"},
+                                            "y": {"type": "integer"},
+                                            "w": {"type": "integer"},
+                                            "h": {"type": "integer"}
+                                        },
+                                        "required": ["x", "y", "w", "h"],
+                                        "additionalProperties": False
+                                    },
+                                    {"type": "null"}
+                                ]
                             }
                         },
                         "required": ["rule_id", "rule_text", "severity", "issue", "fix_suggestion", "evidence", "bbox"],
@@ -163,6 +172,11 @@ async def analyze_compliance(
         client = _get_client()
         user_message = _build_compliance_message(vision_signals, rules, prompt)
 
+        messages: list[ChatCompletionSystemMessageParam | ChatCompletionUserMessageParam] = [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": user_message},
+        ]
+
         response = await asyncio.wait_for(
             asyncio.to_thread(
                 client.chat.completions.create,
@@ -170,16 +184,18 @@ async def analyze_compliance(
                 temperature=0,
                 top_p=0.1,
                 seed=42,
-                response_format=COMPLIANCE_SCHEMA,
-                messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": user_message},
-                ],
+                response_format=COMPLIANCE_SCHEMA,  # type: ignore[arg-type]
+                messages=messages,
             ),
             timeout=LLM_TIMEOUT_SECONDS,
         )
 
-        result = json.loads(response.choices[0].message.content)
+        content = response.choices[0].message.content  # type: ignore[union-attr]
+        if content is None:
+            logger.error("GPT returned empty content")
+            return _placeholder_result("AI returned empty response")
+
+        result = json.loads(content)
         logger.info("GPT verdict: %s (%s%%)", result.get("verdict"), result.get("confidence"))
         return result
 
@@ -187,7 +203,7 @@ async def analyze_compliance(
         logger.error("Azure OpenAI request timed out")
         return _placeholder_result("Request timed out. Please try again.")
     except Exception as e:
-        logger.error(f"Azure OpenAI error: {type(e).__name__}: {e}")
+        logger.error("Azure OpenAI error: %s: %s", type(e).__name__, e)
         return _placeholder_result(f"AI analysis failed: {type(e).__name__}")
 
 
@@ -205,14 +221,14 @@ async def chat_followup(
 
         context_msg = f"COMPLIANCE ANALYSIS RESULTS:\n{json.dumps(compliance_result, indent=2)}"
 
-        api_messages = [
+        api_messages: list[ChatCompletionSystemMessageParam | ChatCompletionUserMessageParam] = [
             {"role": "system", "content": CHAT_SYSTEM_PROMPT},
             {"role": "system", "content": context_msg},
         ]
         for msg in messages:
-            api_messages.append({"role": msg["role"], "content": msg["content"]})
+            api_messages.append({"role": msg["role"], "content": msg["content"]})  # type: ignore[arg-type]
 
-        response = await asyncio.to_thread(
+        stream = await asyncio.to_thread(
             client.chat.completions.create,
             model=settings.azure_openai_deployment,
             temperature=0.3,
@@ -220,12 +236,12 @@ async def chat_followup(
             messages=api_messages,
         )
 
-        for chunk in response:
-            if chunk.choices and chunk.choices[0].delta and chunk.choices[0].delta.content:
-                yield chunk.choices[0].delta.content
+        for chunk in stream:  # type: ignore[union-attr]
+            if hasattr(chunk, "choices") and chunk.choices and chunk.choices[0].delta and chunk.choices[0].delta.content:  # type: ignore[union-attr]
+                yield chunk.choices[0].delta.content  # type: ignore[union-attr]
 
     except Exception as e:
-        logger.error(f"Chat followup error: {type(e).__name__}: {e}")
+        logger.error("Chat followup error: %s: %s", type(e).__name__, e)
         yield f"Sorry, I encountered an error: {type(e).__name__}. Please try again."
 
 
