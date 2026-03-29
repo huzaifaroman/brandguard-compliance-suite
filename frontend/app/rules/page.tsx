@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   BookOpen,
-  Loader2,
   Search,
   Shield,
   Palette,
@@ -12,12 +11,12 @@ import {
   Image,
   Layers,
   AlertTriangle,
-  ChevronDown,
-  ChevronUp,
+  ChevronRight,
   Hash,
+  Inbox,
 } from "lucide-react";
 import { getRules } from "@/lib/api";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RulesSkeleton } from "@/components/Skeletons";
@@ -115,7 +114,12 @@ export default function RulesPage() {
           </div>
         </motion.div>
 
-        <div className="mb-6">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-6"
+        >
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
@@ -123,26 +127,34 @@ export default function RulesPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search rules by ID, text, severity..."
-              className="w-full h-10 pl-10 pr-4 text-sm rounded-lg bg-card border border-border/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+              className="w-full h-10 pl-10 pr-4 text-sm rounded-lg bg-card border border-border/50 text-foreground placeholder:text-muted-foreground input-premium focus:outline-none"
             />
           </div>
-        </div>
+        </motion.div>
 
-        {loading && <RulesSkeleton />}
+        <AnimatePresence mode="wait">
+          {loading && (
+            <motion.div key="skeleton" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <RulesSkeleton />
+            </motion.div>
+          )}
 
-        {error && (
-          <Card className="border-red-500/30 bg-red-500/5">
-            <CardContent className="p-4">
-              <p className="text-sm text-red-400">{error}</p>
-            </CardContent>
-          </Card>
-        )}
+          {error && (
+            <motion.div key="error" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              <Card className="border-red-500/30 bg-red-500/5">
+                <CardContent className="p-4">
+                  <p className="text-sm text-red-400">{error}</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {rules && (
           <div className="space-y-3">
             {Object.entries(rules)
               .filter(([k]) => !META_KEYS.has(k))
-              .map(([category, data]) => {
+              .map(([category, data], catIdx) => {
                 const items = filterItems(formatRuleItems(data));
                 if (search.trim() && items.length === 0) return null;
                 const meta = categoryMeta[category] || { icon: Hash, color: "text-muted-foreground", bg: "bg-muted", border: "border-border" };
@@ -153,13 +165,14 @@ export default function RulesPage() {
                 return (
                   <motion.div
                     key={category}
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: catIdx * 0.04, duration: 0.3 }}
                   >
-                    <Card className={`${meta.border} overflow-hidden`}>
+                    <Card className={`${meta.border} overflow-hidden card-hover`}>
                       <button
                         onClick={() => toggleCategory(category)}
-                        className="w-full flex items-center gap-3 p-4 text-left hover:bg-accent/30 transition-colors"
+                        className="w-full flex items-center gap-3 p-4 text-left hover:bg-accent/20 transition-colors duration-200"
                       >
                         <div className={`p-1.5 rounded-lg ${meta.bg}`}>
                           <Icon className={`w-4 h-4 ${meta.color}`} />
@@ -168,68 +181,94 @@ export default function RulesPage() {
                         <Badge variant="outline" className="text-xs mr-2">
                           {items.length} rule{items.length !== 1 ? "s" : ""}
                         </Badge>
-                        {isExpanded ? (
-                          <ChevronUp className="w-4 h-4 text-muted-foreground" />
-                        ) : (
-                          <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                        )}
+                        <motion.div
+                          animate={{ rotate: isExpanded ? 90 : 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                        </motion.div>
                       </button>
-                      {isExpanded && items.length > 0 && (
-                        <CardContent className="p-0 border-t border-border/50">
-                          <ScrollArea className="max-h-[400px]">
-                            <div className="divide-y divide-border/30">
-                              {items.map((item, i) => (
-                                <div key={i} className="px-4 py-3 hover:bg-accent/20 transition-colors">
-                                  {typeof item === "object" && item !== null ? (
-                                    <div>
-                                      <div className="flex items-center gap-2 mb-1">
-                                        {item.id && (
-                                          <code className="text-xs font-mono font-bold text-primary">{item.id}</code>
-                                        )}
-                                        {item.severity && (
-                                          <Badge
-                                            variant="outline"
-                                            className={`text-[10px] px-1.5 ${
-                                              item.severity === "critical"
-                                                ? "text-red-400 border-red-500/30"
-                                                : item.severity === "high"
-                                                ? "text-orange-400 border-orange-500/30"
-                                                : "text-yellow-400 border-yellow-500/30"
-                                            }`}
-                                          >
-                                            {item.severity}
-                                          </Badge>
-                                        )}
-                                        {item.legal_requirement && (
-                                          <Badge variant="outline" className="text-[10px] px-1.5 text-red-400 border-red-500/30">
-                                            Legal
-                                          </Badge>
-                                        )}
-                                      </div>
-                                      {item.rule && <p className="text-sm text-foreground">{item.rule}</p>}
-                                      {item.visual_description && (
-                                        <p className="text-xs text-muted-foreground mt-1">{item.visual_description}</p>
+                      <AnimatePresence>
+                        {isExpanded && items.length > 0 && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                          >
+                            <CardContent className="p-0 border-t border-border/50">
+                              <ScrollArea className="max-h-[400px]">
+                                <div className="divide-y divide-border/30">
+                                  {items.map((item, i) => (
+                                    <motion.div
+                                      key={i}
+                                      initial={{ opacity: 0 }}
+                                      animate={{ opacity: 1 }}
+                                      transition={{ delay: i * 0.02 }}
+                                      className="px-4 py-3 hover:bg-accent/15 transition-colors duration-200"
+                                    >
+                                      {typeof item === "object" && item !== null ? (
+                                        <div>
+                                          <div className="flex items-center gap-2 mb-1">
+                                            {item.id && (
+                                              <code className="text-xs font-mono font-bold text-primary">{item.id}</code>
+                                            )}
+                                            {item.severity && (
+                                              <Badge
+                                                variant="outline"
+                                                className={`text-[10px] px-1.5 ${
+                                                  item.severity === "critical"
+                                                    ? "text-red-400 border-red-500/30"
+                                                    : item.severity === "high"
+                                                    ? "text-orange-400 border-orange-500/30"
+                                                    : "text-yellow-400 border-yellow-500/30"
+                                                }`}
+                                              >
+                                                {item.severity}
+                                              </Badge>
+                                            )}
+                                            {item.legal_requirement && (
+                                              <Badge variant="outline" className="text-[10px] px-1.5 text-red-400 border-red-500/30">
+                                                Legal
+                                              </Badge>
+                                            )}
+                                          </div>
+                                          {item.rule && <p className="text-sm text-foreground">{item.rule}</p>}
+                                          {item.visual_description && (
+                                            <p className="text-xs text-muted-foreground mt-1">{item.visual_description}</p>
+                                          )}
+                                          {!item.rule && !item.id && (
+                                            <pre className="text-xs text-muted-foreground whitespace-pre-wrap">
+                                              {JSON.stringify(item, null, 2)}
+                                            </pre>
+                                          )}
+                                        </div>
+                                      ) : (
+                                        <p className="text-sm">{String(item)}</p>
                                       )}
-                                      {!item.rule && !item.id && (
-                                        <pre className="text-xs text-muted-foreground whitespace-pre-wrap">
-                                          {JSON.stringify(item, null, 2)}
-                                        </pre>
-                                      )}
-                                    </div>
-                                  ) : (
-                                    <p className="text-sm">{String(item)}</p>
-                                  )}
+                                    </motion.div>
+                                  ))}
                                 </div>
-                              ))}
-                            </div>
-                          </ScrollArea>
-                        </CardContent>
-                      )}
+                              </ScrollArea>
+                            </CardContent>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </Card>
                   </motion.div>
                 );
               })}
           </div>
+        )}
+
+        {rules && totalRules === 0 && !loading && (
+          <Card>
+            <CardContent className="p-16 text-center">
+              <Inbox className="w-10 h-10 text-muted-foreground/50 mx-auto mb-4" />
+              <p className="text-sm font-medium mb-1">No rules loaded</p>
+              <p className="text-xs text-muted-foreground">Check the backend rules configuration.</p>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>
