@@ -14,32 +14,32 @@ function SidebarSkeleton() {
       className="fixed left-0 top-0 h-screen flex flex-col glass-strong z-50"
       style={{ width: "var(--sidebar-width)" }}
     >
-      <div className="p-5 border-b border-[oklch(1_0_0_/_0.06)]">
+      <div className="p-5 border-b border-border">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-lg bg-[oklch(1_0_0_/_0.05)] animate-pulse" />
+          <div className="w-9 h-9 rounded-lg bg-muted animate-pulse" />
           <div className="space-y-1.5">
-            <div className="h-3.5 w-24 rounded bg-[oklch(1_0_0_/_0.05)] animate-pulse" />
-            <div className="h-2.5 w-20 rounded bg-[oklch(1_0_0_/_0.03)] animate-pulse" />
+            <div className="h-3.5 w-24 rounded bg-muted animate-pulse" />
+            <div className="h-2.5 w-20 rounded bg-muted/60 animate-pulse" />
           </div>
         </div>
       </div>
       <nav className="flex-1 p-3 space-y-1">
         {[1, 2, 3, 4].map((i) => (
           <div key={i} className="flex items-center gap-3 px-3 py-2.5">
-            <div className="w-[18px] h-[18px] rounded bg-[oklch(1_0_0_/_0.05)] animate-pulse" />
+            <div className="w-[18px] h-[18px] rounded bg-muted animate-pulse" />
             <div className="space-y-1">
-              <div className="h-3 w-16 rounded bg-[oklch(1_0_0_/_0.05)] animate-pulse" />
-              <div className="h-2.5 w-20 rounded bg-[oklch(1_0_0_/_0.03)] animate-pulse" />
+              <div className="h-3 w-16 rounded bg-muted animate-pulse" />
+              <div className="h-2.5 w-20 rounded bg-muted/60 animate-pulse" />
             </div>
           </div>
         ))}
       </nav>
-      <div className="p-4 border-t border-[oklch(1_0_0_/_0.06)]">
+      <div className="p-4 border-t border-border">
         <div className="space-y-2">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-[oklch(1_0_0_/_0.05)] animate-pulse" />
-              <div className="h-2.5 w-16 rounded bg-[oklch(1_0_0_/_0.03)] animate-pulse" />
+              <div className="w-2.5 h-2.5 rounded-full bg-muted animate-pulse" />
+              <div className="h-2.5 w-16 rounded bg-muted/60 animate-pulse" />
             </div>
           ))}
         </div>

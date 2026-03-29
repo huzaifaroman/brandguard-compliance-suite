@@ -38,15 +38,15 @@ import {
 } from "@/components/ui/tooltip";
 
 const severityConfig = {
-  critical: { color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/20", label: "Critical" },
-  high: { color: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20", label: "High" },
-  medium: { color: "text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/20", label: "Medium" },
+  critical: { color: "text-red-600 dark:text-red-400", bg: "bg-red-500/10", border: "border-red-500/20", label: "Critical" },
+  high: { color: "text-orange-600 dark:text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20", label: "High" },
+  medium: { color: "text-yellow-600 dark:text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/20", label: "Medium" },
 };
 
 const verdictConfig = {
-  PASS: { icon: ShieldCheck, color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/30", glow: "shadow-[0_0_30px_rgba(34,197,94,0.12)]", label: "Compliant", fill: "#22c55e" },
-  FAIL: { icon: ShieldAlert, color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/30", glow: "shadow-[0_0_30px_rgba(239,68,68,0.12)]", label: "Non-Compliant", fill: "#ef4444" },
-  WARNING: { icon: ShieldQuestion, color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/30", glow: "shadow-[0_0_30px_rgba(245,158,11,0.12)]", label: "Needs Review", fill: "#f59e0b" },
+  PASS: { icon: ShieldCheck, color: "text-green-600 dark:text-green-400", bg: "bg-green-500/10", border: "border-green-500/30", glow: "", label: "Compliant", fill: "#22c55e" },
+  FAIL: { icon: ShieldAlert, color: "text-red-600 dark:text-red-400", bg: "bg-red-500/10", border: "border-red-500/30", glow: "", label: "Non-Compliant", fill: "#ef4444" },
+  WARNING: { icon: ShieldQuestion, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/30", glow: "", label: "Needs Review", fill: "#f59e0b" },
 };
 
 const pipelineSteps = [
