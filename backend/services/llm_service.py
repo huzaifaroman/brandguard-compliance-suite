@@ -57,6 +57,17 @@ RULE STATUS — EVERY RULE MUST BE ONE OF THREE:
 
 CRITICAL: Do NOT mark a rule as "pass" if you cannot actually verify it. If a rule doesn't apply to this image, mark it "not_applicable" with a brief reason. Only mark "pass" when you genuinely see the image complies.
 
+C HALO EVALUATION — BE EXTREMELY STRICT:
+The ZONNIC logo has a circular halo around the letter C. This is one of the most important brand elements. You MUST carefully examine:
+1. IS THE HALO PRESENT? Look closely at the C — is there a visible circular ring/halo around it? If missing → violates LOGO-DONT-01
+2. HALO COLOR ON WHITE/LIGHT BACKGROUNDS: On white or light backgrounds, the halo MUST be a visible GRADIENT using BOTH the primary AND secondary flavour colours (two distinct colours blending). A solid single-colour halo on a white background is a VIOLATION of LOGO-05. Look very carefully — if the halo appears to be one flat colour (e.g. just teal, just mint), that violates LOGO-05.
+3. HALO COLOR ON GRADIENT BACKGROUNDS: The halo must use the secondary colour within the gradient (LOGO-04). If it blends into the background → violates LOGO-DONT-06.
+4. HALO SHAPE: Must be a perfect circle, not oval or distorted → LOGO-DONT-15
+5. HALO SIZE: Must be proportional to the logo text → LOGO-DONT-04
+6. HALO PLACEMENT: Must be on the C only, not on any other letter → LOGO-DONT-02, LOGO-DONT-11
+7. HALO OUTLINE: No outline over a coloured halo → LOGO-DONT-03. No reversed outline → LOGO-DONT-08. Outline, halo, and background must not all be the same colour → LOGO-DONT-09.
+8. When in doubt about halo compliance, flag it as a violation rather than passing it. The halo is a critical brand element.
+
 OVERALL VERDICT:
 - PASS: No violations found
 - FAIL: One or more violations found
