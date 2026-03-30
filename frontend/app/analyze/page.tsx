@@ -17,6 +17,10 @@ import {
   MessageSquare,
   RotateCcw,
   CheckCircle2,
+  Cloud,
+  ScanEye,
+  Brain,
+  FileCheck,
   FileText,
   AlertTriangle,
   Info,
@@ -31,7 +35,8 @@ import {
   ChevronDown,
 } from "lucide-react";
 import Link from "next/link";
-import { analyzeImage, getChatMessages, streamChatMessage } from "@/lib/api";
+import { pollAnalysis, getChatMessages, streamChatMessage } from "@/lib/api";
+import type { JobStatus } from "@/lib/api";
 import type { ComplianceResult, Violation, ChatMessage, PassedDetail, CheckPerformed } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -56,7 +61,16 @@ const verdictConfig: Record<string, { icon: typeof ShieldCheck; color: string; b
   FAIL: { icon: ShieldAlert, color: "text-red-600 dark:text-red-400", bg: "bg-red-500/10", border: "border-red-500/30", label: "Non-Compliant" },
   WARNING: { icon: ShieldQuestion, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/30", label: "Needs Review" },
 };
+const pipelineSteps = [
+  { icon: Cloud, label: "Uploading to Azure", sublabel: "Blob Storage" },
+  { icon: ScanEye, label: "Vision Analysis", sublabel: "Azure Vision 4.0" },
+  { icon: Brain, label: "AI Evaluation", sublabel: "GPT-4.1 · 62 rules" },
+  { icon: FileCheck, label: "Building Report", sublabel: "Compliance report" },
+];
 
+const stepToIndex: Record<string, number> = {
+  uploading: 0, vision: 1, llm: 2, persisting: 3, done: 3,
+};
 
 const SESSION_KEY = "compliance_analyze_session";
 
@@ -102,8 +116,11 @@ export default function AnalyzePage() {
   const [chatStreaming, setChatStreaming] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const reportRef = useRef<HTMLDivElement>(null);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [activeStep, setActiveStep] = useState(0);
+  const [streamMessage, setStreamMessage] = useState("");
   const [expandedViolations, setExpandedViolations] = useState<Set<number>>(new Set());
-  const abortRef = useRef<AbortController | null>(null);
+  const cancelRef = useRef<{ cancel: () => void } | null>(null);
   const [restoredFromSession, setRestoredFromSession] = useState(false);
 
   useEffect(() => {
@@ -137,35 +154,52 @@ export default function AnalyzePage() {
     maxSize: 20 * 1024 * 1024,
   });
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!file) return;
-    if (abortRef.current) abortRef.current.abort();
+    if (cancelRef.current) cancelRef.current.cancel();
     setLoading(true);
     setError(null);
     setResult(null);
+    setLoadingProgress(5);
+    setActiveStep(0);
+    setStreamMessage("Starting analysis...");
     setExpandedViolations(new Set());
     setRestoredFromSession(false);
 
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    try {
-      const res = await analyzeImage(file, prompt || undefined, controller.signal);
-      setResult(res);
-      saveSession(res, preview);
-      setTimeout(() => {
-        reportRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 100);
-    } catch (err: unknown) {
-      if (err instanceof Error && err.name === "AbortError") {
-        setError("Analysis was cancelled.");
-      } else {
-        setError(err instanceof Error ? err.message : "Analysis failed");
-      }
-    } finally {
-      setLoading(false);
-      abortRef.current = null;
-    }
+    cancelRef.current = pollAnalysis(
+      file,
+      prompt || undefined,
+      (status: JobStatus) => {
+        setLoadingProgress(status.progress);
+        setActiveStep(stepToIndex[status.step] ?? 0);
+        setStreamMessage(status.message);
+      },
+      (res) => {
+        setLoadingProgress(100);
+        setActiveStep(3);
+        setStreamMessage("Analysis complete");
+        saveSession(res, preview);
+        setTimeout(() => {
+          setResult(res);
+          setLoading(false);
+          setLoadingProgress(0);
+          setActiveStep(0);
+          setStreamMessage("");
+          cancelRef.current = null;
+          setTimeout(() => {
+            reportRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }, 100);
+        }, 500);
+      },
+      (err) => {
+        setError(err.message);
+        setLoading(false);
+        setLoadingProgress(0);
+        setActiveStep(0);
+        setStreamMessage("");
+        cancelRef.current = null;
+      },
+    );
   };
 
   const handleSendChat = () => {
@@ -206,19 +240,29 @@ export default function AnalyzePage() {
     }
   }, [showChat, result?.session_id]);
 
+  useEffect(() => {
+    return () => {
+      if (cancelRef.current) { cancelRef.current.cancel(); cancelRef.current = null; }
+    };
+  }, []);
+
   const handleReset = () => {
-    if (abortRef.current) { abortRef.current.abort(); abortRef.current = null; }
+    if (cancelRef.current) { cancelRef.current.cancel(); cancelRef.current = null; }
     if (preview && !restoredFromSession) URL.revokeObjectURL(preview);
     clearSession();
     setFile(null);
     setPreview(null);
     setResult(null);
     setError(null);
+    setLoading(false);
     setPrompt("");
     setShowChat(false);
     setRestoredFromSession(false);
     setChatMessages([]);
     setExpandedViolations(new Set());
+    setLoadingProgress(0);
+    setActiveStep(0);
+    setStreamMessage("");
   };
 
   const toggleViolation = useCallback((idx: number) => {
@@ -451,15 +495,55 @@ export default function AnalyzePage() {
               className="max-w-2xl mx-auto"
             >
               <Card className="border-primary/20 overflow-hidden">
-                <CardContent className="p-5">
-                  <div className="flex items-center gap-3">
-                    <Loader2 className="w-5 h-5 text-primary animate-spin" />
-                    <div>
-                      <p className="text-sm font-medium">Analyzing image...</p>
-                      <p className="text-xs text-muted-foreground">
-                        Running Vision API and GPT-4.1 compliance evaluation. This may take up to 3 minutes.
-                      </p>
+                <CardContent className="p-6">
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-muted-foreground">{streamMessage}</span>
+                      <span className="text-xs font-mono text-muted-foreground">{loadingProgress}%</span>
                     </div>
+                    <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
+                      <motion.div
+                        className="h-full bg-primary rounded-full"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${loadingProgress}%` }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2">
+                    {pipelineSteps.map((step, i) => {
+                      const Icon = step.icon;
+                      const isActive = i === activeStep;
+                      const isDone = i < activeStep || loadingProgress === 100;
+                      return (
+                        <div
+                          key={i}
+                          className={`flex flex-col items-center gap-1.5 rounded-lg p-2.5 transition-all duration-300 ${
+                            isActive
+                              ? "bg-primary/10 ring-1 ring-primary/30"
+                              : isDone
+                              ? "bg-green-500/10"
+                              : "bg-muted/50 opacity-50"
+                          }`}
+                        >
+                          <div className="relative">
+                            {isActive ? (
+                              <Loader2 className="w-5 h-5 text-primary animate-spin" />
+                            ) : isDone ? (
+                              <CheckCircle2 className="w-5 h-5 text-green-500" />
+                            ) : (
+                              <Icon className="w-5 h-5 text-muted-foreground" />
+                            )}
+                          </div>
+                          <span className={`text-[10px] font-medium text-center leading-tight ${
+                            isActive ? "text-primary" : isDone ? "text-green-600 dark:text-green-400" : "text-muted-foreground"
+                          }`}>
+                            {step.label}
+                          </span>
+                          <span className="text-[9px] text-muted-foreground text-center leading-tight">{step.sublabel}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>

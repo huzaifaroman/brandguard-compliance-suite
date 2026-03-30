@@ -32,6 +32,90 @@ export async function analyzeImage(
   return result;
 }
 
+export interface JobStatus {
+  status: "queued" | "running" | "done" | "error";
+  step: string;
+  progress: number;
+  message: string;
+  result?: ComplianceResult;
+  error?: string;
+}
+
+export async function startAnalysis(
+  file: File,
+  prompt?: string
+): Promise<string> {
+  const formData = new FormData();
+  formData.append("file", file);
+  if (prompt) formData.append("prompt", prompt);
+
+  const res = await fetch(`${API_BASE}/api/analyze/start`, {
+    method: "POST",
+    body: formData,
+  });
+  if (!res.ok) throw new Error(`Failed to start analysis: ${res.statusText}`);
+  const data = await res.json();
+  return data.job_id;
+}
+
+export async function pollAnalysisStatus(jobId: string): Promise<JobStatus> {
+  const res = await fetch(`${API_BASE}/api/analyze/status/${jobId}`);
+  if (!res.ok) throw new Error(`Failed to check status: ${res.statusText}`);
+  return res.json();
+}
+
+export function pollAnalysis(
+  file: File,
+  prompt: string | undefined,
+  onProgress: (status: JobStatus) => void,
+  onDone: (result: ComplianceResult) => void,
+  onError: (err: Error) => void
+): { cancel: () => void } {
+  let cancelled = false;
+  let timerId: ReturnType<typeof setTimeout> | null = null;
+
+  (async () => {
+    try {
+      const jobId = await startAnalysis(file, prompt);
+
+      const poll = async () => {
+        if (cancelled) return;
+        try {
+          const status = await pollAnalysisStatus(jobId);
+          if (cancelled) return;
+
+          onProgress(status);
+
+          if (status.status === "done" && status.result) {
+            cacheInvalidatePrefix("history:");
+            onDone(status.result);
+            return;
+          }
+          if (status.status === "error") {
+            onError(new Error(status.error || "Analysis failed"));
+            return;
+          }
+
+          timerId = setTimeout(poll, 1500);
+        } catch (err) {
+          if (!cancelled) onError(err instanceof Error ? err : new Error("Polling failed"));
+        }
+      };
+
+      timerId = setTimeout(poll, 500);
+    } catch (err) {
+      if (!cancelled) onError(err instanceof Error ? err : new Error("Failed to start"));
+    }
+  })();
+
+  return {
+    cancel: () => {
+      cancelled = true;
+      if (timerId) clearTimeout(timerId);
+    },
+  };
+}
+
 
 export async function batchAnalyze(files: File[]): Promise<BatchResult> {
   const formData = new FormData();

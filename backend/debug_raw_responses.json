@@ -1,148 +1,135 @@
 {
   "_info": "Raw API responses \u2014 overwritten on each new analysis",
-  "_timestamp": "2026-03-30T09:00:59.311698+00:00",
-  "_filename": "Screenshot 2026-03-30 at 12.50.48.png",
-  "_image_hash": "0b70278909d56a71cf22bb233d06eec656ec3feadf9caeee08a81757afbd86d7",
+  "_timestamp": "2026-03-30T09:03:44.742641+00:00",
+  "_filename": "Screenshot 2026-03-30 at 12.50.36.png",
+  "_image_hash": "e294e284ef3506e79e279b56d6be11404436b6a58b5acf0847a19c7b41a53d12",
   "vision_raw": {
-    "caption": "a woman sitting in a chair",
-    "caption_confidence": 0.8759939074516296,
+    "caption": "a close up of a logo",
+    "caption_confidence": 0.7554843425750732,
     "dense_captions": [
       {
-        "text": "a woman sitting in a chair",
-        "confidence": 0.8759939074516296,
+        "text": "a logo with white text",
+        "confidence": 0.6279348731040955,
         "bbox": {
           "x": 0,
           "y": 0,
-          "w": 1336,
-          "h": 692
+          "w": 332,
+          "h": 120
         }
       },
       {
-        "text": "a woman sitting in a chair",
-        "confidence": 0.8708144426345825,
+        "text": "a white letter on a grey background",
+        "confidence": 0.7491357922554016,
         "bbox": {
-          "x": 419,
-          "y": 0,
-          "w": 512,
-          "h": 671
-        }
-      },
-      {
-        "text": "a close-up of a person's leg",
-        "confidence": 0.8629871010780334,
-        "bbox": {
-          "x": 750,
-          "y": 434,
-          "w": 171,
-          "h": 250
-        }
-      },
-      {
-        "text": "a person wearing a grey sweatshirt and white pants",
-        "confidence": 0.7203483581542969,
-        "bbox": {
-          "x": 426,
-          "y": 401,
-          "w": 481,
-          "h": 279
-        }
-      },
-      {
-        "text": "a person with a cast on their leg",
-        "confidence": 0.76328045129776,
-        "bbox": {
-          "x": 675,
-          "y": 398,
+          "x": 65,
+          "y": 20,
           "w": 209,
-          "h": 281
+          "h": 58
+        }
+      },
+      {
+        "text": "a logo with white text",
+        "confidence": 0.6270156502723694,
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "w": 322,
+          "h": 112
+        }
+      },
+      {
+        "text": "a close up of a logo",
+        "confidence": 0.6837379932403564,
+        "bbox": {
+          "x": 21,
+          "y": 54,
+          "w": 231,
+          "h": 62
         }
       }
     ],
     "tags": [
       {
-        "name": "human face",
-        "confidence": 0.988958477973938
+        "name": "font",
+        "confidence": 0.9529534578323364
       },
       {
-        "name": "clothing",
-        "confidence": 0.9875239729881287
+        "name": "screenshot",
+        "confidence": 0.9512537717819214
       },
       {
-        "name": "person",
-        "confidence": 0.9569645524024963
+        "name": "logo",
+        "confidence": 0.9433391094207764
       },
       {
-        "name": "fashion",
-        "confidence": 0.739014744758606
+        "name": "graphics",
+        "confidence": 0.9388076066970825
       },
       {
-        "name": "woman",
-        "confidence": 0.6605888605117798
+        "name": "text",
+        "confidence": 0.9038878679275513
       },
       {
-        "name": "girl",
-        "confidence": 0.6124866604804993
+        "name": "graphic design",
+        "confidence": 0.8807307481765747
+      },
+      {
+        "name": "symbol",
+        "confidence": 0.8651070594787598
+      },
+      {
+        "name": "brand",
+        "confidence": 0.8568629622459412
+      },
+      {
+        "name": "design",
+        "confidence": 0.7910450100898743
       }
     ],
-    "objects": [
-      {
-        "tags": [
-          {
-            "name": "person",
-            "confidence": 0.846
-          }
-        ],
-        "bbox": {
-          "x": 448,
-          "y": 28,
-          "w": 535,
-          "h": 655
-        }
-      }
-    ],
+    "objects": [],
     "ocr_text": [
       {
         "text": "ZONNIC",
         "words": [
           {
             "text": "ZONNIC",
-            "confidence": 0.991,
+            "confidence": 0.989,
             "bounding_polygon": [
               {
-                "x": 332,
-                "y": 292
+                "x": 79,
+                "y": 27
               },
               {
-                "x": 914,
-                "y": 290
+                "x": 228,
+                "y": 29
               },
               {
-                "x": 914,
-                "y": 416
+                "x": 228,
+                "y": 66
               },
               {
-                "x": 332,
-                "y": 416
+                "x": 78,
+                "y": 65
               }
             ]
           }
         ],
         "bounding_polygon": [
           {
-            "x": 315,
-            "y": 291
+            "x": 75,
+            "y": 27
           },
           {
-            "x": 982,
-            "y": 290
+            "x": 244,
+            "y": 28
           },
           {
-            "x": 982,
-            "y": 414
+            "x": 244,
+            "y": 65
           },
           {
-            "x": 315,
-            "y": 416
+            "x": 75,
+            "y": 64
           }
         ]
       }
@@ -150,98 +137,98 @@
   },
   "llm_raw": {
     "verdict": "FAIL",
-    "confidence": 90,
-    "summary": "The ZONNIC logo is present and detected via OCR, confirming logo presence. However, there is no evidence of the required bilingual nicotine warning, 18+ icon, or risk communication text in the vision signals, which are critical regulatory requirements. Most colour, gradient, and shape-based checks require manual review due to unavailable signals.",
+    "confidence": 95,
+    "summary": "The image contains the ZONNIC logo, detected via OCR and captions, but is missing all required regulatory elements: no nicotine warning (bilingual), no 18+ icon, and no risk communication text are present. Logo presence is confirmed, but colour, C halo, and background compliance cannot be fully verified from available signals and require manual review. Most other checks pass or require manual review due to vision limitations.",
     "checks_performed": [
       {
         "check_id": "CHECK-01",
         "check_name": "Regulatory: Nicotine Warning Present",
         "status": "fail",
-        "detail": "No nicotine warning text (English or French) detected at the top of the image via OCR. REG-01, REG-04, and REG-05 violated."
+        "detail": "No nicotine warning text (English or French) detected at the top of the image. Violates REG-01, REG-04, REG-05."
       },
       {
         "check_id": "CHECK-02",
         "check_name": "Regulatory: 18+ Icon Present",
         "status": "fail",
-        "detail": "No '18+' text or icon detected via OCR or object detection. REG-02 violated."
+        "detail": "No '18+' icon or text detected anywhere in the image. Violates REG-02."
       },
       {
         "check_id": "CHECK-03",
         "check_name": "Regulatory: Risk Communication Present",
         "status": "fail",
-        "detail": "No risk communication text detected at the bottom of the image via OCR. REG-03 and REG-04 violated."
+        "detail": "No risk communication text detected at the bottom of the image. Violates REG-03, REG-04."
       },
       {
         "check_id": "CHECK-04",
         "check_name": "Logo Presence",
         "status": "pass",
-        "detail": "ZONNIC text detected via OCR at (332,292)-(914,416) with 99.1% confidence \u2014 logo presence confirmed per LOGO-01."
+        "detail": "ZONNIC text detected via OCR at (75,27)-(244,65) with 98.9% confidence. Logo presence confirmed (LOGO-01)."
       },
       {
         "check_id": "CHECK-05",
         "check_name": "Logo Text Colour vs Background",
         "status": "manual_review",
-        "detail": "Unable to fully verify from available vision signals \u2014 colour analysis and background brightness not available. Requires manual review."
+        "detail": "Unable to verify logo text colour or background brightness from available signals \u2014 colour analysis not available. Requires manual review for LOGO-03, LOGO-06, LOGO-08, LOGO-10, LOGOBG-DONT-06, LOGOBG-DONT-07."
       },
       {
         "check_id": "CHECK-06",
         "check_name": "C Halo Presence and Correctness",
         "status": "manual_review",
-        "detail": "Unable to fully verify from available vision signals \u2014 shape detection and colour analysis not available. Requires manual review."
+        "detail": "Unable to verify C halo presence, colour, or shape from available signals \u2014 shape and colour analysis not available. Requires manual review for LOGO-DONT-01, LOGO-DONT-02, LOGO-DONT-04, LOGO-DONT-14, LOGO-DONT-15."
       },
       {
         "check_id": "CHECK-07",
         "check_name": "Logo Integrity",
         "status": "manual_review",
-        "detail": "Unable to fully verify from available vision signals \u2014 visual analysis for gradients, outlines, or stacking not available. Requires manual review."
+        "detail": "Unable to verify logo gradients, outlines, stacking, or distortion from available signals \u2014 visual analysis not available. Requires manual review for LOGO-13, LOGO-DONT-05, LOGO-DONT-07, LOGO-DONT-13."
       },
       {
         "check_id": "CHECK-08",
         "check_name": "Background Type Detection",
         "status": "manual_review",
-        "detail": "Unable to fully verify from available vision signals \u2014 colour analysis and background classification not available. Requires manual review."
+        "detail": "Background described as 'grey' in dense captions, but unable to confirm gradient or image/light/dark from available signals \u2014 colour/background classification not available. Requires manual review for LOGO-02, LOGO-05, LOGO-07, LOGO-09."
       },
       {
         "check_id": "CHECK-09",
         "check_name": "Gradient Compliance",
         "status": "manual_review",
-        "detail": "Unable to fully verify from available vision signals \u2014 gradient direction and split not available. Requires manual review."
+        "detail": "Unable to verify gradient direction, split, or logo position from available signals \u2014 gradient analysis and object position not available. Requires manual review for GRAD-01, GRAD-02, GRAD-03."
       },
       {
         "check_id": "CHECK-10",
         "check_name": "Content Type vs Background Match",
         "status": "manual_review",
-        "detail": "Unable to fully verify from available vision signals \u2014 content classification and colour analysis not available. Requires manual review."
+        "detail": "Content type inferred as 'unknown' (logo only). Unable to verify background match from available signals \u2014 content classification and colour analysis not available. Requires manual review for CONTENT-01, CONTENT-02, CONTENT-03, CONTENT-DONT-01, CONTENT-DONT-02, CONTENT-DONT-04."
       },
       {
         "check_id": "CHECK-11",
         "check_name": "Colour Palette Compliance",
         "status": "manual_review",
-        "detail": "Unable to fully verify from available vision signals \u2014 dominant colours and colour matching not available. Requires manual review."
+        "detail": "Unable to verify colour palette usage from available signals \u2014 dominant colour and colour matching not available. Requires manual review for COLOR-01, COLOR-02, COLOR-03, COLOR-04."
       },
       {
         "check_id": "CHECK-12",
         "check_name": "Typography Check",
         "status": "manual_review",
-        "detail": "Unable to fully verify from available vision signals \u2014 font analysis not available. Requires manual review."
+        "detail": "Font name/weight not detectable from available signals. Requires manual review for TYPO-01, TYPO-02, TYPO-03, LOGO-14, LOGO-15."
       },
       {
         "check_id": "CHECK-13",
         "check_name": "Grey Gradient Background",
         "status": "manual_review",
-        "detail": "Unable to fully verify from available vision signals \u2014 colour analysis and opacity detection not available. Requires manual review."
+        "detail": "Unable to verify grey gradient opacity or format from available signals \u2014 colour/opacity analysis not available. Requires manual review for GRAD-04, CONTENT-DONT-03."
       },
       {
         "check_id": "CHECK-14",
         "check_name": "Logo Safety Zone",
         "status": "manual_review",
-        "detail": "Unable to fully verify from available vision signals \u2014 object detection and spatial analysis not available. Requires manual review."
+        "detail": "Unable to verify logo safety zone or minimum size from available signals \u2014 object detection/spatial analysis not available. Requires manual review for LOGO-11, LOGO-12."
       },
       {
         "check_id": "CHECK-15",
         "check_name": "Logo on Background Dont's",
         "status": "manual_review",
-        "detail": "Unable to fully verify from available vision signals \u2014 colour analysis and shape detection not available. Requires manual review."
+        "detail": "Unable to verify halo/background colour blending, flavour mismatch, or logo in shapes from available signals \u2014 colour/shape analysis not available. Requires manual review for LOGOBG-DONT-01, LOGOBG-DONT-02, LOGOBG-DONT-03, LOGOBG-DONT-04, LOGOBG-DONT-05, LOGOBG-DONT-08."
       }
     ],
     "violations": [
@@ -251,24 +238,24 @@
         "severity": "critical",
         "issue": "No nicotine warning statement detected at the top of the image.",
         "fix_suggestion": "Add the required bilingual nicotine warning banner at the top of the creative.",
-        "evidence": "No OCR text matching the required English or French warning detected.",
+        "evidence": "No OCR text matching 'WARNING:' or 'AVERTISSEMENT :' detected.",
         "bbox": null
       },
       {
         "rule_id": "REG-04",
         "rule_text": "The nicotine warning banner must be positioned at the TOP of the asset. The risk communication and 18+ icon must be at the BOTTOM. This placement is consistent across all compliant examples in the guidelines.",
         "severity": "critical",
-        "issue": "No nicotine warning at the top, no risk communication or 18+ icon at the bottom.",
-        "fix_suggestion": "Ensure nicotine warning is at the top and risk communication plus 18+ icon are at the bottom.",
-        "evidence": "No relevant OCR text or icon detected at top or bottom of image.",
+        "issue": "Required regulatory elements (nicotine warning at top, risk communication and 18+ icon at bottom) are missing.",
+        "fix_suggestion": "Add the nicotine warning at the top and the risk communication text and 18+ icon at the bottom.",
+        "evidence": "No OCR text or icon detected at top or bottom of image.",
         "bbox": null
       },
       {
         "rule_id": "REG-05",
         "rule_text": "The nicotine warning must appear in BOTH English and French on every asset. English uses 'WARNING:', French uses 'AVERTISSEMENT :'.",
         "severity": "critical",
-        "issue": "No English or French nicotine warning detected.",
-        "fix_suggestion": "Add both English and French nicotine warnings as required.",
+        "issue": "No bilingual nicotine warning detected.",
+        "fix_suggestion": "Add both English and French nicotine warning statements at the top of the creative.",
         "evidence": "No OCR text matching 'WARNING:' or 'AVERTISSEMENT :' detected.",
         "bbox": null
       },
@@ -276,8 +263,8 @@
         "rule_id": "REG-02",
         "rule_text": "The 18+ icon must be present on marketing materials to indicate age restriction.",
         "severity": "critical",
-        "issue": "No 18+ icon or text detected.",
-        "fix_suggestion": "Add the required 18+ icon at the bottom of the creative.",
+        "issue": "No 18+ icon detected in the image.",
+        "fix_suggestion": "Add a circular 18+ icon at the bottom of the creative.",
         "evidence": "No OCR text or icon matching '18+' detected.",
         "bbox": null
       },
@@ -295,7 +282,7 @@
       {
         "rule_id": "LOGO-01",
         "category": "Logo",
-        "detail": "ZONNIC text detected via OCR at (332,292)-(914,416) with 99.1% confidence \u2014 logo presence confirmed.",
+        "detail": "ZONNIC text detected via OCR at (75,27)-(244,65) with 98.9% confidence \u2014 logo presence confirmed per LOGO-01.",
         "verified": true
       },
       {
@@ -355,7 +342,7 @@
       {
         "rule_id": "LOGO-DONT-14",
         "category": "Logo",
-        "detail": "Unable to fully verify from available vision signals \u2014 colour analysis not available. Requires manual review.",
+        "detail": "Unable to fully verify from available vision signals \u2014 shape detection not available. Requires manual review.",
         "verified": false
       },
       {
@@ -391,37 +378,37 @@
       {
         "rule_id": "LOGO-02",
         "category": "Logo",
-        "detail": "Unable to fully verify from available vision signals \u2014 colour analysis not available. Requires manual review.",
+        "detail": "Unable to fully verify from available vision signals \u2014 background classification not available. Requires manual review.",
         "verified": false
       },
       {
         "rule_id": "LOGO-05",
         "category": "Logo",
-        "detail": "Unable to fully verify from available vision signals \u2014 colour analysis not available. Requires manual review.",
+        "detail": "Unable to fully verify from available vision signals \u2014 background classification not available. Requires manual review.",
         "verified": false
       },
       {
         "rule_id": "LOGO-07",
         "category": "Logo",
-        "detail": "Unable to fully verify from available vision signals \u2014 colour analysis not available. Requires manual review.",
+        "detail": "Unable to fully verify from available vision signals \u2014 background classification not available. Requires manual review.",
         "verified": false
       },
       {
         "rule_id": "LOGO-09",
         "category": "Logo",
-        "detail": "Unable to fully verify from available vision signals \u2014 colour analysis not available. Requires manual review.",
+        "detail": "Unable to fully verify from available vision signals \u2014 background classification not available. Requires manual review.",
         "verified": false
       },
       {
         "rule_id": "GRAD-01",
         "category": "Gradient",
-        "detail": "Unable to fully verify from available vision signals \u2014 gradient direction not available. Requires manual review.",
+        "detail": "Unable to fully verify from available vision signals \u2014 gradient analysis not available. Requires manual review.",
         "verified": false
       },
       {
         "rule_id": "GRAD-02",
         "category": "Gradient",
-        "detail": "Unable to fully verify from available vision signals \u2014 gradient split not available. Requires manual review.",
+        "detail": "Unable to fully verify from available vision signals \u2014 gradient analysis not available. Requires manual review.",
         "verified": false
       },
       {
@@ -433,61 +420,61 @@
       {
         "rule_id": "CONTENT-01",
         "category": "Content",
-        "detail": "Unable to fully verify from available vision signals \u2014 content classification and colour analysis not available. Requires manual review.",
+        "detail": "Unable to fully verify from available vision signals \u2014 content classification not available. Requires manual review.",
         "verified": false
       },
       {
         "rule_id": "CONTENT-02",
         "category": "Content",
-        "detail": "Unable to fully verify from available vision signals \u2014 content classification and colour analysis not available. Requires manual review.",
+        "detail": "Unable to fully verify from available vision signals \u2014 content classification not available. Requires manual review.",
         "verified": false
       },
       {
         "rule_id": "CONTENT-03",
         "category": "Content",
-        "detail": "Unable to fully verify from available vision signals \u2014 content classification and colour analysis not available. Requires manual review.",
+        "detail": "Unable to fully verify from available vision signals \u2014 content classification not available. Requires manual review.",
         "verified": false
       },
       {
         "rule_id": "CONTENT-DONT-01",
         "category": "Content",
-        "detail": "Unable to fully verify from available vision signals \u2014 colour analysis not available. Requires manual review.",
+        "detail": "Unable to fully verify from available vision signals \u2014 content classification not available. Requires manual review.",
         "verified": false
       },
       {
         "rule_id": "CONTENT-DONT-02",
         "category": "Content",
-        "detail": "Unable to fully verify from available vision signals \u2014 content classification and colour analysis not available. Requires manual review.",
+        "detail": "Unable to fully verify from available vision signals \u2014 content classification not available. Requires manual review.",
         "verified": false
       },
       {
         "rule_id": "CONTENT-DONT-04",
         "category": "Content",
-        "detail": "Unable to fully verify from available vision signals \u2014 colour analysis not available. Requires manual review.",
+        "detail": "Unable to fully verify from available vision signals \u2014 content classification not available. Requires manual review.",
         "verified": false
       },
       {
         "rule_id": "COLOR-01",
         "category": "Colors",
-        "detail": "Unable to fully verify from available vision signals \u2014 dominant colours and colour matching not available. Requires manual review.",
+        "detail": "Unable to fully verify from available vision signals \u2014 colour analysis not available. Requires manual review.",
         "verified": false
       },
       {
         "rule_id": "COLOR-02",
         "category": "Colors",
-        "detail": "Unable to fully verify from available vision signals \u2014 dominant colours and colour matching not available. Requires manual review.",
+        "detail": "Unable to fully verify from available vision signals \u2014 colour analysis not available. Requires manual review.",
         "verified": false
       },
       {
         "rule_id": "COLOR-03",
         "category": "Colors",
-        "detail": "Unable to fully verify from available vision signals \u2014 dominant colours and colour matching not available. Requires manual review.",
+        "detail": "Unable to fully verify from available vision signals \u2014 colour analysis not available. Requires manual review.",
         "verified": false
       },
       {
         "rule_id": "COLOR-04",
         "category": "Colors",
-        "detail": "Unable to fully verify from available vision signals \u2014 dominant colours and colour matching not available. Requires manual review.",
+        "detail": "Unable to fully verify from available vision signals \u2014 colour analysis not available. Requires manual review.",
         "verified": false
       },
       {
@@ -523,25 +510,25 @@
       {
         "rule_id": "GRAD-04",
         "category": "Gradient",
-        "detail": "Unable to fully verify from available vision signals \u2014 colour analysis and opacity detection not available. Requires manual review.",
+        "detail": "Unable to fully verify from available vision signals \u2014 opacity detection not available. Requires manual review.",
         "verified": false
       },
       {
         "rule_id": "CONTENT-DONT-03",
         "category": "Content",
-        "detail": "Unable to fully verify from available vision signals \u2014 colour analysis and opacity detection not available. Requires manual review.",
+        "detail": "Unable to fully verify from available vision signals \u2014 opacity detection not available. Requires manual review.",
         "verified": false
       },
       {
         "rule_id": "LOGO-11",
         "category": "Logo",
-        "detail": "Unable to fully verify from available vision signals \u2014 object detection and spatial analysis not available. Requires manual review.",
+        "detail": "Unable to fully verify from available vision signals \u2014 spatial analysis not available. Requires manual review.",
         "verified": false
       },
       {
         "rule_id": "LOGO-12",
         "category": "Logo",
-        "detail": "Unable to fully verify from available vision signals \u2014 object detection and spatial analysis not available. Requires manual review.",
+        "detail": "Unable to fully verify from available vision signals \u2014 spatial analysis not available. Requires manual review.",
         "verified": false
       },
       {
@@ -581,7 +568,7 @@
         "verified": false
       }
     ],
-    "content_type_detected": "brand_purpose",
+    "content_type_detected": "unknown",
     "background_type_detected": "unknown"
   }
 }
