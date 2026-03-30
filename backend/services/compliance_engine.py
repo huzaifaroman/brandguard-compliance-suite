@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from typing import Optional, AsyncGenerator
 from pathlib import Path
 
-from backend.services.blob_service import upload_image
+from backend.services.blob_service import upload_image, get_sas_url
 from backend.services.vision_service import analyze_image
 from backend.services.llm_service import analyze_compliance
 from backend import redis_client, database
@@ -45,6 +45,8 @@ async def analyze_single_image(
     cached = await redis_client.get_cached_analysis(image_hash)
     if cached:
         cached["cached"] = True
+        if "image_url" in cached:
+            cached["image_url"] = get_sas_url(cached["image_url"])
         if "passed_details" not in cached and "checks_passed" in cached:
             old = cached.pop("checks_passed", [])
             if isinstance(old, list):
@@ -77,7 +79,7 @@ async def analyze_single_image(
     passed_count = len(passed_details) if isinstance(passed_details, list) else 0
 
     result = {
-        "image_url": blob_url,
+        "image_url": get_sas_url(blob_url),
         "image_width": width,
         "image_height": height,
         "verdict": llm_result.get("verdict", "WARNING"),
@@ -139,6 +141,8 @@ async def analyze_single_image_streaming(
     cached = await redis_client.get_cached_analysis(image_hash)
     if cached:
         cached["cached"] = True
+        if "image_url" in cached:
+            cached["image_url"] = get_sas_url(cached["image_url"])
         if "passed_details" not in cached and "checks_passed" in cached:
             old = cached.pop("checks_passed", [])
             if isinstance(old, list):
@@ -188,7 +192,7 @@ async def analyze_single_image_streaming(
     passed_count = len(passed_details) if isinstance(passed_details, list) else 0
 
     result = {
-        "image_url": blob_url,
+        "image_url": get_sas_url(blob_url),
         "image_width": width,
         "image_height": height,
         "verdict": verdict,

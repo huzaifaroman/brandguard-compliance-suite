@@ -209,16 +209,23 @@ export default function HistoryPage() {
 function ImageThumbnail({ url }: { url: string | null }) {
   const [failed, setFailed] = useState(false);
 
+  useEffect(() => { setFailed(false); }, [url]);
+
   if (!url || failed) {
     return (
-      <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
-        <ImageIcon className="w-5 h-5 text-muted-foreground/50" />
+      <div className="w-12 h-12 rounded-lg bg-muted/60 flex items-center justify-center flex-shrink-0 border border-border/30">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-muted-foreground/40">
+          <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="1.5" />
+          <circle cx="9" cy="9" r="2" stroke="currentColor" strokeWidth="1.5" />
+          <path d="M3 16l4.293-4.293a1 1 0 011.414 0L13 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          <path d="M13 14l2.293-2.293a1 1 0 011.414 0L21 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
       </div>
     );
   }
 
   return (
-    <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden">
+    <div className="w-12 h-12 rounded-lg bg-muted/60 flex items-center justify-center flex-shrink-0 overflow-hidden border border-border/30">
       <img
         src={url}
         alt="Analysis"

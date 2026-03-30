@@ -3,6 +3,7 @@ import logging
 from fastapi import APIRouter, HTTPException
 from backend.models.schemas import HistoryResponse, HistoryItem, ComplianceResult, Violation, PassedDetail
 from backend import database, redis_client
+from backend.services.blob_service import get_sas_url
 
 logger = logging.getLogger("backend.routers.history")
 
@@ -45,7 +46,7 @@ async def get_history(limit: int = 50, offset: int = 0):
         HistoryItem(
             id=row["id"],
             image_hash=row["image_hash"],
-            blob_url=row["blob_url"],
+            blob_url=get_sas_url(row["blob_url"]),
             verdict=row["verdict"],
             confidence=row["confidence"],
             violations_count=row["violations_count"] or 0,
@@ -119,7 +120,7 @@ async def get_analysis(session_id: str):
         passed_details = []
 
     return {
-        "image_url": row["blob_url"],
+        "image_url": get_sas_url(row["blob_url"]),
         "image_width": row["image_width"],
         "image_height": row["image_height"],
         "verdict": row["verdict"] or "WARNING",

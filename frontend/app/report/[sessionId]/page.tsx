@@ -684,16 +684,23 @@ function StatCard({ label, value, color }: { label: string; value: string | numb
 function ReportImage({ url }: { url: string | null }) {
   const [failed, setFailed] = useState(false);
 
+  useEffect(() => { setFailed(false); }, [url]);
+
   if (!url || failed) {
     return (
-      <div className="w-full md:w-48 h-48 rounded-lg bg-muted/30 overflow-hidden flex-shrink-0 border border-border/50 flex items-center justify-center">
-        <ImageIcon className="w-10 h-10 text-muted-foreground/30" />
+      <div className="w-full md:w-48 h-48 rounded-lg bg-muted/20 overflow-hidden flex-shrink-0 border border-border/40 flex items-center justify-center">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-muted-foreground/25">
+          <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="1.5" />
+          <circle cx="9" cy="9" r="2" stroke="currentColor" strokeWidth="1.5" />
+          <path d="M3 16l4.293-4.293a1 1 0 011.414 0L13 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          <path d="M13 14l2.293-2.293a1 1 0 011.414 0L21 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
       </div>
     );
   }
 
   return (
-    <div className="w-full md:w-48 h-48 rounded-lg bg-muted/30 overflow-hidden flex-shrink-0 border border-border/50">
+    <div className="w-full md:w-48 h-48 rounded-lg bg-muted/20 overflow-hidden flex-shrink-0 border border-border/40">
       <img
         src={url}
         alt="Analyzed image"

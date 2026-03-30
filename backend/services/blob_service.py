@@ -1,14 +1,68 @@
 import asyncio
 import io
 import logging
+from datetime import datetime, timedelta, timezone
 from typing import Tuple, Optional
+from urllib.parse import urlparse, unquote
 
 from PIL import Image
-from azure.storage.blob import BlobServiceClient, ContentSettings
+from azure.storage.blob import BlobServiceClient, ContentSettings, generate_blob_sas, BlobSasPermissions
 
 from backend.config import settings
 
 logger = logging.getLogger("backend.services.blob")
+
+_conn_parts: dict = {}
+
+
+def _parse_connection_string() -> dict:
+    global _conn_parts
+    if _conn_parts:
+        return _conn_parts
+    if not settings.azure_blob_connection_string:
+        return {}
+    try:
+        _conn_parts = dict(
+            part.split("=", 1)
+            for part in settings.azure_blob_connection_string.split(";")
+            if "=" in part
+        )
+    except Exception:
+        _conn_parts = {}
+    return _conn_parts
+
+
+def get_sas_url(blob_url: Optional[str], expiry_hours: int = 2) -> Optional[str]:
+    if not blob_url or not settings.azure_blob_connection_string:
+        return blob_url
+
+    try:
+        parts = _parse_connection_string()
+        account_name = parts.get("AccountName", "")
+        account_key = parts.get("AccountKey", "")
+        if not account_name or not account_key:
+            return blob_url
+
+        base_url = blob_url.split("?")[0] if "?" in blob_url else blob_url
+        parsed = urlparse(base_url)
+        path_segments = parsed.path.strip("/").split("/", 1)
+        if len(path_segments) < 2:
+            return blob_url
+        container_name = path_segments[0]
+        blob_name = unquote(path_segments[1])
+
+        sas_token = generate_blob_sas(
+            account_name=account_name,
+            container_name=container_name,
+            blob_name=blob_name,
+            account_key=account_key,
+            permission=BlobSasPermissions(read=True),
+            expiry=datetime.now(timezone.utc) + timedelta(hours=expiry_hours),
+        )
+        return f"{base_url}?{sas_token}"
+    except Exception as e:
+        logger.warning("SAS URL generation failed: %s", e)
+        return blob_url
 
 _blob_client = None
 
