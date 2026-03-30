@@ -236,11 +236,7 @@ export default function ReportPage() {
             <CardContent className="p-0">
               <div className={`${vc.bg} p-6`}>
                 <div className="flex flex-col md:flex-row gap-6">
-                  {result.image_url && (
-                    <div className="w-full md:w-48 h-48 rounded-lg bg-muted/30 overflow-hidden flex-shrink-0 border border-border/50">
-                      <img src={result.image_url} alt="Analyzed image" className="w-full h-full object-contain" />
-                    </div>
-                  )}
+                  <ReportImage url={result.image_url} />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-3">
                       <motion.div
@@ -682,6 +678,29 @@ function StatCard({ label, value, color }: { label: string; value: string | numb
         <p className="text-[10px] text-muted-foreground mt-0.5">{label}</p>
       </CardContent>
     </Card>
+  );
+}
+
+function ReportImage({ url }: { url: string | null }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!url || failed) {
+    return (
+      <div className="w-full md:w-48 h-48 rounded-lg bg-muted/30 overflow-hidden flex-shrink-0 border border-border/50 flex items-center justify-center">
+        <ImageIcon className="w-10 h-10 text-muted-foreground/30" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full md:w-48 h-48 rounded-lg bg-muted/30 overflow-hidden flex-shrink-0 border border-border/50">
+      <img
+        src={url}
+        alt="Analyzed image"
+        className="w-full h-full object-contain"
+        onError={() => setFailed(true)}
+      />
+    </div>
   );
 }
 

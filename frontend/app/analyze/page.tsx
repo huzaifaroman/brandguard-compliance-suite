@@ -25,7 +25,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { RadialBarChart, RadialBar, PolarAngleAxis } from "recharts";
-import { analyzeImage, getChatMessages, streamChatMessage } from "@/lib/api";
+import { streamAnalysis, getChatMessages, streamChatMessage } from "@/lib/api";
+import type { StreamEvent } from "@/lib/api";
 import type { ComplianceResult, Violation, ChatMessage, PassedDetail } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -74,6 +75,7 @@ export default function AnalyzePage() {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [activeStep, setActiveStep] = useState(0);
   const [animatedConfidence, setAnimatedConfidence] = useState(0);
+  const [streamMessage, setStreamMessage] = useState("");
 
   const onDrop = useCallback((accepted: File[]) => {
     const f = accepted[0];
@@ -94,22 +96,9 @@ export default function AnalyzePage() {
     maxSize: 20 * 1024 * 1024,
   });
 
-  useEffect(() => {
-    if (!loading) return;
-    setLoadingProgress(0);
-    setActiveStep(0);
-    const steps = [
-      { target: 15, step: 0, delay: 300 },
-      { target: 35, step: 1, delay: 1500 },
-      { target: 60, step: 2, delay: 3000 },
-      { target: 80, step: 2, delay: 6000 },
-      { target: 90, step: 3, delay: 9000 },
-    ];
-    const timers = steps.map(({ target, step, delay }) =>
-      setTimeout(() => { setLoadingProgress(target); setActiveStep(step); }, delay)
-    );
-    return () => timers.forEach(clearTimeout);
-  }, [loading]);
+  const stepToIndex: Record<string, number> = {
+    uploading: 0, vision: 1, llm: 2, persisting: 3, done: 3, cache_hit: 3,
+  };
 
   useEffect(() => {
     if (!result) { setAnimatedConfidence(0); return; }
@@ -128,23 +117,42 @@ export default function AnalyzePage() {
     requestAnimationFrame(animate);
   }, [result]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!file) return;
     setLoading(true);
     setError(null);
-    try {
-      const res = await analyzeImage(file, prompt || undefined);
-      setLoadingProgress(100);
-      setActiveStep(3);
-      await new Promise((r) => setTimeout(r, 500));
-      setResult(res);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Analysis failed");
-    } finally {
-      setLoading(false);
-      setLoadingProgress(0);
-      setActiveStep(0);
-    }
+    setLoadingProgress(0);
+    setActiveStep(0);
+    setStreamMessage("");
+
+    streamAnalysis(
+      file,
+      prompt || undefined,
+      (event: StreamEvent) => {
+        if (event.progress !== undefined) setLoadingProgress(event.progress);
+        if (event.step) setActiveStep(stepToIndex[event.step] ?? 0);
+        if (event.message) setStreamMessage(event.message);
+      },
+      (res) => {
+        setLoadingProgress(100);
+        setActiveStep(3);
+        setStreamMessage("Analysis complete");
+        setTimeout(() => {
+          setResult(res);
+          setLoading(false);
+          setLoadingProgress(0);
+          setActiveStep(0);
+          setStreamMessage("");
+        }, 500);
+      },
+      (err) => {
+        setError(err.message);
+        setLoading(false);
+        setLoadingProgress(0);
+        setActiveStep(0);
+        setStreamMessage("");
+      },
+    );
   };
 
   const handleSendChat = () => {
@@ -383,6 +391,16 @@ export default function AnalyzePage() {
                         <span className="text-xs font-mono text-primary">{loadingProgress}%</span>
                       </div>
                       <Progress value={loadingProgress} className="h-1.5" />
+                      {streamMessage && (
+                        <motion.p
+                          key={streamMessage}
+                          initial={{ opacity: 0, y: 4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-xs text-muted-foreground"
+                        >
+                          {streamMessage}
+                        </motion.p>
+                      )}
                       <div className="grid grid-cols-4 gap-2">
                         {pipelineSteps.map((step, i) => {
                           const StepIcon = step.icon;

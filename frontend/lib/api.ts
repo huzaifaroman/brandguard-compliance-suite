@@ -30,14 +30,79 @@ export async function analyzeImage(
   return result;
 }
 
+export interface StreamEvent {
+  event: "step" | "result" | "error";
+  step?: string;
+  progress?: number;
+  message?: string;
+  data?: ComplianceResult;
+}
+
 export function streamAnalysis(
   file: File,
   prompt: string | undefined,
-  onChunk: (text: string) => void,
+  onStep: (event: StreamEvent) => void,
   onDone: (result: ComplianceResult) => void,
   onError: (err: Error) => void
 ) {
-  analyzeImage(file, prompt).then(onDone).catch(onError);
+  const formData = new FormData();
+  formData.append("file", file);
+  if (prompt) formData.append("prompt", prompt);
+
+  fetch(`${API_BASE}/api/analyze/stream`, {
+    method: "POST",
+    body: formData,
+  })
+    .then(async (res) => {
+      if (!res.ok || !res.body) throw new Error(`Analysis failed: ${res.statusText}`);
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let finalResult: ComplianceResult | null = null;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith("data: ")) continue;
+          try {
+            const parsed: StreamEvent = JSON.parse(trimmed.slice(6));
+            if (parsed.event === "step") {
+              onStep(parsed);
+            } else if (parsed.event === "result" && parsed.data) {
+              finalResult = parsed.data;
+            } else if (parsed.event === "error") {
+              throw new Error(parsed.message || "Analysis failed");
+            }
+          } catch (e) {
+            if (e instanceof Error && e.message !== "Analysis failed") continue;
+            throw e;
+          }
+        }
+      }
+
+      if (buffer.trim().startsWith("data: ")) {
+        try {
+          const parsed: StreamEvent = JSON.parse(buffer.trim().slice(6));
+          if (parsed.event === "result" && parsed.data) {
+            finalResult = parsed.data;
+          }
+        } catch {}
+      }
+
+      if (finalResult) {
+        cacheInvalidatePrefix("history:");
+        onDone(finalResult);
+      } else {
+        throw new Error("No result received from analysis stream");
+      }
+    })
+    .catch(onError);
 }
 
 export async function batchAnalyze(files: File[]): Promise<BatchResult> {

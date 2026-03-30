@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Clock,
@@ -156,13 +156,7 @@ export default function HistoryPage() {
                             <div className={isMultiple ? "divide-y divide-blue-500/10" : ""}>
                               {group.map((item) => (
                                 <div key={item.id} className="flex items-center gap-4 p-4 hover:bg-accent/20 transition-colors duration-200">
-                                  <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden">
-                                    {item.blob_url ? (
-                                      <img src={item.blob_url} alt="Analysis" className="w-full h-full object-cover" />
-                                    ) : (
-                                      <ImageIcon className="w-5 h-5 text-muted-foreground" />
-                                    )}
-                                  </div>
+                                  <ImageThumbnail url={item.blob_url} />
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1">
                                       {verdictIcon(item.verdict)}
@@ -208,6 +202,29 @@ export default function HistoryPage() {
           )}
         </AnimatePresence>
       </div>
+    </div>
+  );
+}
+
+function ImageThumbnail({ url }: { url: string | null }) {
+  const [failed, setFailed] = useState(false);
+
+  if (!url || failed) {
+    return (
+      <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
+        <ImageIcon className="w-5 h-5 text-muted-foreground/50" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center flex-shrink-0 overflow-hidden">
+      <img
+        src={url}
+        alt="Analysis"
+        className="w-full h-full object-cover"
+        onError={() => setFailed(true)}
+      />
     </div>
   );
 }
