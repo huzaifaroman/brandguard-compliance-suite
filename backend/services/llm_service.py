@@ -13,7 +13,7 @@ from backend.config import settings
 
 logger = logging.getLogger("backend.services.llm")
 
-LLM_TIMEOUT_SECONDS = 60
+LLM_TIMEOUT_SECONDS = 180
 
 _client = None
 
@@ -27,6 +27,8 @@ def _get_client() -> AzureOpenAI:
             api_version=settings.azure_openai_api_version,
             azure_endpoint=settings.azure_openai_endpoint,
             api_key=settings.azure_openai_key,
+            timeout=180,
+            max_retries=1,
         )
     return _client
 

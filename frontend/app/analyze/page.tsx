@@ -17,10 +17,6 @@ import {
   MessageSquare,
   RotateCcw,
   CheckCircle2,
-  Cloud,
-  ScanEye,
-  Brain,
-  FileCheck,
   FileText,
   AlertTriangle,
   Info,
@@ -35,13 +31,11 @@ import {
   ChevronDown,
 } from "lucide-react";
 import Link from "next/link";
-import { streamAnalysis, getChatMessages, streamChatMessage } from "@/lib/api";
-import type { StreamEvent } from "@/lib/api";
+import { analyzeImage, getChatMessages, streamChatMessage } from "@/lib/api";
 import type { ComplianceResult, Violation, ChatMessage, PassedDetail, CheckPerformed } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -63,12 +57,37 @@ const verdictConfig: Record<string, { icon: typeof ShieldCheck; color: string; b
   WARNING: { icon: ShieldQuestion, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/30", label: "Needs Review" },
 };
 
-const pipelineSteps = [
-  { icon: Cloud, label: "Uploading to Azure", sublabel: "Blob Storage" },
-  { icon: ScanEye, label: "Vision Analysis", sublabel: "Azure Vision 4.0" },
-  { icon: Brain, label: "AI Evaluation", sublabel: "GPT-4.1 · 62 rules" },
-  { icon: FileCheck, label: "Building Report", sublabel: "Compliance report" },
-];
+
+const SESSION_KEY = "compliance_analyze_session";
+
+function saveSession(result: ComplianceResult, previewUrl: string | null) {
+  try {
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+      result,
+      previewUrl: result.image_url || previewUrl,
+      savedAt: Date.now(),
+    }));
+  } catch {}
+}
+
+function loadSession(): { result: ComplianceResult; previewUrl: string | null } | null {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (Date.now() - data.savedAt > 30 * 60 * 1000) {
+      sessionStorage.removeItem(SESSION_KEY);
+      return null;
+    }
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+function clearSession() {
+  try { sessionStorage.removeItem(SESSION_KEY); } catch {}
+}
 
 export default function AnalyzePage() {
   const [file, setFile] = useState<File | null>(null);
@@ -83,15 +102,23 @@ export default function AnalyzePage() {
   const [chatStreaming, setChatStreaming] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const reportRef = useRef<HTMLDivElement>(null);
-  const [loadingProgress, setLoadingProgress] = useState(0);
-  const [activeStep, setActiveStep] = useState(0);
-  const [streamMessage, setStreamMessage] = useState("");
   const [expandedViolations, setExpandedViolations] = useState<Set<number>>(new Set());
+  const abortRef = useRef<AbortController | null>(null);
+  const [restoredFromSession, setRestoredFromSession] = useState(false);
+
+  useEffect(() => {
+    const saved = loadSession();
+    if (saved) {
+      setResult(saved.result);
+      if (saved.previewUrl) setPreview(saved.previewUrl);
+      setRestoredFromSession(true);
+    }
+  }, []);
 
   const onDrop = useCallback((accepted: File[]) => {
     const f = accepted[0];
     if (!f) return;
-    if (preview) URL.revokeObjectURL(preview);
+    if (preview && !restoredFromSession) URL.revokeObjectURL(preview);
     setFile(f);
     setPreview(URL.createObjectURL(f));
     setResult(null);
@@ -99,7 +126,9 @@ export default function AnalyzePage() {
     setShowChat(false);
     setChatMessages([]);
     setExpandedViolations(new Set());
-  }, [preview]);
+    setRestoredFromSession(false);
+    clearSession();
+  }, [preview, restoredFromSession]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -108,51 +137,35 @@ export default function AnalyzePage() {
     maxSize: 20 * 1024 * 1024,
   });
 
-  const stepToIndex: Record<string, number> = {
-    uploading: 0, vision: 1, llm: 2, persisting: 3, done: 3, cache_hit: 3,
-  };
-
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!file) return;
+    if (abortRef.current) abortRef.current.abort();
     setLoading(true);
     setError(null);
     setResult(null);
-    setLoadingProgress(0);
-    setActiveStep(0);
-    setStreamMessage("");
     setExpandedViolations(new Set());
+    setRestoredFromSession(false);
 
-    streamAnalysis(
-      file,
-      prompt || undefined,
-      (event: StreamEvent) => {
-        if (event.progress !== undefined) setLoadingProgress(event.progress);
-        if (event.step) setActiveStep(stepToIndex[event.step] ?? 0);
-        if (event.message) setStreamMessage(event.message);
-      },
-      (res) => {
-        setLoadingProgress(100);
-        setActiveStep(3);
-        setStreamMessage("Analysis complete");
-        setTimeout(() => {
-          setResult(res);
-          setLoading(false);
-          setLoadingProgress(0);
-          setActiveStep(0);
-          setStreamMessage("");
-          setTimeout(() => {
-            reportRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-          }, 100);
-        }, 500);
-      },
-      (err) => {
-        setError(err.message);
-        setLoading(false);
-        setLoadingProgress(0);
-        setActiveStep(0);
-        setStreamMessage("");
-      },
-    );
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    try {
+      const res = await analyzeImage(file, prompt || undefined, controller.signal);
+      setResult(res);
+      saveSession(res, preview);
+      setTimeout(() => {
+        reportRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === "AbortError") {
+        setError("Analysis was cancelled.");
+      } else {
+        setError(err instanceof Error ? err.message : "Analysis failed");
+      }
+    } finally {
+      setLoading(false);
+      abortRef.current = null;
+    }
   };
 
   const handleSendChat = () => {
@@ -194,13 +207,16 @@ export default function AnalyzePage() {
   }, [showChat, result?.session_id]);
 
   const handleReset = () => {
-    if (preview) URL.revokeObjectURL(preview);
+    if (abortRef.current) { abortRef.current.abort(); abortRef.current = null; }
+    if (preview && !restoredFromSession) URL.revokeObjectURL(preview);
+    clearSession();
     setFile(null);
     setPreview(null);
     setResult(null);
     setError(null);
     setPrompt("");
     setShowChat(false);
+    setRestoredFromSession(false);
     setChatMessages([]);
     setExpandedViolations(new Set());
   };
@@ -435,67 +451,15 @@ export default function AnalyzePage() {
               className="max-w-2xl mx-auto"
             >
               <Card className="border-primary/20 overflow-hidden">
-                <CardContent className="p-5 space-y-4">
-                  <div className="flex items-center justify-between mb-1">
-                    <p className="text-sm font-medium">AI Analysis Pipeline</p>
-                    <span className="text-xs font-mono text-primary">{loadingProgress}%</span>
-                  </div>
-                  <Progress value={loadingProgress} className="h-1.5" />
-                  {streamMessage && (
-                    <motion.p
-                      key={streamMessage}
-                      initial={{ opacity: 0, y: 4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="text-xs text-muted-foreground"
-                    >
-                      {streamMessage}
-                    </motion.p>
-                  )}
-                  <div className="grid grid-cols-4 gap-2">
-                    {pipelineSteps.map((step, i) => {
-                      const StepIcon = step.icon;
-                      const isActive = activeStep === i;
-                      const isDone = activeStep > i;
-                      return (
-                        <motion.div
-                          key={i}
-                          className={`flex flex-col items-center gap-1.5 p-2.5 rounded-lg transition-all duration-500 ${
-                            isActive ? "bg-primary/10" : isDone ? "bg-green-500/5" : "bg-muted/30"
-                          }`}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: i * 0.1 }}
-                        >
-                          <div className={`relative p-1.5 rounded-lg transition-colors duration-500 ${
-                            isActive ? "text-primary" : isDone ? "text-green-500" : "text-muted-foreground/50"
-                          }`}>
-                            {isDone ? (
-                              <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                transition={{ type: "spring", stiffness: 500, damping: 15 }}
-                              >
-                                <CheckCircle2 className="w-4 h-4" />
-                              </motion.div>
-                            ) : isActive ? (
-                              <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}>
-                                <StepIcon className="w-4 h-4" />
-                              </motion.div>
-                            ) : (
-                              <StepIcon className="w-4 h-4" />
-                            )}
-                          </div>
-                          <span className={`text-[10px] font-medium text-center leading-tight transition-colors duration-500 ${
-                            isActive ? "text-primary" : isDone ? "text-green-500/80" : "text-muted-foreground/50"
-                          }`}>
-                            {step.label}
-                          </span>
-                          <span className="text-[9px] text-muted-foreground/50 text-center leading-tight">
-                            {step.sublabel}
-                          </span>
-                        </motion.div>
-                      );
-                    })}
+                <CardContent className="p-5">
+                  <div className="flex items-center gap-3">
+                    <Loader2 className="w-5 h-5 text-primary animate-spin" />
+                    <div>
+                      <p className="text-sm font-medium">Analyzing image...</p>
+                      <p className="text-xs text-muted-foreground">
+                        Running Vision API and GPT-4.1 compliance evaluation. This may take up to 3 minutes.
+                      </p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
