@@ -47,7 +47,8 @@ YOUR TASK:
 - Follow the ai_evaluation_checklist in EXACT ORDER (CHECK-01 through CHECK-15)
 - You MUST evaluate and report on ALL 15 checks — no skipping
 - For each check, evaluate every rule_id listed in rules_to_evaluate
-- Every rule_id must appear in EITHER violations OR passed_details — account for ALL rules
+- There are 62 rules total across all checks. Every single rule_id must appear in EITHER violations OR passed_details — no rule may be omitted
+- Double-check your response: count violations + passed_details — the total must equal 62
 
 CLASSIFICATION:
 - PASS: No violations found (unable-to-verify items do not count as violations)

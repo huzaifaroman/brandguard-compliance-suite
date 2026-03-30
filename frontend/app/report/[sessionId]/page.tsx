@@ -130,8 +130,9 @@ export default function ReportPage() {
     );
   };
 
-  const checksPassedCount = Array.isArray(result?.passed_details) ? result!.passed_details.filter(p => p.verified !== false).length : 0;
-  const manualReviewCount = Array.isArray(result?.passed_details) ? result!.passed_details.filter(p => p.verified === false).length : 0;
+  const passedCount = Array.isArray(result?.passed_details) ? result!.passed_details.length : 0;
+  const violationCount = result?.violations?.length || 0;
+  const totalRules = passedCount + violationCount;
 
   const passedByCategory = (result?.passed_details || []).reduce<Record<string, PassedDetail[]>>((acc, pd) => {
     const cat = pd.category || "Content";
@@ -158,8 +159,7 @@ export default function ReportPage() {
   );
 
   const checksPerformed = result?.checks_performed || [];
-  const totalChecks = checksPerformed.length > 0 ? checksPerformed.length : (result?.violations?.length || 0) + (result?.passed_details?.length || 0);
-  const passRate = totalChecks > 0 ? Math.round(((checksPassedCount + manualReviewCount) / totalChecks) * 100) : 0;
+  const passRate = totalRules > 0 ? Math.round((passedCount / totalRules) * 100) : 0;
 
   const formatDate = (ts?: string) => {
     if (!ts) return "N/A";
@@ -273,9 +273,9 @@ export default function ReportPage() {
 
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            <StatCard label="Total Checks" value={totalChecks} color="text-foreground" />
-            <StatCard label="Passed" value={checksPassedCount} color="text-green-600 dark:text-green-400" />
-            <StatCard label="Violations" value={result.violations.length} color="text-red-600 dark:text-red-400" />
+            <StatCard label="Total Rules" value={totalRules} color="text-foreground" />
+            <StatCard label="Passed" value={passedCount} color="text-green-600 dark:text-green-400" />
+            <StatCard label="Failed" value={violationCount} color="text-red-600 dark:text-red-400" />
             <StatCard label="Pass Rate" value={`${passRate}%`} color={passRate >= 80 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"} />
             <StatCard label="Verdict" value={result.verdict} color={vc.color} />
           </div>
@@ -318,7 +318,7 @@ export default function ReportPage() {
               </TabsTrigger>
               <TabsTrigger value="passed" className="gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                Passed ({checksPassedCount})
+                Passed ({passedCount})
               </TabsTrigger>
               {checksPerformed.length > 0 && (
                 <TabsTrigger value="checks" className="gap-1.5">

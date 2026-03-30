@@ -133,7 +133,7 @@
       "severity": "critical",
       "legal_requirement": true,
       "required_text_en": "WARNING: This product contains nicotine. Nicotine is highly addictive. Only to be used by adults who are trying to quit smoking.",
-      "required_text_fr": "AVERTISSEMENT : Ce produit contient de la nicotine. La nicotine crée une forte dépendance. À utiliser uniquement par des adultes qui désirent cesser de fumer."
+      "required_text_fr": "AVERTISSEMENT : Ce produit contient de la nicotine. La nicotine cr\u00e9e une forte d\u00e9pendance. \u00c0 utiliser uniquement par des adultes qui d\u00e9sirent cesser de fumer."
     },
     {
       "id": "REG-02",
@@ -390,13 +390,13 @@
       "id": "LOGOBG-DONT-06",
       "rule": "Don't use the navy logo over dark images.",
       "severity": "critical",
-      "visual_description": "Navy blue ZONNIC text on dark photograph — poor readability."
+      "visual_description": "Navy blue ZONNIC text on dark photograph \u2014 poor readability."
     },
     {
       "id": "LOGOBG-DONT-07",
       "rule": "Don't use the white logo over light images.",
       "severity": "critical",
-      "visual_description": "White ZONNIC text on light photograph — poor readability."
+      "visual_description": "White ZONNIC text on light photograph \u2014 poor readability."
     },
     {
       "id": "LOGOBG-DONT-08",
@@ -486,7 +486,7 @@
   "content_donts": [
     {
       "id": "CONTENT-DONT-01",
-      "rule": "Don't use the secondary colour as a full background — only as an accent.",
+      "rule": "Don't use the secondary colour as a full background \u2014 only as an accent.",
       "severity": "critical",
       "visual_description": "Full background is light secondary colour instead of grey/primary."
     },
@@ -587,7 +587,8 @@
         "brand_detection"
       ],
       "rules_to_evaluate": [
-        "LOGO-01"
+        "LOGO-01",
+        "LOGO-04"
       ]
     },
     {
@@ -620,7 +621,12 @@
         "LOGO-DONT-02",
         "LOGO-DONT-04",
         "LOGO-DONT-14",
-        "LOGO-DONT-15"
+        "LOGO-DONT-15",
+        "LOGO-DONT-03",
+        "LOGO-DONT-06",
+        "LOGO-DONT-08",
+        "LOGO-DONT-09",
+        "LOGO-DONT-11"
       ]
     },
     {
@@ -634,7 +640,9 @@
         "LOGO-13",
         "LOGO-DONT-05",
         "LOGO-DONT-07",
-        "LOGO-DONT-13"
+        "LOGO-DONT-13",
+        "LOGO-DONT-10",
+        "LOGO-DONT-12"
       ]
     },
     {
@@ -663,7 +671,8 @@
       "rules_to_evaluate": [
         "GRAD-01",
         "GRAD-02",
-        "GRAD-03"
+        "GRAD-03",
+        "GRAD-05"
       ]
     },
     {
