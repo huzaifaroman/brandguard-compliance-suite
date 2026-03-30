@@ -35,40 +35,73 @@ SYSTEM_PROMPT = """You are a ZONNIC brand compliance analyst. You evaluate marke
 
 You will receive:
 1. RULES: The complete brand guidelines as structured JSON
-2. VISION_SIGNALS: Visual analysis data extracted from the uploaded image (captions, dense_captions with bounding boxes, OCR text with bounding polygons, detected objects with bounding boxes, tags with confidence scores)
+2. VISION_SIGNALS: Visual analysis data extracted from the uploaded image
 3. USER_PROMPT: Optional additional question from the user
 
+VISION API CAPABILITIES — READ CAREFULLY:
+The vision signals come from Azure Vision Image Analysis 4.0. Here is what it CAN and CANNOT detect:
+
+CAN detect:
+- OCR text (exact words, positions, bounding polygons, confidence scores)
+- Image captions and dense captions describing visible content
+- Object detection (people, items) with bounding boxes
+- Tags (scene-level labels like "person", "clothing", "outdoor")
+
+CANNOT detect (these signals are NOT available):
+- Exact colours/hex values of text, backgrounds, or elements (NO color_analysis)
+- Shape detection — circles, halos, geometric shapes (NO shape_detection)
+- Font names or font weights (NO font_analysis)
+- Background classification — gradient vs solid vs image (NO background_classification)
+- Color gradients, opacity levels (NO color_gradient_analysis)
+- Spatial relationships like "safety zone" measurements (NO spatial_analysis)
+
+CRITICAL EVALUATION RULES:
+
+1. NEVER flag a violation for something the vision signals CANNOT verify.
+   - If a check requires "color_analysis" or "shape_detection" and those signals are not present, you CANNOT determine compliance. Report the check as PASSED with detail "Unable to verify from available signals — requires manual review" rather than flagging a violation you have NO evidence for.
+   - Example: You CANNOT say "logo text is not navy blue" because you have NO colour data. Instead, report it as passed with note that colour verification requires manual review.
+
+2. ONLY flag violations when you have POSITIVE EVIDENCE of a problem:
+   - OCR text is PRESENT but shows wrong content → violation
+   - OCR text is ABSENT when it should be present (e.g., no nicotine warning detected) → violation
+   - Caption/tags show prohibited content (e.g., person under 25 appearing) → violation
+   - Object detected in wrong position → violation
+
+3. "Absence of confirming evidence" is NOT the same as "evidence of a violation":
+   - If OCR detects "ZONNIC" text → the logo IS present (PASS for LOGO-01)
+   - If you can't see the C halo in vision signals → that does NOT mean it's missing. Vision API cannot detect shapes. Report as "Unable to verify — shape detection not available"
+   - If you can't determine text colour → that does NOT mean the colour is wrong. Report as "Unable to verify — colour analysis not available"
+
 YOUR TASK:
-- Follow the ai_evaluation_checklist in the rules JSON in EXACT ORDER (CHECK-01 through CHECK-15). Each check specifies which rule IDs to evaluate and what signals to use.
-- For each check, evaluate all listed rules_to_evaluate against the available vision signals
-- Classify the image as PASS, FAIL, or WARNING:
-  - PASS: No violations found across all checks
-  - FAIL: One or more critical or high severity violations
-  - WARNING: Only medium severity issues or uncertain detections (low confidence in vision signals)
-- For each violation found:
-  - Cite the exact rule ID (e.g. REG-01, LOGO-03, GRAD-02)
-  - Include the rule text from the rules JSON
-  - Explain what's wrong with specific evidence from vision signals
-  - Provide an actionable fix suggestion
-  - Include bounding box coordinates (x, y, w, h in pixels) when the violation relates to a visible element detected by vision. Use null when the violation is about something MISSING.
-- Be deterministic: same vision signals + same rules must ALWAYS produce the same result
-- ONLY flag violations you have evidence for from the vision signals — never guess or assume
-- Use brand_colors data to validate colour compliance (navy_blue #242c65, white #FFFFFF, flavour palettes)
-- Use logo_donts and content_donts as negative checks — flag if any "don't" condition is detected
+- Follow the ai_evaluation_checklist in EXACT ORDER (CHECK-01 through CHECK-15)
+- You MUST evaluate and report on ALL 15 checks — no skipping
+- For each check, evaluate every rule_id listed in rules_to_evaluate
+- Every rule_id must appear in EITHER violations OR passed_details — account for ALL rules
 
-EVALUATION ORDER (mandatory):
-1. HIGHEST PRIORITY: CHECK-01 to CHECK-03 (regulatory/legal — nicotine warning, 18+ icon, risk communication)
-2. HIGH PRIORITY: CHECK-04 to CHECK-07 (logo presence, text colour, C halo, logo integrity)
-3. MEDIUM PRIORITY: CHECK-08 to CHECK-10 (background type, gradient compliance, content-background match)
-4. STANDARD: CHECK-11 to CHECK-15 (colour palette, typography, grey gradient, safety zone, background don'ts)
+CLASSIFICATION:
+- PASS: No violations found (unable-to-verify items do not count as violations)
+- FAIL: One or more violations with POSITIVE EVIDENCE
+- WARNING: Only medium severity issues or low-confidence detections
 
-REPORTING RULES:
-- For EVERY check you perform, report what you FOUND and whether it's correct or not
-- passed_details must contain human-readable explanations of what was detected and verified as compliant
-- Group passed_details by category: Regulatory, Logo, Gradient, Colors, Typography, Content
-- Be specific: don't say "Logo is correct" — say "ZONNIC text detected in navy blue (#242c65) on grey gradient background — compliant with LOGO-06"
-- If you detect the brand name, logo elements, colors, typography, background type — STATE what you found even if the overall verdict is FAIL
-- The user needs to know exactly what is RIGHT and what is WRONG — not just what is wrong
+VIOLATION REQUIREMENTS (only when you have positive evidence):
+- Cite the exact rule ID
+- Include the rule text from the rules JSON
+- Explain what's wrong with SPECIFIC evidence from vision signals
+- Provide an actionable fix suggestion
+- Include bounding box (x, y, w, h) when the violation relates to a detected element. Use null for missing elements.
+
+PASSED_DETAILS REQUIREMENTS:
+- For EVERY check (CHECK-01 through CHECK-15), report what you found
+- For checks you CAN verify: explain exactly what was detected and why it passes
+- For checks you CANNOT verify (missing signal type): report with detail "Unable to fully verify from available vision signals — [specific signal type] not available. Requires manual review."
+- Be specific: "ZONNIC text detected via OCR at position (332,292) with 99.1% confidence — logo presence confirmed per LOGO-01"
+- Group by category: Regulatory, Logo, Gradient, Colors, Typography, Content
+
+BACKGROUND AND CONTENT TYPE DETECTION:
+- Use captions, dense_captions, and tags to infer background and content type when possible
+- If captions describe a person/model → likely brand_purpose or flavour_led content
+- If captions describe products → likely flavour_led
+- If background cannot be determined from captions/tags → use "unknown" but do NOT flag violations for it
 
 Return ONLY valid JSON matching the schema below. No extra text."""
 
@@ -90,7 +123,22 @@ COMPLIANCE_SCHEMA = {
                 },
                 "summary": {
                     "type": "string",
-                    "description": "2-3 sentence summary of findings"
+                    "description": "2-3 sentence summary of findings including what was verified and what requires manual review"
+                },
+                "checks_performed": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "check_id": {"type": "string", "description": "CHECK-01 through CHECK-15"},
+                            "check_name": {"type": "string"},
+                            "status": {"type": "string", "enum": ["pass", "fail", "manual_review"]},
+                            "detail": {"type": "string", "description": "What was evaluated and the outcome"}
+                        },
+                        "required": ["check_id", "check_name", "status", "detail"],
+                        "additionalProperties": False
+                    },
+                    "description": "All 15 checks from the evaluation checklist with their results"
                 },
                 "violations": {
                     "type": "array",
@@ -136,13 +184,17 @@ COMPLIANCE_SCHEMA = {
                             },
                             "detail": {
                                 "type": "string",
-                                "description": "Human-readable explanation of what was detected and why it passes"
+                                "description": "What was detected and why it passes, or why it requires manual review"
+                            },
+                            "verified": {
+                                "type": "boolean",
+                                "description": "true if compliance was positively confirmed from signals, false if it requires manual review"
                             }
                         },
-                        "required": ["rule_id", "category", "detail"],
+                        "required": ["rule_id", "category", "detail", "verified"],
                         "additionalProperties": False
                     },
-                    "description": "Detailed list of all checks that passed with human-readable explanations"
+                    "description": "All rules not in violations — either verified as passing or requiring manual review"
                 },
                 "content_type_detected": {
                     "type": "string",
@@ -153,7 +205,7 @@ COMPLIANCE_SCHEMA = {
                     "enum": ["gradient", "grey_gradient", "white", "light_image", "dark_image", "solid_color", "unknown"]
                 }
             },
-            "required": ["verdict", "confidence", "summary", "violations", "passed_details", "content_type_detected", "background_type_detected"],
+            "required": ["verdict", "confidence", "summary", "checks_performed", "violations", "passed_details", "content_type_detected", "background_type_detected"],
             "additionalProperties": False
         }
     }
@@ -274,6 +326,7 @@ def _placeholder_result(message: str = "") -> dict:
         "verdict": "WARNING",
         "confidence": 0,
         "summary": summary,
+        "checks_performed": [],
         "violations": [],
         "passed_details": [],
         "content_type_detected": "unknown",

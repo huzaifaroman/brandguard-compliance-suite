@@ -28,7 +28,7 @@ import {
   BookOpen,
 } from "lucide-react";
 import { getAnalysis, getChatMessages, streamChatMessage } from "@/lib/api";
-import type { ComplianceResult, Violation, PassedDetail, ChatMessage } from "@/lib/types";
+import type { ComplianceResult, Violation, PassedDetail, ChatMessage, CheckPerformed } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -130,7 +130,8 @@ export default function ReportPage() {
     );
   };
 
-  const checksPassedCount = Array.isArray(result?.passed_details) ? result!.passed_details.length : 0;
+  const checksPassedCount = Array.isArray(result?.passed_details) ? result!.passed_details.filter(p => p.verified !== false).length : 0;
+  const manualReviewCount = Array.isArray(result?.passed_details) ? result!.passed_details.filter(p => p.verified === false).length : 0;
 
   const passedByCategory = (result?.passed_details || []).reduce<Record<string, PassedDetail[]>>((acc, pd) => {
     const cat = pd.category || "Content";
@@ -156,8 +157,9 @@ export default function ReportPage() {
     (a, b) => (severityConfig[b.severity]?.weight || 0) - (severityConfig[a.severity]?.weight || 0)
   );
 
-  const totalChecks = (result?.violations?.length || 0) + checksPassedCount;
-  const passRate = totalChecks > 0 ? Math.round((checksPassedCount / totalChecks) * 100) : 0;
+  const checksPerformed = result?.checks_performed || [];
+  const totalChecks = checksPerformed.length > 0 ? checksPerformed.length : (result?.violations?.length || 0) + (result?.passed_details?.length || 0);
+  const passRate = totalChecks > 0 ? Math.round(((checksPassedCount + manualReviewCount) / totalChecks) * 100) : 0;
 
   const formatDate = (ts?: string) => {
     if (!ts) return "N/A";
@@ -318,6 +320,12 @@ export default function ReportPage() {
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 Passed ({checksPassedCount})
               </TabsTrigger>
+              {checksPerformed.length > 0 && (
+                <TabsTrigger value="checks" className="gap-1.5">
+                  <FileText className="w-3.5 h-3.5" />
+                  All Checks ({checksPerformed.length})
+                </TabsTrigger>
+              )}
               <TabsTrigger value="details" className="gap-1.5">
                 <Info className="w-3.5 h-3.5" />
                 Full Details
@@ -361,7 +369,7 @@ export default function ReportPage() {
             </TabsContent>
 
             <TabsContent value="passed" className="mt-4">
-              {checksPassedCount === 0 ? (
+              {(result?.passed_details?.length || 0) === 0 ? (
                 <Card>
                   <CardContent className="p-8 text-center">
                     <Info className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
@@ -370,34 +378,83 @@ export default function ReportPage() {
                 </Card>
               ) : (
                 <div className="space-y-4">
-                  {Object.entries(passedByCategory).map(([category, items]) => (
-                    <Card key={category} className="border-green-500/20">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm flex items-center gap-2 text-green-600 dark:text-green-400">
-                          <CheckCircle2 className="w-4 h-4" />
-                          {category}
-                          <Badge variant="outline" className="text-[10px] border-green-500/30 text-green-600 dark:text-green-400 ml-auto">
-                            {items.length} passed
-                          </Badge>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="pt-0">
-                        <div className="space-y-1.5">
-                          {items.map((pd, i) => (
-                            <div key={`${pd.rule_id}-${i}`} className="flex items-start gap-2.5 rounded-md px-3 py-2 bg-green-500/5 border border-green-500/10">
-                              <Badge variant="outline" className="mt-0.5 shrink-0 text-[10px] border-green-500/30 text-green-600 dark:text-green-500 font-mono">
-                                {pd.rule_id}
-                              </Badge>
-                              <p className="text-xs text-muted-foreground leading-relaxed">{pd.detail}</p>
+                  {Object.entries(passedByCategory).map(([category, items]) => {
+                    const verifiedItems = items.filter(p => p.verified !== false);
+                    const reviewItems = items.filter(p => p.verified === false);
+                    return (
+                      <Card key={category} className="border-green-500/20">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm flex items-center gap-2 text-green-600 dark:text-green-400">
+                            <CheckCircle2 className="w-4 h-4" />
+                            {category}
+                            <div className="ml-auto flex gap-1.5">
+                              {verifiedItems.length > 0 && (
+                                <Badge variant="outline" className="text-[10px] border-green-500/30 text-green-600 dark:text-green-400">
+                                  {verifiedItems.length} verified
+                                </Badge>
+                              )}
+                              {reviewItems.length > 0 && (
+                                <Badge variant="outline" className="text-[10px] border-amber-500/30 text-amber-600 dark:text-amber-400">
+                                  {reviewItems.length} manual review
+                                </Badge>
+                              )}
                             </div>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                          <div className="space-y-1.5">
+                            {items.map((pd, i) => {
+                              const isVerified = pd.verified !== false;
+                              return (
+                                <div key={`${pd.rule_id}-${i}`} className={`flex items-start gap-2.5 rounded-md px-3 py-2 ${isVerified ? "bg-green-500/5 border border-green-500/10" : "bg-amber-500/5 border border-amber-500/10"}`}>
+                                  <Badge variant="outline" className={`mt-0.5 shrink-0 text-[10px] font-mono ${isVerified ? "border-green-500/30 text-green-600 dark:text-green-500" : "border-amber-500/30 text-amber-600 dark:text-amber-500"}`}>
+                                    {pd.rule_id}
+                                  </Badge>
+                                  <p className="text-xs text-muted-foreground leading-relaxed">{pd.detail}</p>
+                                  {!isVerified && (
+                                    <Badge variant="outline" className="mt-0.5 shrink-0 text-[9px] border-amber-500/30 text-amber-600 dark:text-amber-400">
+                                      Review
+                                    </Badge>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
               )}
             </TabsContent>
+
+            {checksPerformed.length > 0 && (
+              <TabsContent value="checks" className="mt-4">
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground mb-3">
+                    All {checksPerformed.length} checks from the evaluation checklist (CHECK-01 through CHECK-15)
+                  </p>
+                  {checksPerformed.map((check) => {
+                    const statusColors = {
+                      pass: { bg: "bg-green-500/10", border: "border-green-500/20", text: "text-green-600 dark:text-green-400", label: "Pass" },
+                      fail: { bg: "bg-red-500/10", border: "border-red-500/20", text: "text-red-600 dark:text-red-400", label: "Fail" },
+                      manual_review: { bg: "bg-amber-500/10", border: "border-amber-500/20", text: "text-amber-600 dark:text-amber-400", label: "Manual Review" },
+                    };
+                    const sc = statusColors[check.status] || statusColors.manual_review;
+                    return (
+                      <div key={check.check_id} className={`px-4 py-3 rounded-lg ${sc.bg} border ${sc.border}`}>
+                        <div className="flex items-center gap-3 mb-1">
+                          <code className="text-xs font-mono font-bold text-primary">{check.check_id}</code>
+                          <span className="text-sm font-medium flex-1">{check.check_name}</span>
+                          <Badge variant="outline" className={`text-[10px] ${sc.text} border-current`}>{sc.label}</Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{check.detail}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </TabsContent>
+            )}
 
             <TabsContent value="details" className="mt-4">
               <div className="space-y-4">

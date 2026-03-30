@@ -19,6 +19,14 @@ export interface PassedDetail {
   rule_id: string;
   category: "Regulatory" | "Logo" | "Gradient" | "Colors" | "Typography" | "Content";
   detail: string;
+  verified?: boolean;
+}
+
+export interface CheckPerformed {
+  check_id: string;
+  check_name: string;
+  status: "pass" | "fail" | "manual_review";
+  detail: string;
 }
 
 export interface ComplianceResult {
@@ -29,6 +37,7 @@ export interface ComplianceResult {
   confidence: number;
   violations: Violation[];
   passed_details: PassedDetail[];
+  checks_performed?: CheckPerformed[];
   checks_passed?: string[] | number;
   summary: string;
   content_type_detected: string;

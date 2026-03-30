@@ -1,22 +1,239 @@
 {
   "_info": "Raw API responses \u2014 overwritten on each new analysis",
-  "_timestamp": "2026-03-30T08:02:14.602466+00:00",
+  "_timestamp": "2026-03-30T08:28:48.950382+00:00",
   "_filename": "Screenshot 2026-03-30 at 12.50.48.png",
   "_image_hash": "0b70278909d56a71cf22bb233d06eec656ec3feadf9caeee08a81757afbd86d7",
   "vision_raw": {
-    "caption": "",
-    "caption_confidence": 0.0,
-    "dense_captions": [],
-    "tags": [],
-    "objects": [],
-    "ocr_text": []
+    "caption": "a woman sitting in a chair",
+    "caption_confidence": 0.8759939074516296,
+    "dense_captions": [
+      {
+        "text": "a woman sitting in a chair",
+        "confidence": 0.8759939074516296,
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "w": 1336,
+          "h": 692
+        }
+      },
+      {
+        "text": "a woman sitting in a chair",
+        "confidence": 0.8708144426345825,
+        "bbox": {
+          "x": 419,
+          "y": 0,
+          "w": 512,
+          "h": 671
+        }
+      },
+      {
+        "text": "a close-up of a person's leg",
+        "confidence": 0.8629871010780334,
+        "bbox": {
+          "x": 750,
+          "y": 434,
+          "w": 171,
+          "h": 250
+        }
+      },
+      {
+        "text": "a person wearing a grey sweatshirt and white pants",
+        "confidence": 0.7203483581542969,
+        "bbox": {
+          "x": 426,
+          "y": 401,
+          "w": 481,
+          "h": 279
+        }
+      },
+      {
+        "text": "a person with a cast on their leg",
+        "confidence": 0.76328045129776,
+        "bbox": {
+          "x": 675,
+          "y": 398,
+          "w": 209,
+          "h": 281
+        }
+      }
+    ],
+    "tags": [
+      {
+        "name": "human face",
+        "confidence": 0.988958477973938
+      },
+      {
+        "name": "clothing",
+        "confidence": 0.9875239729881287
+      },
+      {
+        "name": "person",
+        "confidence": 0.9569645524024963
+      },
+      {
+        "name": "fashion",
+        "confidence": 0.739014744758606
+      },
+      {
+        "name": "woman",
+        "confidence": 0.6605888605117798
+      },
+      {
+        "name": "girl",
+        "confidence": 0.6124866604804993
+      }
+    ],
+    "objects": [
+      {
+        "tags": [
+          {
+            "name": "person",
+            "confidence": 0.846
+          }
+        ],
+        "bbox": {
+          "x": 448,
+          "y": 28,
+          "w": 535,
+          "h": 655
+        }
+      }
+    ],
+    "ocr_text": [
+      {
+        "text": "ZONNIC",
+        "words": [
+          {
+            "text": "ZONNIC",
+            "confidence": 0.991,
+            "bounding_polygon": [
+              {
+                "x": 332,
+                "y": 292
+              },
+              {
+                "x": 914,
+                "y": 290
+              },
+              {
+                "x": 914,
+                "y": 416
+              },
+              {
+                "x": 332,
+                "y": 416
+              }
+            ]
+          }
+        ],
+        "bounding_polygon": [
+          {
+            "x": 315,
+            "y": 291
+          },
+          {
+            "x": 982,
+            "y": 290
+          },
+          {
+            "x": 982,
+            "y": 414
+          },
+          {
+            "x": 315,
+            "y": 416
+          }
+        ]
+      }
+    ]
   },
   "llm_raw": {
-    "verdict": "WARNING",
-    "confidence": 0,
-    "summary": "AI analysis failed: APIConnectionError",
-    "violations": [],
-    "passed_details": [],
+    "verdict": "FAIL",
+    "confidence": 98,
+    "summary": "Critical regulatory elements are missing: no nicotine warning banner, no 18+ icon, and no risk communication text. The ZONNIC logo is detected, but without evidence of the C halo or correct colour usage. No background or content compliance can be confirmed due to lack of visual signals. Immediate fixes are required for legal and brand compliance.",
+    "violations": [
+      {
+        "rule_id": "REG-01",
+        "rule_text": "Every marketing asset MUST include a bilingual nicotine warning statement banner at the TOP of the creative.",
+        "severity": "critical",
+        "issue": "Nicotine warning statement is missing from the top of the image.",
+        "fix_suggestion": "Add a bilingual nicotine warning banner at the top: 'WARNING: This product contains nicotine. Nicotine is highly addictive. Only to be used by adults who are trying to quit smoking.' and 'AVERTISSEMENT : Ce produit contient de la nicotine. La nicotine cr\u00e9e une forte d\u00e9pendance. \u00c0 utiliser uniquement par des adultes qui d\u00e9sirent cesser de fumer.'",
+        "evidence": "No text matching the required warning detected in OCR or text signals.",
+        "bbox": null
+      },
+      {
+        "rule_id": "REG-02",
+        "rule_text": "The 18+ icon must be present on marketing materials to indicate age restriction.",
+        "severity": "critical",
+        "issue": "18+ age restriction icon is missing from the image.",
+        "fix_suggestion": "Add a circular 18+ icon at the bottom of the creative.",
+        "evidence": "No shape or text matching '18+' detected in vision signals.",
+        "bbox": null
+      },
+      {
+        "rule_id": "REG-03",
+        "rule_text": "Every marketing asset MUST include risk communication text at the BOTTOM of the creative.",
+        "severity": "critical",
+        "issue": "Risk communication text is missing from the bottom of the image.",
+        "fix_suggestion": "Add the risk communication text at the bottom: 'This product may not be right for you. Always read and follow the label.'",
+        "evidence": "No text matching the required risk communication detected in OCR or text signals.",
+        "bbox": null
+      },
+      {
+        "rule_id": "REG-04",
+        "rule_text": "The nicotine warning banner must be positioned at the TOP of the asset. The risk communication and 18+ icon must be at the BOTTOM. This placement is consistent across all compliant examples in the guidelines.",
+        "severity": "critical",
+        "issue": "Required regulatory elements (nicotine warning, risk communication, 18+ icon) are missing and not positioned correctly.",
+        "fix_suggestion": "Add the nicotine warning banner at the top and the risk communication text plus 18+ icon at the bottom.",
+        "evidence": "No evidence of required elements at top or bottom positions in vision signals.",
+        "bbox": null
+      },
+      {
+        "rule_id": "REG-05",
+        "rule_text": "The nicotine warning must appear in BOTH English and French on every asset. English uses 'WARNING:', French uses 'AVERTISSEMENT :'.",
+        "severity": "critical",
+        "issue": "Bilingual nicotine warning (English and French) is missing.",
+        "fix_suggestion": "Add both English and French nicotine warnings at the top of the creative.",
+        "evidence": "No text matching 'WARNING:' or 'AVERTISSEMENT :' detected in OCR or text signals.",
+        "bbox": null
+      },
+      {
+        "rule_id": "LOGO-DONT-01",
+        "rule_text": "Don't lose the C halo (logo without any halo on the C).",
+        "severity": "critical",
+        "issue": "No evidence of a circular halo around the C in the ZONNIC logo.",
+        "fix_suggestion": "Ensure the ZONNIC logo includes a circular halo around the C, using the correct flavour colour.",
+        "evidence": "OCR detects 'ZONNIC' but no shape detection or visual evidence of a halo around the C.",
+        "bbox": {
+          "x": 332,
+          "y": 292,
+          "w": 582,
+          "h": 124
+        }
+      },
+      {
+        "rule_id": "LOGO-01",
+        "rule_text": "The ZONNIC logo consists of navy blue typographic text with a circular halo around the letter C. The halo colour varies by product flavour profile.",
+        "severity": "critical",
+        "issue": "Logo detected but no evidence of the C halo or correct colour usage.",
+        "fix_suggestion": "Use the full ZONNIC logo with navy blue text and a circular halo around the C in the correct flavour colour.",
+        "evidence": "OCR detects 'ZONNIC' but no shape or colour analysis confirms the halo or navy blue text.",
+        "bbox": {
+          "x": 332,
+          "y": 292,
+          "w": 582,
+          "h": 124
+        }
+      }
+    ],
+    "passed_details": [
+      {
+        "rule_id": "LOGO-01",
+        "category": "Logo",
+        "detail": "ZONNIC text detected in the image (OCR confidence 0.991), indicating brand presence."
+      }
+    ],
     "content_type_detected": "unknown",
     "background_type_detected": "unknown"
   }

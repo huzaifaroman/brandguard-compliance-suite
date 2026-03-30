@@ -37,7 +37,7 @@ import {
 import Link from "next/link";
 import { streamAnalysis, getChatMessages, streamChatMessage } from "@/lib/api";
 import type { StreamEvent } from "@/lib/api";
-import type { ComplianceResult, Violation, ChatMessage, PassedDetail } from "@/lib/types";
+import type { ComplianceResult, Violation, ChatMessage, PassedDetail, CheckPerformed } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -224,7 +224,8 @@ export default function AnalyzePage() {
   }, []);
 
   const passedDetails = result?.passed_details || [];
-  const checksPassedCount = passedDetails.length;
+  const checksPassedCount = passedDetails.filter(p => p.verified !== false).length;
+  const manualReviewCount = passedDetails.filter(p => p.verified === false).length;
 
   const passedByCategory = passedDetails.reduce<Record<string, PassedDetail[]>>((acc, pd) => {
     const cat = pd.category || "Content";
@@ -243,8 +244,9 @@ export default function AnalyzePage() {
     (a, b) => (severityConfig[b.severity]?.weight || 0) - (severityConfig[a.severity]?.weight || 0)
   );
 
-  const totalChecks = (result?.violations?.length || 0) + checksPassedCount;
-  const passRate = totalChecks > 0 ? Math.round((checksPassedCount / totalChecks) * 100) : 0;
+  const checksPerformed = result?.checks_performed || [];
+  const totalChecks = checksPerformed.length > 0 ? checksPerformed.length : (result?.violations?.length || 0) + passedDetails.length;
+  const passRate = totalChecks > 0 ? Math.round(((checksPassedCount + manualReviewCount) / totalChecks) * 100) : 0;
 
   const formatDate = (ts?: string) => {
     if (!ts) return new Date().toLocaleString("en-US", {
@@ -650,6 +652,12 @@ export default function AnalyzePage() {
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       Passed ({checksPassedCount})
                     </TabsTrigger>
+                    {checksPerformed.length > 0 && (
+                      <TabsTrigger value="checks" className="gap-1.5">
+                        <FileText className="w-3.5 h-3.5" />
+                        All Checks ({checksPerformed.length})
+                      </TabsTrigger>
+                    )}
                     <TabsTrigger value="details" className="gap-1.5">
                       <Info className="w-3.5 h-3.5" />
                       Full Details
@@ -730,6 +738,34 @@ export default function AnalyzePage() {
                       </div>
                     )}
                   </TabsContent>
+
+                  {checksPerformed.length > 0 && (
+                    <TabsContent value="checks" className="mt-4">
+                      <div className="space-y-2">
+                        <p className="text-xs text-muted-foreground mb-3">
+                          All {checksPerformed.length} checks from the evaluation checklist (CHECK-01 through CHECK-15)
+                        </p>
+                        {checksPerformed.map((check) => {
+                          const statusColors = {
+                            pass: { bg: "bg-green-500/10", border: "border-green-500/20", text: "text-green-600 dark:text-green-400", label: "Pass" },
+                            fail: { bg: "bg-red-500/10", border: "border-red-500/20", text: "text-red-600 dark:text-red-400", label: "Fail" },
+                            manual_review: { bg: "bg-amber-500/10", border: "border-amber-500/20", text: "text-amber-600 dark:text-amber-400", label: "Manual Review" },
+                          };
+                          const sc = statusColors[check.status] || statusColors.manual_review;
+                          return (
+                            <div key={check.check_id} className={`px-4 py-3 rounded-lg ${sc.bg} border ${sc.border}`}>
+                              <div className="flex items-center gap-3 mb-1">
+                                <code className="text-xs font-mono font-bold text-primary">{check.check_id}</code>
+                                <span className="text-sm font-medium flex-1">{check.check_name}</span>
+                                <Badge variant="outline" className={`text-[10px] ${sc.text} border-current`}>{sc.label}</Badge>
+                              </div>
+                              <p className="text-xs text-muted-foreground leading-relaxed">{check.detail}</p>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </TabsContent>
+                  )}
 
                   <TabsContent value="details" className="mt-4">
                     <div className="space-y-4">
