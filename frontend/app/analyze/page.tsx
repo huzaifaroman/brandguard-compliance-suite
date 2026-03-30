@@ -62,10 +62,10 @@ const verdictConfig: Record<string, { icon: typeof ShieldCheck; color: string; b
   WARNING: { icon: ShieldQuestion, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/30", label: "Needs Review" },
 };
 const pipelineSteps = [
-  { icon: Cloud, label: "Uploading to Azure", sublabel: "Blob Storage" },
-  { icon: ScanEye, label: "Vision Analysis", sublabel: "Azure Vision 4.0" },
-  { icon: Brain, label: "AI Evaluation", sublabel: "GPT-4.1 · 62 rules" },
-  { icon: FileCheck, label: "Building Report", sublabel: "Compliance report" },
+  { icon: Cloud, label: "Uploading Image", sublabel: "Cloud storage" },
+  { icon: ScanEye, label: "Scanning Image", sublabel: "Reading elements" },
+  { icon: Brain, label: "Checking Rules", sublabel: "62 brand rules" },
+  { icon: FileCheck, label: "Building Report", sublabel: "Final results" },
 ];
 
 const stepToIndex: Record<string, number> = {
@@ -453,15 +453,7 @@ export default function AnalyzePage() {
             </CardContent>
           </Card>
 
-          <div className="flex gap-3">
-            <input
-              type="text"
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Optional: focus on specific rules..."
-              className="flex-1 h-10 px-4 text-sm rounded-lg bg-card border border-border/50 text-foreground placeholder:text-muted-foreground input-premium focus:outline-none"
-              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-            />
+          <div className="flex gap-3 justify-end">
             {result && (
               <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
                 <Button variant="outline" size="sm" onClick={handleReset} className="h-10 px-4 gap-2">
