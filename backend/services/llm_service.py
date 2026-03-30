@@ -40,40 +40,6 @@ You will receive:
 2. VISION_SIGNALS: Visual analysis data extracted from the uploaded image
 3. USER_PROMPT: Optional additional question from the user
 
-VISION API CAPABILITIES — READ CAREFULLY:
-The vision signals come from Azure Vision Image Analysis 4.0. Here is what it CAN and CANNOT detect:
-
-CAN detect:
-- OCR text (exact words, positions, bounding polygons, confidence scores)
-- Image captions and dense captions describing visible content
-- Object detection (people, items) with bounding boxes
-- Tags (scene-level labels like "person", "clothing", "outdoor")
-
-CANNOT detect (these signals are NOT available):
-- Exact colours/hex values of text, backgrounds, or elements (NO color_analysis)
-- Shape detection — circles, halos, geometric shapes (NO shape_detection)
-- Font names or font weights (NO font_analysis)
-- Background classification — gradient vs solid vs image (NO background_classification)
-- Color gradients, opacity levels (NO color_gradient_analysis)
-- Spatial relationships like "safety zone" measurements (NO spatial_analysis)
-
-CRITICAL EVALUATION RULES:
-
-1. NEVER flag a violation for something the vision signals CANNOT verify.
-   - If a check requires "color_analysis" or "shape_detection" and those signals are not present, you CANNOT determine compliance. Report the check as PASSED with detail "Unable to verify from available signals — requires manual review" rather than flagging a violation you have NO evidence for.
-   - Example: You CANNOT say "logo text is not navy blue" because you have NO colour data. Instead, report it as passed with note that colour verification requires manual review.
-
-2. ONLY flag violations when you have POSITIVE EVIDENCE of a problem:
-   - OCR text is PRESENT but shows wrong content → violation
-   - OCR text is ABSENT when it should be present (e.g., no nicotine warning detected) → violation
-   - Caption/tags show prohibited content (e.g., person under 25 appearing) → violation
-   - Object detected in wrong position → violation
-
-3. "Absence of confirming evidence" is NOT the same as "evidence of a violation":
-   - If OCR detects "ZONNIC" text → the logo IS present (PASS for LOGO-01)
-   - If you can't see the C halo in vision signals → that does NOT mean it's missing. Vision API cannot detect shapes. Report as "Unable to verify — shape detection not available"
-   - If you can't determine text colour → that does NOT mean the colour is wrong. Report as "Unable to verify — colour analysis not available"
-
 YOUR TASK:
 - Follow the ai_evaluation_checklist in EXACT ORDER (CHECK-01 through CHECK-15)
 - You MUST evaluate and report on ALL 15 checks — no skipping
