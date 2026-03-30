@@ -36,9 +36,12 @@ def _get_client() -> AzureOpenAI:
 SYSTEM_PROMPT = """You are a ZONNIC brand compliance analyst. You evaluate marketing images against the ZONNIC Design Guidelines.
 
 You will receive:
-1. RULES: The complete brand guidelines as structured JSON
-2. VISION_SIGNALS: Visual analysis data extracted from the uploaded image
-3. USER_PROMPT: Optional additional question from the user
+1. THE IMAGE: The actual marketing image to evaluate — use this to verify colors, shapes, gradients, fonts, layout, and all visual elements
+2. RULES: The complete brand guidelines as structured JSON
+3. VISION_SIGNALS: Supplementary data from Azure Vision API (OCR text positions, object detection, captions) — use as supporting evidence
+4. USER_PROMPT: Optional additional question from the user
+
+IMPORTANT: You have BOTH the image and the vision signals. Use the image directly to check colors, gradients, shapes, logo styling, typography, and layout. Use the vision signals for precise OCR text positions and bounding boxes.
 
 YOUR TASK:
 - Follow the ai_evaluation_checklist in EXACT ORDER (CHECK-01 through CHECK-15)
@@ -191,7 +194,7 @@ Answer follow-up questions about:
 Be concise, actionable, and always reference specific rule IDs (e.g. REG-01, LOGO-03, GRAD-02). If the user asks about something not covered in the analysis results, say so clearly and suggest running a new analysis if needed."""
 
 
-def _build_compliance_message(vision_signals: dict, rules: dict, prompt: Optional[str]) -> str:
+def _build_compliance_text(vision_signals: dict, rules: dict, prompt: Optional[str]) -> str:
     user_prompt = prompt if prompt else "Check this image for brand compliance."
     return f"""RULES:
 {json.dumps(rules, indent=2)}
@@ -202,10 +205,38 @@ VISION_SIGNALS:
 USER_PROMPT: {user_prompt}"""
 
 
+def _build_user_content(text_message: str, image_bytes: Optional[bytes] = None) -> list | str:
+    if not image_bytes:
+        return text_message
+
+    import base64
+    b64 = base64.b64encode(image_bytes).decode("utf-8")
+    content_type = "image/png"
+    if image_bytes[:3] == b'\xff\xd8\xff':
+        content_type = "image/jpeg"
+    elif image_bytes[:4] == b'RIFF':
+        content_type = "image/webp"
+
+    return [
+        {
+            "type": "image_url",
+            "image_url": {
+                "url": f"data:{content_type};base64,{b64}",
+                "detail": "high",
+            },
+        },
+        {
+            "type": "text",
+            "text": text_message,
+        },
+    ]
+
+
 async def analyze_compliance(
     vision_signals: dict,
     rules: dict,
     prompt: Optional[str] = None,
+    image_bytes: Optional[bytes] = None,
 ) -> dict:
     if not settings.azure_openai_endpoint or not settings.azure_openai_key:
         logger.warning("Azure OpenAI not configured — returning placeholder")
@@ -213,12 +244,16 @@ async def analyze_compliance(
 
     try:
         client = _get_client()
-        user_message = _build_compliance_message(vision_signals, rules, prompt)
+        text_message = _build_compliance_text(vision_signals, rules, prompt)
+        user_content = _build_user_content(text_message, image_bytes)
 
-        messages: list[ChatCompletionSystemMessageParam | ChatCompletionUserMessageParam] = [
+        messages: list = [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": user_message},
+            {"role": "user", "content": user_content},
         ]
+
+        if image_bytes:
+            logger.info("Sending image (%dKB) + vision signals to LLM", len(image_bytes) // 1024)
 
         response = await asyncio.wait_for(
             asyncio.to_thread(

@@ -80,6 +80,7 @@ async def run_job(job_id: str):
     job["message"] = "Uploading image to cloud storage..."
 
     file_bytes = job.pop("file_bytes")
+    image_bytes_for_llm = file_bytes
     filename = job["filename"]
     rules = job["rules"]
     prompt = job["prompt"]
@@ -126,7 +127,7 @@ async def run_job(job_id: str):
         job["message"] = "Deep thinking... analyzing brand elements"
         job["llm_start"] = time.time()
 
-        llm_result = await analyze_compliance(vision_signals, rules, prompt)
+        llm_result = await analyze_compliance(vision_signals, rules, prompt, image_bytes=image_bytes_for_llm)
         logger.info("[%s] └─ LLM done → %s %s%%", short_hash,
                     llm_result.get("verdict"), llm_result.get("confidence"))
 
