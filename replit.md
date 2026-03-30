@@ -18,7 +18,7 @@ backend/
   database.py          # asyncpg pool, schema migration (analyses, batches, chat_sessions, chat_messages)
   redis_client.py      # Upstash Redis async cache (analysis, rules, chat, history, batch)
   data/rules.json      # ZONNIC brand rules (62 rules, 10 categories + checklist)
-  models/schemas.py    # Pydantic models (ComplianceResult, Violation with bbox/evidence/fix_suggestion, PassedDetail with rule_id/category/detail)
+  models/schemas.py    # Pydantic models (ComplianceResult, Violation with bbox/evidence/fix_suggestion, PassedDetail with rule_id/category/detail/status where status is "pass"|"not_applicable")
   routers/
     compliance.py      # POST /api/analyze — single image analysis (20MB limit, MIME validation)
     batch.py           # POST /api/batch — parallel multi-image analysis (up to 10, per-file validation)

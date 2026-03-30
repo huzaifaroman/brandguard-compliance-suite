@@ -130,11 +130,24 @@ export default function ReportPage() {
     );
   };
 
-  const passedCount = Array.isArray(result?.passed_details) ? result!.passed_details.length : 0;
+  const allPassedDetails = Array.isArray(result?.passed_details) ? result!.passed_details : [];
+  const passedDetails = allPassedDetails.filter(p => p.status !== "not_applicable");
+  const naDetails = allPassedDetails.filter(p => p.status === "not_applicable");
   const violationCount = result?.violations?.length || 0;
-  const totalRules = passedCount + violationCount;
+  const passedCount = passedDetails.length;
+  const naCount = naDetails.length;
+  const totalRules = violationCount + passedCount + naCount;
+  const applicableRules = violationCount + passedCount;
+  const passRate = applicableRules > 0 ? Math.round((passedCount / applicableRules) * 100) : 0;
 
-  const passedByCategory = (result?.passed_details || []).reduce<Record<string, PassedDetail[]>>((acc, pd) => {
+  const passedByCategory = passedDetails.reduce<Record<string, PassedDetail[]>>((acc, pd) => {
+    const cat = pd.category || "Content";
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(pd);
+    return acc;
+  }, {});
+
+  const naByCategory = naDetails.reduce<Record<string, PassedDetail[]>>((acc, pd) => {
     const cat = pd.category || "Content";
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push(pd);
@@ -159,7 +172,6 @@ export default function ReportPage() {
   );
 
   const checksPerformed = result?.checks_performed || [];
-  const passRate = totalRules > 0 ? Math.round((passedCount / totalRules) * 100) : 0;
 
   const formatDate = (ts?: string) => {
     if (!ts) return "N/A";
@@ -273,9 +285,9 @@ export default function ReportPage() {
 
         <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            <StatCard label="Total Rules" value={totalRules} color="text-foreground" />
             <StatCard label="Passed" value={passedCount} color="text-green-600 dark:text-green-400" />
             <StatCard label="Failed" value={violationCount} color="text-red-600 dark:text-red-400" />
+            <StatCard label="N/A" value={naCount} color="text-muted-foreground" />
             <StatCard label="Pass Rate" value={`${passRate}%`} color={passRate >= 80 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"} />
             <StatCard label="Verdict" value={result.verdict} color={vc.color} />
           </div>
@@ -320,14 +332,14 @@ export default function ReportPage() {
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 Passed ({passedCount})
               </TabsTrigger>
-              {checksPerformed.length > 0 && (
-                <TabsTrigger value="checks" className="gap-1.5">
-                  <FileText className="w-3.5 h-3.5" />
-                  All Checks ({checksPerformed.length})
+              {naCount > 0 && (
+                <TabsTrigger value="na" className="gap-1.5">
+                  <Info className="w-3.5 h-3.5" />
+                  N/A ({naCount})
                 </TabsTrigger>
               )}
               <TabsTrigger value="details" className="gap-1.5">
-                <Info className="w-3.5 h-3.5" />
+                <FileText className="w-3.5 h-3.5" />
                 Full Details
               </TabsTrigger>
             </TabsList>
@@ -369,7 +381,7 @@ export default function ReportPage() {
             </TabsContent>
 
             <TabsContent value="passed" className="mt-4">
-              {(result?.passed_details?.length || 0) === 0 ? (
+              {passedCount === 0 ? (
                 <Card>
                   <CardContent className="p-8 text-center">
                     <Info className="w-10 h-10 text-muted-foreground/50 mx-auto mb-3" />
@@ -378,69 +390,80 @@ export default function ReportPage() {
                 </Card>
               ) : (
                 <div className="space-y-4">
-                  {Object.entries(passedByCategory).map(([category, items]) => {
-                    const verifiedItems = items.filter(p => p.verified !== false);
-                    const reviewItems = items.filter(p => p.verified === false);
-                    return (
-                      <Card key={category} className="border-green-500/20">
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-sm flex items-center gap-2 text-green-600 dark:text-green-400">
-                            <CheckCircle2 className="w-4 h-4" />
-                            {category}
-                            <div className="ml-auto flex gap-1.5">
-                              {verifiedItems.length > 0 && (
-                                <Badge variant="outline" className="text-[10px] border-green-500/30 text-green-600 dark:text-green-400">
-                                  {verifiedItems.length} verified
-                                </Badge>
-                              )}
-                              {reviewItems.length > 0 && (
-                                <Badge variant="outline" className="text-[10px] border-amber-500/30 text-amber-600 dark:text-amber-400">
-                                  {reviewItems.length} manual review
-                                </Badge>
-                              )}
+                  {Object.entries(passedByCategory).map(([category, items]) => (
+                    <Card key={category} className="border-green-500/20">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm flex items-center gap-2 text-green-600 dark:text-green-400">
+                          <CheckCircle2 className="w-4 h-4" />
+                          {category}
+                          <Badge variant="outline" className="text-[10px] border-green-500/30 text-green-600 dark:text-green-400 ml-auto">
+                            {items.length} passed
+                          </Badge>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <div className="space-y-1.5">
+                          {items.map((pd, i) => (
+                            <div key={`${pd.rule_id}-${i}`} className="flex items-start gap-2.5 rounded-md px-3 py-2 bg-green-500/5 border border-green-500/10">
+                              <Badge variant="outline" className="mt-0.5 shrink-0 text-[10px] border-green-500/30 text-green-600 dark:text-green-500 font-mono">
+                                {pd.rule_id}
+                              </Badge>
+                              <p className="text-xs text-muted-foreground leading-relaxed">{pd.detail}</p>
                             </div>
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="pt-0">
-                          <div className="space-y-1.5">
-                            {items.map((pd, i) => {
-                              const isVerified = pd.verified !== false;
-                              return (
-                                <div key={`${pd.rule_id}-${i}`} className={`flex items-start gap-2.5 rounded-md px-3 py-2 ${isVerified ? "bg-green-500/5 border border-green-500/10" : "bg-amber-500/5 border border-amber-500/10"}`}>
-                                  <Badge variant="outline" className={`mt-0.5 shrink-0 text-[10px] font-mono ${isVerified ? "border-green-500/30 text-green-600 dark:text-green-500" : "border-amber-500/30 text-amber-600 dark:text-amber-500"}`}>
-                                    {pd.rule_id}
-                                  </Badge>
-                                  <p className="text-xs text-muted-foreground leading-relaxed">{pd.detail}</p>
-                                  {!isVerified && (
-                                    <Badge variant="outline" className="mt-0.5 shrink-0 text-[9px] border-amber-500/30 text-amber-600 dark:text-amber-400">
-                                      Review
-                                    </Badge>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
               )}
             </TabsContent>
+
+            {naCount > 0 && (
+              <TabsContent value="na" className="mt-4">
+                <div className="space-y-4">
+                  {Object.entries(naByCategory).map(([category, items]) => (
+                    <Card key={category} className="border-muted-foreground/20">
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm flex items-center gap-2 text-muted-foreground">
+                          <Info className="w-4 h-4" />
+                          {category}
+                          <Badge variant="outline" className="text-[10px] border-muted-foreground/30 text-muted-foreground ml-auto">
+                            {items.length} not applicable
+                          </Badge>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <div className="space-y-1.5">
+                          {items.map((pd, i) => (
+                            <div key={`${pd.rule_id}-${i}`} className="flex items-start gap-2.5 rounded-md px-3 py-2 bg-muted/30 border border-muted-foreground/10">
+                              <Badge variant="outline" className="mt-0.5 shrink-0 text-[10px] border-muted-foreground/30 text-muted-foreground font-mono">
+                                {pd.rule_id}
+                              </Badge>
+                              <p className="text-xs text-muted-foreground leading-relaxed">{pd.detail}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </TabsContent>
+            )}
 
             {checksPerformed.length > 0 && (
               <TabsContent value="checks" className="mt-4">
                 <div className="space-y-2">
                   <p className="text-xs text-muted-foreground mb-3">
-                    All {checksPerformed.length} checks from the evaluation checklist (CHECK-01 through CHECK-15)
+                    All {checksPerformed.length} checks from the evaluation checklist
                   </p>
                   {checksPerformed.map((check) => {
                     const statusColors = {
                       pass: { bg: "bg-green-500/10", border: "border-green-500/20", text: "text-green-600 dark:text-green-400", label: "Pass" },
                       fail: { bg: "bg-red-500/10", border: "border-red-500/20", text: "text-red-600 dark:text-red-400", label: "Fail" },
-                      manual_review: { bg: "bg-amber-500/10", border: "border-amber-500/20", text: "text-amber-600 dark:text-amber-400", label: "Manual Review" },
+                      not_applicable: { bg: "bg-gray-500/10", border: "border-gray-500/20", text: "text-muted-foreground", label: "N/A" },
                     };
-                    const sc = statusColors[check.status] || statusColors.manual_review;
+                    const sc = statusColors[check.status] || statusColors.not_applicable;
                     return (
                       <div key={check.check_id} className={`px-4 py-3 rounded-lg ${sc.bg} border ${sc.border}`}>
                         <div className="flex items-center gap-3 mb-1">

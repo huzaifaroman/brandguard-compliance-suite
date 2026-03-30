@@ -51,10 +51,13 @@ async def analyze_single_image(
             old = cached.pop("checks_passed", [])
             if isinstance(old, list):
                 cached["passed_details"] = [
-                    {"rule_id": rid, "category": "Content", "detail": f"Rule {rid} passed (legacy)"} for rid in old
+                    {"rule_id": rid, "category": "Content", "detail": f"Rule {rid} passed (legacy)", "status": "pass"} for rid in old
                 ]
             else:
                 cached["passed_details"] = []
+        for pd in cached.get("passed_details", []):
+            if "status" not in pd:
+                pd["status"] = "pass"
         logger.info("[%s] Cache HIT", short_hash)
         return cached
 
@@ -147,10 +150,13 @@ async def analyze_single_image_streaming(
             old = cached.pop("checks_passed", [])
             if isinstance(old, list):
                 cached["passed_details"] = [
-                    {"rule_id": rid, "category": "Content", "detail": f"Rule {rid} passed (legacy)"} for rid in old
+                    {"rule_id": rid, "category": "Content", "detail": f"Rule {rid} passed (legacy)", "status": "pass"} for rid in old
                 ]
             else:
                 cached["passed_details"] = []
+        for pd in cached.get("passed_details", []):
+            if "status" not in pd:
+                pd["status"] = "pass"
         logger.info("[%s] Cache HIT (stream)", short_hash)
         yield {"event": "step", "step": "cache_hit", "progress": 100, "message": "Cached result found"}
         yield {"event": "result", "data": cached}

@@ -24,6 +24,7 @@ class PassedDetail(BaseModel):
     rule_id: str
     category: Literal["Regulatory", "Logo", "Gradient", "Colors", "Typography", "Content"] = "Content"
     detail: str
+    status: Literal["pass", "not_applicable"] = "pass"
 
 
 class ComplianceResult(BaseModel):

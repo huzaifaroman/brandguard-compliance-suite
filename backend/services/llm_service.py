@@ -41,46 +41,48 @@ You will receive:
 3. VISION_SIGNALS: Supplementary data from Azure Vision API (OCR text positions, object detection, captions) — use as supporting evidence
 4. USER_PROMPT: Optional additional question from the user
 
-IMPORTANT: You have BOTH the image and the vision signals. Use the image directly to check colors, gradients, shapes, logo styling, typography, and layout. Use the vision signals for precise OCR text positions and bounding boxes.
+IMPORTANT: You have BOTH the image and the vision signals. You can SEE the image — use it directly to check colors, gradients, shapes, logo styling, typography, layout, and everything visual. Use the vision signals for supplementary text positions and bounding boxes.
 
 YOUR TASK:
 - Follow the ai_evaluation_checklist in EXACT ORDER (CHECK-01 through CHECK-15)
 - You MUST evaluate and report on ALL 15 checks — no skipping
 - For each check, evaluate every rule_id listed in rules_to_evaluate
-- There are 62 rules total across all checks. Every single rule_id must appear in EITHER violations OR passed_details — no rule may be omitted
-- Double-check your response: count violations + passed_details — the total must equal 62
+- There are 62 rules total. Every rule_id must appear in EITHER violations OR passed_details
+- Double-check: violations + passed_details must total 62
 
-CLASSIFICATION:
-- PASS: No violations found (unable-to-verify items do not count as violations)
-- FAIL: One or more violations with POSITIVE EVIDENCE
-- WARNING: Only medium severity issues or low-confidence detections
+RULE STATUS — EVERY RULE MUST BE ONE OF THREE:
+1. VIOLATION (in violations array): The rule is clearly broken — you can see evidence in the image
+2. PASS (in passed_details with status "pass"): The rule is met — you verified it by looking at the image
+3. NOT APPLICABLE (in passed_details with status "not_applicable"): The rule does not apply to this type of image/content (e.g. "educational content rules" on a flavour-led image, or "dark background rules" on a light background image)
 
-VIOLATION REQUIREMENTS (only when you have positive evidence):
-- Cite the exact rule ID
-- Include the rule text from the rules JSON
-- Explain what's wrong in plain, non-technical language that a marketing team can understand
-- Do NOT use technical terms like "OCR", "Vision API", "bounding polygon", "dense_captions", "tags", "confidence score", "signal", or "Azure" in your response
-- Instead use plain language: "text detected", "logo found", "element visible at this position", "image analysis shows"
+CRITICAL: Do NOT mark a rule as "pass" if you cannot actually verify it. If a rule doesn't apply to this image, mark it "not_applicable" with a brief reason. Only mark "pass" when you genuinely see the image complies.
+
+OVERALL VERDICT:
+- PASS: No violations found
+- FAIL: One or more violations found
+- WARNING: Only medium severity issues or borderline cases
+
+VIOLATION REQUIREMENTS:
+- Cite the exact rule ID and include the rule text
+- Explain what's wrong in plain language a marketing team can understand
 - Provide an actionable fix suggestion
-- Include bounding box (x, y, w, h) when the violation relates to a detected element. Use null for missing elements.
+- Include bounding box (x, y, w, h) when relevant, null for missing elements
 
 PASSED_DETAILS REQUIREMENTS:
-- For EVERY check (CHECK-01 through CHECK-15), report what you found
-- For checks you CAN verify: explain what was detected and why it passes in plain language
-- For checks you CANNOT verify: report with detail "Requires manual review — this check needs visual inspection."
-- Use plain language: e.g. "ZONNIC logo text found in the image — logo presence confirmed" instead of "ZONNIC text detected via OCR at position (332,292) with 99.1% confidence"
+- For rules that PASS: describe what you see in the image that confirms compliance
+- For rules that are NOT APPLICABLE: briefly explain why (e.g. "This rule applies to educational content only — this is a flavour-led image")
 - Group by category: Regulatory, Logo, Gradient, Colors, Typography, Content
 
-LANGUAGE RULES FOR ALL OUTPUT:
-- Write all summaries, details, evidence, and fix suggestions in plain, non-technical English
-- Never mention "OCR", "Vision API", "Azure Vision", "GPT", "AI model", "dense captions", "tags", "bounding polygon", "confidence score", or any technical term
-- Use simple descriptions: "text found", "logo visible", "color detected", "element present", "image shows"
+LANGUAGE RULES — VERY IMPORTANT:
+- Write everything in plain, non-technical English for a marketing team
+- NEVER use: "OCR", "Vision API", "Azure", "GPT", "AI model", "dense captions", "tags", "bounding polygon", "confidence score", "signal", "verified from signals", "image signals", "manual review needed"
+- Instead use: "text found", "logo visible", "color matches", "element present", "the image shows", "not visible in the image"
 
 BACKGROUND AND CONTENT TYPE DETECTION:
 - Look at the image to determine background and content type
-- If the image shows a person/model → likely brand_purpose or flavour_led content
-- If the image shows products → likely flavour_led
-- If background cannot be determined → use "unknown" but do NOT flag violations for it
+- Person/model visible → likely brand_purpose or flavour_led
+- Products visible → likely flavour_led
+- If unclear → use "unknown" but do NOT flag violations for it
 
 Return ONLY valid JSON matching the schema below. No extra text."""
 
@@ -111,7 +113,7 @@ COMPLIANCE_SCHEMA = {
                         "properties": {
                             "check_id": {"type": "string", "description": "CHECK-01 through CHECK-15"},
                             "check_name": {"type": "string"},
-                            "status": {"type": "string", "enum": ["pass", "fail", "manual_review"]},
+                            "status": {"type": "string", "enum": ["pass", "fail", "not_applicable"]},
                             "detail": {"type": "string", "description": "What was evaluated and the outcome"}
                         },
                         "required": ["check_id", "check_name", "status", "detail"],
@@ -163,17 +165,18 @@ COMPLIANCE_SCHEMA = {
                             },
                             "detail": {
                                 "type": "string",
-                                "description": "What was detected and why it passes, or why it requires manual review"
+                                "description": "Plain language explanation of what was found or why the rule does not apply"
                             },
-                            "verified": {
-                                "type": "boolean",
-                                "description": "true if compliance was positively confirmed from signals, false if it requires manual review"
+                            "status": {
+                                "type": "string",
+                                "enum": ["pass", "not_applicable"],
+                                "description": "pass = rule is met and verified, not_applicable = rule does not apply to this image type"
                             }
                         },
-                        "required": ["rule_id", "category", "detail", "verified"],
+                        "required": ["rule_id", "category", "detail", "status"],
                         "additionalProperties": False
                     },
-                    "description": "All rules not in violations — either verified as passing or requiring manual review"
+                    "description": "All rules not in violations — either verified as passing or not applicable to this image"
                 },
                 "content_type_detected": {
                     "type": "string",
