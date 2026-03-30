@@ -2,7 +2,10 @@ import hashlib
 import uuid
 import json
 import logging
+import os
+from datetime import datetime, timezone
 from typing import Optional, AsyncGenerator
+from pathlib import Path
 
 from backend.services.blob_service import upload_image
 from backend.services.vision_service import analyze_image
@@ -10,6 +13,24 @@ from backend.services.llm_service import analyze_compliance
 from backend import redis_client, database
 
 logger = logging.getLogger("backend.services.engine")
+
+DEBUG_FILE = Path(__file__).parent.parent / "debug_raw_responses.json"
+
+
+def _save_debug(filename: str, image_hash: str, vision_raw: dict, llm_raw: dict):
+    try:
+        debug_data = {
+            "_info": "Raw API responses — overwritten on each new analysis",
+            "_timestamp": datetime.now(timezone.utc).isoformat(),
+            "_filename": filename,
+            "_image_hash": image_hash,
+            "vision_raw": vision_raw,
+            "llm_raw": llm_raw,
+        }
+        DEBUG_FILE.write_text(json.dumps(debug_data, indent=2, default=str))
+        logger.info("Debug raw responses saved to %s", DEBUG_FILE)
+    except Exception as e:
+        logger.warning("Failed to save debug file: %s", e)
 
 
 async def analyze_single_image(
@@ -47,6 +68,8 @@ async def analyze_single_image(
     llm_result = await analyze_compliance(vision_signals, rules, prompt)
     logger.info("[%s] └─ LLM done → %s %s%%", short_hash,
                 llm_result.get("verdict"), llm_result.get("confidence"))
+
+    _save_debug(filename, image_hash, vision_signals, llm_result)
 
     session_id = str(uuid.uuid4())
 
@@ -153,6 +176,8 @@ async def analyze_single_image_streaming(
     confidence = llm_result.get("confidence", 0)
     violations = llm_result.get("violations", [])
     logger.info("[%s] └─ LLM done → %s %s%%", short_hash, verdict, confidence)
+
+    _save_debug(filename, image_hash, vision_signals, llm_result)
 
     yield {"event": "step", "step": "llm", "progress": 85, "message": f"AI evaluation complete — {verdict} ({confidence}%) with {len(violations)} violation(s)"}
 
