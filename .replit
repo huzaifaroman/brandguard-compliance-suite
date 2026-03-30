@@ -2,9 +2,29 @@ modules = ["python-3.11", "nodejs-20"]
 [agent]
 expertMode = true
 
+[networking]
+allowed_outbound_hosts = [
+  "azurevision-test132121.cognitiveservices.azure.com",
+  "novanewagentgpt.openai.azure.com",
+  "complianceuploadsmg.blob.core.windows.net",
+]
+
 [nix]
 channel = "stable-25_05"
-packages = ["freetype", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "openjpeg", "postgresql", "tcl", "tk", "zlib"]
+packages = [
+  "freetype",
+  "lcms2",
+  "libimagequant",
+  "libjpeg",
+  "libtiff",
+  "libwebp",
+  "libxcrypt",
+  "openjpeg",
+  "postgresql",
+  "tcl",
+  "tk",
+  "zlib",
+]
 
 [workflows]
 runButton = "Project"
