@@ -12,9 +12,12 @@ from backend.logging_config import setup_logging
 from backend.config import settings
 from backend import database, redis_client
 from backend.routers import compliance, batch, rules, history, chat
+from backend.services.dns_helper import init_dns
 
 setup_logging()
 logger = logging.getLogger("backend.main")
+
+init_dns()
 
 
 @asynccontextmanager
