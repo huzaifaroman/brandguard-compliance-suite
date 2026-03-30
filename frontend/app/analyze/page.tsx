@@ -658,7 +658,7 @@ export default function AnalyzePage() {
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                   <StatCard label="Passed" value={passedCount} color="text-green-600 dark:text-green-400" />
                   <StatCard label="Failed" value={violationCount} color="text-red-600 dark:text-red-400" />
-                  <StatCard label="N/A" value={naCount} color="text-muted-foreground" />
+                  <StatCard label="Not Applicable" value={naCount} color="text-muted-foreground" />
                   <StatCard label="Pass Rate" value={`${passRate}%`} color={passRate >= 80 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"} />
                   <StatCard label="Verdict" value={result.verdict} color={vc.color} />
                 </div>
@@ -706,7 +706,7 @@ export default function AnalyzePage() {
                     {naCount > 0 && (
                       <TabsTrigger value="na" className="gap-1.5">
                         <Info className="w-3.5 h-3.5" />
-                        N/A ({naCount})
+                        Not Applicable ({naCount})
                       </TabsTrigger>
                     )}
                     <TabsTrigger value="details" className="gap-1.5">
@@ -716,6 +716,12 @@ export default function AnalyzePage() {
                   </TabsList>
 
                   <TabsContent value="violations" className="mt-4">
+                    <div className="flex items-start gap-2.5 rounded-lg px-4 py-3 mb-4 bg-red-500/5 border border-red-500/15">
+                      <Info className="w-4 h-4 text-red-500/70 mt-0.5 shrink-0" />
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        These are brand rules that the image does not comply with. Each violation includes what was found, why it fails, and a suggested fix.
+                      </p>
+                    </div>
                     {result.violations.length === 0 ? (
                       <Card>
                         <CardContent className="p-8 text-center">
@@ -752,6 +758,12 @@ export default function AnalyzePage() {
                   </TabsContent>
 
                   <TabsContent value="passed" className="mt-4">
+                    <div className="flex items-start gap-2.5 rounded-lg px-4 py-3 mb-4 bg-green-500/5 border border-green-500/15">
+                      <Info className="w-4 h-4 text-green-500/70 mt-0.5 shrink-0" />
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        These are brand rules that the image fully complies with. Each rule was checked and confirmed to be met.
+                      </p>
+                    </div>
                     {passedCount === 0 ? (
                       <Card>
                         <CardContent className="p-8 text-center">
@@ -792,6 +804,12 @@ export default function AnalyzePage() {
 
                   {naCount > 0 && (
                     <TabsContent value="na" className="mt-4">
+                      <div className="flex items-start gap-2.5 rounded-lg px-4 py-3 mb-4 bg-amber-500/5 border border-amber-500/15">
+                        <Info className="w-4 h-4 text-amber-500/70 mt-0.5 shrink-0" />
+                        <p className="text-xs text-muted-foreground leading-relaxed">
+                          These rules don&apos;t apply to this particular image. For example, rules about dark backgrounds won&apos;t apply to a light background image, or educational content rules won&apos;t apply to a flavour-led design. They are excluded from the pass rate calculation.
+                        </p>
+                      </div>
                       <div className="space-y-4">
                         {Object.entries(naByCategory).map(([category, items]) => (
                           <Card key={category} className="border-muted-foreground/20">
