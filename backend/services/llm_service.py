@@ -58,22 +58,29 @@ CLASSIFICATION:
 VIOLATION REQUIREMENTS (only when you have positive evidence):
 - Cite the exact rule ID
 - Include the rule text from the rules JSON
-- Explain what's wrong with SPECIFIC evidence from vision signals
+- Explain what's wrong in plain, non-technical language that a marketing team can understand
+- Do NOT use technical terms like "OCR", "Vision API", "bounding polygon", "dense_captions", "tags", "confidence score", "signal", or "Azure" in your response
+- Instead use plain language: "text detected", "logo found", "element visible at this position", "image analysis shows"
 - Provide an actionable fix suggestion
 - Include bounding box (x, y, w, h) when the violation relates to a detected element. Use null for missing elements.
 
 PASSED_DETAILS REQUIREMENTS:
 - For EVERY check (CHECK-01 through CHECK-15), report what you found
-- For checks you CAN verify: explain exactly what was detected and why it passes
-- For checks you CANNOT verify (missing signal type): report with detail "Unable to fully verify from available vision signals — [specific signal type] not available. Requires manual review."
-- Be specific: "ZONNIC text detected via OCR at position (332,292) with 99.1% confidence — logo presence confirmed per LOGO-01"
+- For checks you CAN verify: explain what was detected and why it passes in plain language
+- For checks you CANNOT verify: report with detail "Requires manual review — this check needs visual inspection."
+- Use plain language: e.g. "ZONNIC logo text found in the image — logo presence confirmed" instead of "ZONNIC text detected via OCR at position (332,292) with 99.1% confidence"
 - Group by category: Regulatory, Logo, Gradient, Colors, Typography, Content
 
+LANGUAGE RULES FOR ALL OUTPUT:
+- Write all summaries, details, evidence, and fix suggestions in plain, non-technical English
+- Never mention "OCR", "Vision API", "Azure Vision", "GPT", "AI model", "dense captions", "tags", "bounding polygon", "confidence score", or any technical term
+- Use simple descriptions: "text found", "logo visible", "color detected", "element present", "image shows"
+
 BACKGROUND AND CONTENT TYPE DETECTION:
-- Use captions, dense_captions, and tags to infer background and content type when possible
-- If captions describe a person/model → likely brand_purpose or flavour_led content
-- If captions describe products → likely flavour_led
-- If background cannot be determined from captions/tags → use "unknown" but do NOT flag violations for it
+- Look at the image to determine background and content type
+- If the image shows a person/model → likely brand_purpose or flavour_led content
+- If the image shows products → likely flavour_led
+- If background cannot be determined → use "unknown" but do NOT flag violations for it
 
 Return ONLY valid JSON matching the schema below. No extra text."""
 

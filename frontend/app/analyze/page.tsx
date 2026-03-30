@@ -64,7 +64,7 @@ const verdictConfig: Record<string, { icon: typeof ShieldCheck; color: string; b
 const pipelineSteps = [
   { icon: Cloud, label: "Uploading Image", sublabel: "Cloud storage" },
   { icon: ScanEye, label: "Scanning Image", sublabel: "Reading elements" },
-  { icon: Brain, label: "Checking Rules", sublabel: "62 brand rules" },
+  { icon: Brain, label: "Checking Rules", sublabel: "Brand guidelines" },
   { icon: FileCheck, label: "Building Report", sublabel: "Final results" },
 ];
 
@@ -338,7 +338,7 @@ export default function AnalyzePage() {
             <div>
               <h1 className="text-2xl font-bold tracking-tight gradient-text">Analyze Image</h1>
               <p className="text-sm text-muted-foreground">
-                Upload a marketing asset for AI-powered compliance review against 62 brand rules
+                Upload a marketing asset for AI-powered compliance review
               </p>
             </div>
           </div>
