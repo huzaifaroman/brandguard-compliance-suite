@@ -82,6 +82,14 @@ export async function getHistory(
   return data;
 }
 
+export async function getAnalysis(
+  sessionId: string
+): Promise<ComplianceResult> {
+  const res = await fetch(`${API_BASE}/api/analysis/${sessionId}`);
+  if (!res.ok) throw new Error(`Failed to load analysis: ${res.statusText}`);
+  return res.json();
+}
+
 export async function getChatMessages(
   sessionId: string
 ): Promise<ChatMessage[]> {

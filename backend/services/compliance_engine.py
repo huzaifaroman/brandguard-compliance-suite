@@ -77,8 +77,9 @@ async def analyze_single_image(
                     """
                     INSERT INTO analyses
                         (image_hash, blob_url, image_width, image_height, verdict,
-                         confidence, violations_json, checks_passed, passed_details_json, prompt, session_id)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9::jsonb, $10, $11)
+                         confidence, violations_json, checks_passed, passed_details_json,
+                         prompt, session_id, summary, content_type_detected, background_type_detected)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9::jsonb, $10, $11, $12, $13, $14)
                     RETURNING id
                     """,
                     image_hash, blob_url, width, height,
@@ -86,6 +87,9 @@ async def analyze_single_image(
                     json.dumps(result["violations"]),
                     passed_count, json.dumps(passed_details),
                     prompt, session_id,
+                    result.get("summary", ""),
+                    result.get("content_type_detected", "unknown"),
+                    result.get("background_type_detected", "unknown"),
                 )
                 analysis_id = row["id"]
                 await conn.execute(

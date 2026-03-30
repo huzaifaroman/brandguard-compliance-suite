@@ -21,7 +21,9 @@ import {
   ScanEye,
   Brain,
   FileCheck,
+  FileText,
 } from "lucide-react";
+import Link from "next/link";
 import { RadialBarChart, RadialBar, PolarAngleAxis } from "recharts";
 import { analyzeImage, getChatMessages, streamChatMessage } from "@/lib/api";
 import type { ComplianceResult, Violation, ChatMessage, PassedDetail } from "@/lib/types";
@@ -521,6 +523,13 @@ export default function AnalyzePage() {
                                 <Badge variant="outline" className="text-blue-400 border-blue-500/30 text-xs gap-1">
                                   <Zap className="w-3 h-3" /> Cached
                                 </Badge>
+                              )}
+                              {result.session_id && (
+                                <Link href={`/report/${result.session_id}`}>
+                                  <Button variant="outline" size="sm" className="ml-auto h-7 text-xs gap-1.5">
+                                    <FileText className="w-3 h-3" /> Full Report
+                                  </Button>
+                                </Link>
                               )}
                             </div>
                             <motion.p

@@ -23,7 +23,7 @@ backend/
     compliance.py      # POST /api/analyze — single image analysis (20MB limit, MIME validation)
     batch.py           # POST /api/batch — parallel multi-image analysis (up to 10, per-file validation)
     rules.py           # GET /api/rules — returns loaded brand rules (Redis-cached)
-    history.py         # GET /api/history — paginated analysis audit log (Redis-cached, error handling)
+    history.py         # GET /api/history — paginated analysis audit log (Redis-cached); GET /api/analysis/{session_id} — full analysis detail retrieval
     chat.py            # GET/POST /api/chat/{session_id} — streaming AI chat follow-up (error handling)
   services/
     vision_service.py  # Azure Vision 4.0 (captions, dense_captions, tags, objects, OCR) with retries
@@ -36,7 +36,8 @@ frontend/
     analyze/page.tsx   # Drag-drop upload, Recharts radial confidence arc, bounding box SVG overlay, verdict with spring animation, chat panel with streaming
     batch/page.tsx     # Multi-image upload, Recharts donut chart summary, expandable results table, CSV/PDF export
     rules/page.tsx     # Categorized rule browser with search, severity badges, collapsible sections
-    history/page.tsx   # Audit log with consistency verification, hash grouping, empty states
+    history/page.tsx   # Audit log with consistency verification, hash grouping, report ID links
+    report/[sessionId]/page.tsx # Full compliance report with violations detail, passed checks, severity breakdown, AI chat, print support
     layout.tsx         # Root layout with sidebar, dark theme, TooltipProvider, ErrorBoundary
     globals.css        # Premium oklch dark/light theme, aurora orbs, glass utilities, gradient-text, glow animations, responsive mobile optimization, reduced-motion support
   components/

@@ -178,23 +178,18 @@ export default function HistoryPage() {
                                     </div>
                                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
                                       <span>{new Date(item.timestamp).toLocaleString()}</span>
-                                      <Tooltip>
-                                        <TooltipTrigger>
-                                          <code className="font-mono text-[10px] opacity-60">
-                                            {item.image_hash.slice(0, 12)}...
-                                          </code>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                          <p className="text-xs font-mono">{item.image_hash}</p>
-                                        </TooltipContent>
-                                      </Tooltip>
+                                      {item.session_id && (
+                                        <code className="font-mono text-[10px] opacity-60 text-primary">
+                                          RPT-{item.session_id.slice(0, 8).toUpperCase()}
+                                        </code>
+                                      )}
                                       {item.session_id && (
                                         <a
-                                          href={`/analyze?session=${item.session_id}`}
-                                          className="flex items-center gap-1 text-primary hover:underline transition-colors"
+                                          href={`/report/${item.session_id}`}
+                                          className="flex items-center gap-1 text-primary hover:underline transition-colors font-medium"
                                         >
                                           <ExternalLink className="w-3 h-3" />
-                                          View
+                                          View Report
                                         </a>
                                       )}
                                     </div>
