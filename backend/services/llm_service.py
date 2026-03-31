@@ -47,13 +47,13 @@ Examine the image and report on ALL of the following. If something is not presen
 LOGO ANALYSIS:
 - Is the ZONNIC logo visible? Describe its position (top/center/bottom, left/center/right)
 - What colour is the logo text? (navy blue, white, other — describe exact colour)
-- Is the logo distorted, stretched, or modified? "Distorted" means the logo has been STRETCHED, SQUASHED, SKEWED, ROTATED, or structurally REARRANGED (e.g. stacking ZON/NIC). The Z in the official ZONNIC logo is intentionally stylized with sharp geometric angles and extended strokes — this angular LETTER SHAPE is the correct original design, NOT a distortion. However, if there is any CIRCLE, RING, or FILLED SHAPE behind or around the Z, that IS a modification/distortion — flag it.
+- Is the logo distorted, stretched, or modified? "Distorted" means the logo has been STRETCHED, SQUASHED, SKEWED, ROTATED, or structurally REARRANGED (e.g. stacking ZON/NIC), OR has circles/shapes added behind letters that shouldn't have them. The Z's angular LETTER SHAPE with sharp geometric edges is the correct original design, NOT a distortion. However, if there is any CIRCLE, RING, or FILLED SHAPE behind or around ANY letter other than C, that IS a modification — flag it.
 - Is there sufficient clear space around the logo?
 - Estimate the logo size relative to the full image
 
 C HALO ANALYSIS (MOST IMPORTANT — BE EXTREMELY DETAILED):
 - The correct ZONNIC logo has "ZONNIC" spelled out. The letters from left to right are: Z-O-N-N-I-C
-- IMPORTANT: The Z's angular/geometric LETTER SHAPE with sharp edges and extended strokes is the OFFICIAL design — do not confuse the letter's shape with a halo or distortion. However, if you see any CIRCLE, RING, or FILLED SHAPE behind or around the Z letter, that IS wrong — the Z should have NO shape behind it at all. Only the C gets a halo.
+- IMPORTANT: The Z's angular/geometric LETTER SHAPE with sharp edges and extended strokes is the OFFICIAL design — do not confuse the letter's shape with a halo or distortion. However, if you see any CIRCLE, RING, or FILLED SHAPE behind or around ANY letter other than C (including Z, O, N, N, I), that IS wrong — only the C should have a halo. No other letter should have any shape behind it.
 - The HALO is a coloured ring/circle that goes AROUND a letter. The halo should ONLY appear around the C (last/rightmost letter). No other letter should have any ring, circle, or shape around or behind it.
 - Look at EACH letter carefully. Which letter(s) have a coloured ring/halo AROUND them?
 - Specifically: Does the C (last letter, rightmost) have a halo ring around it? Does any other letter have a halo? (No letter other than C should have one.)
@@ -207,8 +207,8 @@ YOUR TASK:
 
 IMPORTANT BRAND DESIGN CONTEXT:
 - The ZONNIC logo is the text "ZONNIC" in navy blue. The Z has an intentionally stylized angular LETTER SHAPE with sharp geometric edges — this letter shape is the OFFICIAL design and is NOT a distortion.
-- However, if there is any CIRCLE, RING, or FILLED SHAPE behind or around the Z, that IS a violation — the Z should have NO shape behind it. Only the C gets a halo. A circle behind the Z means the logo has been modified (LOGO-13 violation) and has a halo on the wrong letter (LOGO-DONT-02 violation).
-- "Distorted or modified" means: STRETCHED, SQUASHED, SKEWED, ROTATED, structurally REARRANGED (e.g. stacking ZON/NIC), OR any added shapes/circles around letters that shouldn't have them. The Z's angular letter shape itself is NOT distortion, but a circle/shape behind it IS.
+- If there is any CIRCLE, RING, or FILLED SHAPE behind or around ANY letter other than C (Z, O, N, N, I), that IS a violation — only the C gets a halo. A circle/shape behind any other letter means the logo has been modified (LOGO-13 violation) and has a halo on the wrong letter (LOGO-DONT-02 for Z, LOGO-DONT-11 for any other letter).
+- "Distorted or modified" means: STRETCHED, SQUASHED, SKEWED, ROTATED, structurally REARRANGED (e.g. stacking ZON/NIC), OR any added shapes/circles/rings around letters that shouldn't have them. The Z's angular letter shape itself is NOT distortion, but a circle/shape behind any letter other than C IS.
 - The HALO is a coloured ring that goes AROUND the C letter (rightmost). The halo should ONLY be on the C. No other letter has any circle or shape around it.
 - On white or grey backgrounds, the C halo MUST be a gradient (two colours), NOT a solid single colour.
 
@@ -789,8 +789,8 @@ def _enforce_detection_violations(result: dict, detection: dict):
             })
 
     if halo.get("halo_on_other_letters", "none").lower() not in ("none", "not present", ""):
+        other = halo.get("halo_on_other_letters", "")
         if "LOGO-DONT-11" not in violation_ids:
-            other = halo.get("halo_on_other_letters", "")
             logger.warning("CROSS-VALIDATION: Halo on other letters '%s' but LLM passed LOGO-DONT-11 — forcing violation", other)
             forced_violations.append({
                 "rule_id": "LOGO-DONT-11",
@@ -799,6 +799,17 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "issue": f"Halo or outline detected on letters other than C: {other}.",
                 "fix_suggestion": "Remove halos or outlines from all letters except C.",
                 "evidence": f"Brand detection found halos/outlines on: {other}.",
+                "bbox": None,
+            })
+        if "LOGO-13" not in violation_ids:
+            logger.warning("CROSS-VALIDATION: Halo on other letters '%s' means logo is modified — forcing LOGO-13", other)
+            forced_violations.append({
+                "rule_id": "LOGO-13",
+                "rule_text": "The logo should never be altered or recreated in any way.",
+                "severity": "critical",
+                "issue": f"The logo has been modified — there are circles/shapes behind letter(s) other than C ({other}). The official ZONNIC logo only has a halo on the C.",
+                "fix_suggestion": f"Remove the circle/shape from behind the letter(s) {other}. Only the C should have a halo ring.",
+                "evidence": f"Brand detection confirmed halos/shapes on: {other}, which means the logo has been modified from its original design.",
                 "bbox": None,
             })
 
