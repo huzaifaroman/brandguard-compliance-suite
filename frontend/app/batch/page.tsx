@@ -242,11 +242,16 @@ export default function BatchPage() {
       <div className="max-w-6xl mx-auto">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <div className="flex items-center gap-3 mb-1">
-            <div className="p-2 rounded-xl bg-primary/10 animate-glow-pulse">
+            <motion.div
+              className="p-2.5 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 animate-glow-pulse"
+              whileHover={{ scale: 1.08, rotate: 5 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 20 }}
+            >
               <Layers className="w-5 h-5 text-primary" />
-            </div>
+            </motion.div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight gradient-text">Batch Analysis</h1>
+              <h1 className="text-2xl font-bold tracking-tight gradient-text">Batch Scan</h1>
               <p className="text-sm text-muted-foreground">
                 Upload up to {MAX_FILES} images for parallel compliance checking
               </p>

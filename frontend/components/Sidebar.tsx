@@ -44,21 +44,42 @@ export default function Sidebar() {
       className="fixed left-0 top-0 h-screen flex flex-col glass-strong z-50"
       style={{ width: "var(--sidebar-width)" }}
     >
-      <div className="p-5 border-b border-border">
-        <div className="flex items-center gap-2.5">
-          <motion.div
-            className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center relative animate-glow-pulse"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <ShieldCheck className="w-5 h-5 text-primary" />
-          </motion.div>
-          <div>
-            <h1 className="text-sm font-semibold tracking-tight gradient-text">BrandGuard</h1>
-            <p className="text-[10px] text-muted-foreground tracking-wider uppercase">Compliance Suite</p>
+      <Link href="/analyze" className="block">
+        <motion.div
+          className="p-5 border-b border-border group cursor-pointer"
+          whileHover={{ backgroundColor: "rgba(99,102,241,0.04)" }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="flex items-center gap-3">
+            <motion.div
+              className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center relative animate-glow-pulse"
+              whileHover={{ scale: 1.08, rotate: 3 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 20 }}
+            >
+              <ShieldCheck className="w-6 h-6 text-primary" />
+              <motion.div
+                className="absolute inset-0 rounded-xl border border-primary/20"
+                initial={{ opacity: 0 }}
+                whileHover={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+              />
+            </motion.div>
+            <div>
+              <motion.h1
+                className="text-base font-bold tracking-tight gradient-text leading-tight"
+                whileHover={{ letterSpacing: "0.01em" }}
+                transition={{ duration: 0.3 }}
+              >
+                BrandGuard
+              </motion.h1>
+              <p className="text-[10px] text-muted-foreground tracking-wider uppercase group-hover:text-muted-foreground/80 transition-colors duration-300">
+                Compliance Suite
+              </p>
+            </div>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </Link>
 
       <nav className="flex-1 p-3 space-y-0.5">
         {navItems.map((item) => {

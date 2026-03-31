@@ -387,11 +387,16 @@ export default function AnalyzePage() {
           transition={{ duration: 0.4 }}
         >
           <div className="flex items-center gap-3 mb-1">
-            <div className="p-2 rounded-xl bg-primary/10 animate-glow-pulse">
+            <motion.div
+              className="p-2.5 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 animate-glow-pulse"
+              whileHover={{ scale: 1.08, rotate: 5 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 20 }}
+            >
               <SearchCheck className="w-5 h-5 text-primary" />
-            </div>
+            </motion.div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight gradient-text">Brand Review</h1>
+              <h1 className="text-2xl font-bold tracking-tight gradient-text">Compliance Scan</h1>
               <p className="text-sm text-muted-foreground">
                 Upload a marketing asset for intelligent compliance review
               </p>
@@ -558,7 +563,7 @@ export default function AnalyzePage() {
               ) : (
                 <ScanLine className="w-4 h-4" />
               )}
-              {loading ? "Reviewing" : "Review"}
+              {loading ? "Scanning..." : "Scan"}
             </Button>
           </div>
         </motion.div>
