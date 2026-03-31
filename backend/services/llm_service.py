@@ -51,8 +51,8 @@ LOGO ANALYSIS:
 - Is there sufficient clear space around the logo?
 - Estimate the logo size relative to the full image
 
-CRITICAL — PRODUCT PACKAGING vs MARKETING ASSET:
-If the image shows a PHOTOGRAPH of a physical ZONNIC product (tin, pouch, box), the logo and halo PRINTED ON THE PRODUCT PACKAGING are part of the official product design and should NOT be evaluated for logo compliance violations. Only evaluate logos that are part of the MARKETING ASSET itself (e.g., headline text "ZONNIC", standalone logos placed by the designer). The logo on the physical product tin/can is pre-approved product artwork.
+CRITICAL — PRODUCT PACKAGING:
+If the image shows a PHOTOGRAPH of a physical ZONNIC product (tin, pouch, box), the logo and halo PRINTED ON THE PRODUCT PACKAGING must be evaluated with the SAME brand rules as any other logo. Product packaging is NOT exempt. Analyze the halo colour, gradient, shape, and letter positioning on product packaging exactly as you would for a standalone marketing logo.
 
 HALO / CIRCLE ANALYSIS (MOST IMPORTANT — BE EXTREMELY DETAILED):
 
@@ -63,9 +63,9 @@ THE CORRECT ZONNIC LOGO looks like this:
 - The Z, O, N, N, and I should have NO circle, ring, or shape behind them whatsoever — they are plain letters on the background with nothing behind them
 
 YOUR TASK — examine EACH letter one by one from left to right.
-IMPORTANT: Only analyze the MARKETING ASSET logo (headline text, standalone logos). If the only ZONNIC logo visible is printed ON a physical product (tin/can/box in a photo), report the halo details from the product but set halo_on_z=false — product packaging logos are pre-approved and do NOT count as violations.
+IMPORTANT: Analyze ALL visible ZONNIC logos, including logos printed on physical product packaging (tin/can/box). Product packaging logos must be evaluated the same way.
 
-1. Z (leftmost): Is there ANY circle, ring, or filled shape sitting BEHIND this letter IN THE MARKETING ASSET LOGO (not on product packaging)? Look carefully at the area behind and around the Z. If there is a dark circle, navy circle, or any round shape behind it → report halo_on_z=true. The Z letter itself has sharp angular edges — that is the normal letter shape. But if there is a SEPARATE circular shape BEHIND the Z letter, that is wrong.
+1. Z (leftmost): Is there ANY circle, ring, or filled shape sitting BEHIND this letter? Look carefully at the area behind and around the Z. If there is a dark circle, navy circle, or any round shape behind it → report halo_on_z=true. The Z letter itself has sharp angular edges — that is the normal letter shape. But if there is a SEPARATE circular shape BEHIND the Z letter, that is wrong.
 2. O: Any circle or shape behind it?
 3. First N: Any circle or shape behind it?
 4. Second N: Any circle or shape behind it?
@@ -75,7 +75,7 @@ IMPORTANT: Only analyze the MARKETING ASSET logo (headline text, standalone logo
 Report halo_on_other_letters with the name of ANY letter (other than C) that has a circle/shape behind it.
 
 If a halo exists on the C:
-- What colour is it? Is it a single solid colour or a gradient (two colours blending)?
+- What colour is it? Look VERY carefully for gradients — even subtle ones count. A gradient means ANY visible transition between two shades or colours within the halo. On product packaging (tins/cans), the curved surface may make gradients appear more subtle, but if there is ANY variation in colour from one side of the halo to the other (e.g. darker green to lighter green, or dark teal blending to lighter mint), that IS a gradient — report halo_is_gradient=true. Only report halo_is_gradient=false if the halo is truly one uniform flat colour with zero variation.
 - Is it a perfect circle or distorted/oval?
 - Is it proportional to the letter or oversized/undersized?
 - Does it have an outline/stroke? What colour is the outline?
@@ -277,8 +277,8 @@ B) PRESENT BUT WRONG (something IS there but violates the rules):
 USING THE BRAND_DETECTION FACTS:
 - The brand detection has already identified what's in the image — colours, positions, shapes, text.
 - Cross-reference EVERY detection fact against the rules. If something detected is wrong (wrong colour, wrong position, wrong shape, wrong size), flag it as a violation.
-- If brand detection says halo_on_z=true → VIOLATION (halo on wrong letter). EXCEPTION: if the logo with the halo is ONLY visible on a physical product (tin/can/box) in a product photo, this is pre-approved product packaging and should NOT be flagged as a violation.
-- If brand detection says halo_is_gradient=false on a white/grey background → VIOLATION. EXCEPTION: halos on product packaging photos are pre-approved.
+- If brand detection says halo_on_z=true → VIOLATION (halo on wrong letter). This applies to ALL logos including those on product packaging.
+- If brand detection says halo_is_gradient=false on a white/grey background → VIOLATION. This applies to ALL logos including those on product packaging.
 - If brand detection says halo_shape=oval or distorted → VIOLATION
 - If brand detection says halo_has_outline=true → VIOLATION (LOGO-DONT-03)
 - If brand detection says halo_proportional=false → VIOLATION (LOGO-DONT-04)
@@ -813,32 +813,9 @@ def _enforce_detection_violations(result: dict, detection: dict):
 
     forced_violations = []
 
-    logo_position = (logo.get("position") or "").lower()
     content_type = detection.get("content_type", "").lower()
-    is_product_photo = any(kw in logo_position for kw in ["product", "tin", "can", "box", "pouch", "packaging"])
-    if is_product_photo:
-        logger.info("CROSS-VALIDATION: Logo detected on product packaging — skipping halo_on_z enforcement (product packaging logos are pre-approved)")
-        PRODUCT_EXEMPT_RULES = {
-            "LOGO-DONT-01", "LOGO-DONT-02", "LOGO-DONT-03", "LOGO-DONT-04",
-            "LOGO-DONT-11", "LOGO-DONT-14", "LOGO-05", "LOGO-07", "LOGO-09", "LOGO-13",
-        }
-        before_count = len(result.get("violations", []))
-        result["violations"] = [
-            v for v in result.get("violations", [])
-            if v.get("rule_id") not in PRODUCT_EXEMPT_RULES
-        ]
-        removed = before_count - len(result["violations"])
-        if removed > 0:
-            logger.info("CROSS-VALIDATION: Removed %d product-packaging-exempt halo/logo violations", removed)
-            for rid in PRODUCT_EXEMPT_RULES:
-                if rid not in {v.get("rule_id") for v in result.get("violations", [])} and rid not in {p.get("rule_id") for p in result.get("passed_details", [])}:
-                    result.setdefault("passed_details", []).append({
-                        "rule_id": rid,
-                        "rule_text": f"Exempt — logo on product packaging is pre-approved.",
-                    })
-        violation_ids = {v["rule_id"] for v in result.get("violations", []) if "rule_id" in v}
 
-    if halo.get("halo_on_z") is True and not is_product_photo:
+    if halo.get("halo_on_z") is True:
         if "LOGO-DONT-02" not in violation_ids:
             logger.warning("CROSS-VALIDATION: Detection says halo_on_z=true but LLM passed LOGO-DONT-02 — forcing violation")
             forced_violations.append({
@@ -864,7 +841,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
 
     other_letters_raw = halo.get("halo_on_other_letters", "none")
     has_other = other_letters_raw and str(other_letters_raw).lower() not in ("none", "n/a", "no", "")
-    if has_other and not is_product_photo:
+    if has_other:
         if "LOGO-DONT-11" not in violation_ids:
             logger.warning("CROSS-VALIDATION: Detection says halo on other letters (%s) — forcing LOGO-DONT-11", other_letters_raw)
             forced_violations.append({
@@ -887,7 +864,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "bbox": None,
             })
 
-    if logo.get("distorted_or_modified") is True and not is_product_photo:
+    if logo.get("distorted_or_modified") is True:
         if "LOGO-13" not in violation_ids and "LOGO-13" not in {v["rule_id"] for v in forced_violations}:
             logger.warning("CROSS-VALIDATION: Logo detected as distorted/modified — forcing LOGO-13")
             forced_violations.append({
@@ -902,7 +879,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
 
     logo_not_present = logo.get("present") is False
     is_educational = "educational" in content_type or "testimonial" in content_type
-    if not halo.get("any_halo_present", True) and not is_product_photo and not logo_not_present:
+    if not halo.get("any_halo_present", True) and not logo_not_present:
         if is_educational:
             logger.info("CROSS-VALIDATION: No halo detected but content is educational — skipping LOGO-DONT-01 enforcement (logo may be legitimately absent)")
         elif "LOGO-DONT-01" not in violation_ids:
@@ -918,7 +895,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
             })
 
     bg_type = bg.get("type", "")
-    if bg_type in ("white", "grey_gradient", "solid_colour") and halo.get("any_halo_present") and not halo.get("halo_is_gradient", True) and not is_product_photo:
+    if bg_type in ("white", "grey_gradient", "solid_colour") and halo.get("any_halo_present") and not halo.get("halo_is_gradient", True):
         if "LOGO-05" not in violation_ids:
             halo_col = halo.get("halo_colour", "unknown colour")
             logger.warning("CROSS-VALIDATION: Solid halo on white/grey bg but LLM passed LOGO-05 — forcing violation")
@@ -932,7 +909,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "bbox": None,
             })
 
-    if halo.get("halo_on_other_letters", "none").lower() not in ("none", "not present", "") and not is_product_photo:
+    if halo.get("halo_on_other_letters", "none").lower() not in ("none", "not present", ""):
         other = halo.get("halo_on_other_letters", "")
         if "LOGO-DONT-11" not in violation_ids:
             logger.warning("CROSS-VALIDATION: Halo on other letters '%s' but LLM passed LOGO-DONT-11 — forcing violation", other)
@@ -1108,7 +1085,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 })
 
     bg_type_str = bg.get("type", "")
-    if logo.get("present") and not is_product_photo:
+    if logo.get("present"):
         logo_colour = logo.get("text_colour", "").lower()
         if bg_type_str in ("white", "solid_colour", "grey_gradient", "gradient") and "dark" not in bg_type_str:
             if logo_colour and "navy" not in logo_colour and "blue" not in logo_colour and "dark" not in logo_colour and logo_colour not in ("not present", "unknown", ""):
