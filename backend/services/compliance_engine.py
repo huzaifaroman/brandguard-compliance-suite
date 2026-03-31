@@ -19,6 +19,7 @@ DEBUG_FILE = Path(__file__).parent.parent / "debug_raw_responses.json"
 
 def _save_debug(filename: str, image_hash: str, vision_signals: dict, brand_detection: dict, llm_result: dict):
     try:
+        from backend.services.llm_service import _format_detection_summary
         debug_data = {
             "_info": "Raw API responses — overwritten on each new analysis",
             "_timestamp": datetime.now(timezone.utc).isoformat(),
@@ -26,6 +27,7 @@ def _save_debug(filename: str, image_hash: str, vision_signals: dict, brand_dete
             "_image_hash": image_hash,
             "step_1_vision_api": vision_signals,
             "step_2_brand_detection_pass1": brand_detection,
+            "step_2b_formatted_detection_sent_to_pass2": _format_detection_summary(brand_detection),
             "step_3_rule_evaluation_pass2": llm_result,
         }
         DEBUG_FILE.write_text(json.dumps(debug_data, indent=2, default=str))
@@ -43,26 +45,7 @@ async def analyze_single_image(
     image_hash = hashlib.sha256(file_bytes).hexdigest()
     short_hash = image_hash[:8]
 
-    cached = await redis_client.get_cached_analysis(image_hash)
-    if cached:
-        cached["cached"] = True
-        if "image_url" in cached:
-            cached["image_url"] = get_sas_url(cached["image_url"])
-        if "passed_details" not in cached and "checks_passed" in cached:
-            old = cached.pop("checks_passed", [])
-            if isinstance(old, list):
-                cached["passed_details"] = [
-                    {"rule_id": rid, "category": "Content", "detail": f"Rule {rid} passed (legacy)", "status": "pass"} for rid in old
-                ]
-            else:
-                cached["passed_details"] = []
-        for pd in cached.get("passed_details", []):
-            if "status" not in pd:
-                pd["status"] = "pass"
-        logger.info("[%s] Cache HIT", short_hash)
-        return cached
-
-    logger.info("[%s] Pipeline START — %s (%dKB)", short_hash, filename, len(file_bytes) // 1024)
+    logger.info("[%s] Pipeline START — %s (%dKB) — fresh analysis (no cache)", short_hash, filename, len(file_bytes) // 1024)
 
     blob_url, width, height = await upload_image(file_bytes, f"{image_hash[:16]}_{filename}")
     logger.info("[%s] ├─ Blob uploaded (%dx%d)", short_hash, width or 0, height or 0)
@@ -143,28 +126,7 @@ async def analyze_single_image_streaming(
     image_hash = hashlib.sha256(file_bytes).hexdigest()
     short_hash = image_hash[:8]
 
-    cached = await redis_client.get_cached_analysis(image_hash)
-    if cached:
-        cached["cached"] = True
-        if "image_url" in cached:
-            cached["image_url"] = get_sas_url(cached["image_url"])
-        if "passed_details" not in cached and "checks_passed" in cached:
-            old = cached.pop("checks_passed", [])
-            if isinstance(old, list):
-                cached["passed_details"] = [
-                    {"rule_id": rid, "category": "Content", "detail": f"Rule {rid} passed (legacy)", "status": "pass"} for rid in old
-                ]
-            else:
-                cached["passed_details"] = []
-        for pd in cached.get("passed_details", []):
-            if "status" not in pd:
-                pd["status"] = "pass"
-        logger.info("[%s] Cache HIT (stream)", short_hash)
-        yield {"event": "step", "step": "cache_hit", "progress": 100, "message": "Cached result found"}
-        yield {"event": "result", "data": cached}
-        return
-
-    logger.info("[%s] Pipeline START (stream) — %s (%dKB)", short_hash, filename, len(file_bytes) // 1024)
+    logger.info("[%s] Pipeline START (stream) — %s (%dKB) — fresh analysis (no cache)", short_hash, filename, len(file_bytes) // 1024)
 
     yield {"event": "step", "step": "uploading", "progress": 5, "message": "Uploading image to cloud storage..."}
 

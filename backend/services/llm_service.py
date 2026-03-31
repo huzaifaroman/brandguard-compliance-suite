@@ -399,13 +399,21 @@ async def detect_brand_elements(
 
     try:
         client = _get_client()
-        text_message = f"""BRAND_REFERENCE (official ZONNIC colours for comparison):
+        text_message = f"""════════════════════════════════════════════════════
+OFFICIAL ZONNIC BRAND COLOURS (use these as reference when identifying colours)
+════════════════════════════════════════════════════
 {json.dumps(brand_colors, indent=2)}
 
-VISION_SIGNALS (supplementary text and object data):
+════════════════════════════════════════════════════
+SUPPLEMENTARY VISION DATA (OCR text positions, object labels from Azure Vision)
+════════════════════════════════════════════════════
 {json.dumps(vision_signals, indent=2)}
 
-Now examine the image carefully and report what you see."""
+════════════════════════════════════════════════════
+TASK: Examine the image carefully and report exactly what brand elements you see.
+Focus on: logo presence/position, C halo (colour, gradient vs solid, shape),
+background type/colours, regulatory text, typography, and overall colour palette.
+════════════════════════════════════════════════════"""
 
         user_content = _build_user_content(text_message, image_bytes)
 
@@ -466,16 +474,24 @@ async def evaluate_compliance(
         client = _get_client()
         user_prompt = prompt if prompt else "Check this image for brand compliance."
 
-        text_message = f"""BRAND_DETECTION (verified facts about what is in the image — trust these):
-{json.dumps(brand_detection, indent=2)}
+        detection_summary = _format_detection_summary(brand_detection)
 
-RULES:
+        text_message = f"""════════════════════════════════════════════════════
+VERIFIED BRAND ELEMENT DETECTION (from separate image inspection — TRUST THESE FACTS)
+════════════════════════════════════════════════════
+{detection_summary}
+
+════════════════════════════════════════════════════
+BRAND RULES TO EVALUATE (check every rule against the detection facts above)
+════════════════════════════════════════════════════
 {json.dumps(rules, indent=2)}
 
-VISION_SIGNALS (supplementary):
+════════════════════════════════════════════════════
+SUPPLEMENTARY VISION DATA (OCR text positions, object labels)
+════════════════════════════════════════════════════
 {json.dumps(vision_signals, indent=2)}
 
-USER_PROMPT: {user_prompt}"""
+USER REQUEST: {user_prompt}"""
 
         user_content = _build_user_content(text_message, image_bytes)
 
@@ -516,6 +532,90 @@ USER_PROMPT: {user_prompt}"""
     except Exception as e:
         logger.error("Pass 2 — Rule evaluation error: %s: %s", type(e).__name__, e)
         return _placeholder_result(f"AI analysis failed: {type(e).__name__}")
+
+
+def _format_detection_summary(detection: dict) -> str:
+    if not detection:
+        return "No brand detection data available."
+
+    logo = detection.get("logo", {})
+    halo = detection.get("halo", {})
+    bg = detection.get("background", {})
+    reg = detection.get("regulatory", {})
+    typo = detection.get("typography", {})
+    colours = detection.get("colours", {})
+    content_type = detection.get("content_type", "unknown")
+    desc = detection.get("overall_description", "")
+
+    lines = []
+    lines.append(f"OVERVIEW: {desc}")
+    lines.append(f"CONTENT TYPE: {content_type}")
+    lines.append("")
+
+    lines.append("── LOGO ──")
+    lines.append(f"  Present: {'YES' if logo.get('present') else 'NO'}")
+    if logo.get("present"):
+        lines.append(f"  Position: {logo.get('position', 'unknown')}")
+        lines.append(f"  Text colour: {logo.get('text_colour', 'unknown')}")
+        lines.append(f"  Distorted or modified: {'YES' if logo.get('distorted_or_modified') else 'NO'}")
+        lines.append(f"  Clear space sufficient: {'YES' if logo.get('clear_space_sufficient') else 'NO'}")
+        lines.append(f"  Relative size: {logo.get('relative_size', 'unknown')}")
+    lines.append("")
+
+    lines.append("── C HALO (CRITICAL) ──")
+    lines.append(f"  Any halo present: {'YES' if halo.get('any_halo_present') else 'NO'}")
+    if halo.get("any_halo_present"):
+        halo_on_z = halo.get("halo_on_z", False)
+        halo_on_c = halo.get("halo_on_c", False)
+        lines.append(f"  Halo on Z (leftmost letter): {'YES ⚠ WRONG LETTER!' if halo_on_z else 'NO (correct)'}")
+        lines.append(f"  Halo on C (rightmost letter): {'YES (correct)' if halo_on_c else 'NO ⚠ MISSING FROM C!'}")
+        lines.append(f"  Halo on other letters: {halo.get('halo_on_other_letters', 'none')}")
+        lines.append(f"  Halo colour: {halo.get('halo_colour', 'unknown')}")
+        is_grad = halo.get("halo_is_gradient", False)
+        lines.append(f"  Halo is gradient (two colours): {'YES' if is_grad else 'NO — solid single colour ⚠'}")
+        lines.append(f"  Gradient colours: {halo.get('halo_gradient_colours', 'N/A')}")
+        lines.append(f"  Shape: {halo.get('halo_shape', 'unknown')}")
+        lines.append(f"  Proportional: {'YES' if halo.get('halo_proportional') else 'NO'}")
+        lines.append(f"  Has outline: {'YES' if halo.get('halo_has_outline') else 'NO'}")
+        if halo.get("halo_has_outline"):
+            lines.append(f"  Outline colour: {halo.get('halo_outline_colour', 'unknown')}")
+    else:
+        lines.append("  ⚠ NO HALO DETECTED ON ANY LETTER — LOGO-DONT-01 VIOLATION")
+    lines.append("")
+
+    lines.append("── BACKGROUND ──")
+    lines.append(f"  Type: {bg.get('type', 'unknown')}")
+    lines.append(f"  Colours: {bg.get('colours', 'unknown')}")
+    if bg.get("gradient_direction") and bg.get("gradient_direction") != "NOT PRESENT":
+        lines.append(f"  Gradient direction: {bg.get('gradient_direction')}")
+    lines.append(f"  Description: {bg.get('description', '')}")
+    lines.append("")
+
+    lines.append("── REGULATORY ELEMENTS ──")
+    lines.append(f"  Nicotine warning: {'PRESENT' if reg.get('nicotine_warning_present') else 'NOT PRESENT ⚠'}")
+    if reg.get("nicotine_warning_present"):
+        lines.append(f"    Position: {reg.get('nicotine_warning_position', 'unknown')}")
+        lines.append(f"    Bilingual: {'YES' if reg.get('nicotine_warning_bilingual') else 'NO ⚠'}")
+    lines.append(f"  18+ age icon: {'PRESENT' if reg.get('age_icon_present') else 'NOT PRESENT ⚠'}")
+    if reg.get("age_icon_present"):
+        lines.append(f"    Position: {reg.get('age_icon_position', 'unknown')}")
+    lines.append(f"  Risk communication: {'PRESENT' if reg.get('risk_communication_present') else 'NOT PRESENT ⚠'}")
+    if reg.get("risk_communication_present"):
+        lines.append(f"    Position: {reg.get('risk_communication_position', 'unknown')}")
+    lines.append("")
+
+    lines.append("── TYPOGRAPHY ──")
+    lines.append(f"  Fonts: {typo.get('fonts_visible', 'unknown')}")
+    lines.append(f"  Sans-serif: {'YES' if typo.get('is_sans_serif') else 'NO'}")
+    lines.append(f"  Additional text: {typo.get('additional_text', 'none')}")
+    lines.append("")
+
+    lines.append("── COLOURS ──")
+    lines.append(f"  Dominant: {colours.get('dominant_colours', 'unknown')}")
+    lines.append(f"  Flavour palette match: {colours.get('matches_flavour_palette', 'unknown')}")
+    lines.append(f"  Secondary colour usage: {colours.get('secondary_colour_usage', 'unknown')}")
+
+    return "\n".join(lines)
 
 
 async def analyze_compliance(

@@ -104,20 +104,7 @@ async def run_job(job_id: str):
         image_hash = hashlib.sha256(file_bytes).hexdigest()
         short_hash = image_hash[:8]
 
-        cached = await redis_client.get_cached_analysis(image_hash)
-        if cached:
-            cached["cached"] = True
-            if "image_url" in cached:
-                cached["image_url"] = get_sas_url(cached["image_url"])
-            job["status"] = "done"
-            job["step"] = "done"
-            job["progress"] = 100
-            job["message"] = "Cached result found"
-            job["result"] = cached
-            logger.info("[%s] Cache HIT (job)", short_hash)
-            return
-
-        logger.info("[%s] Pipeline START (job) — %s (%dKB)", short_hash, filename, len(file_bytes) // 1024)
+        logger.info("[%s] Pipeline START (job) — %s (%dKB) — fresh analysis (no cache)", short_hash, filename, len(file_bytes) // 1024)
 
         blob_url, width, height = await upload_image(file_bytes, f"{image_hash[:16]}_{filename}")
         logger.info("[%s] ├─ Blob uploaded (%dx%d)", short_hash, width or 0, height or 0)
