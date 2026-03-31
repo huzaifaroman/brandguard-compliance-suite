@@ -868,7 +868,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "bbox": None,
             })
 
-    if logo.get("distorted_or_modified") is True:
+    if logo.get("distorted_or_modified") is True and not is_product_photo:
         if "LOGO-13" not in violation_ids and "LOGO-13" not in {v["rule_id"] for v in forced_violations}:
             logger.warning("CROSS-VALIDATION: Logo detected as distorted/modified — forcing LOGO-13")
             forced_violations.append({
@@ -881,8 +881,12 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "bbox": None,
             })
 
-    if not halo.get("any_halo_present", True):
-        if "LOGO-DONT-01" not in violation_ids:
+    logo_not_present = logo.get("present") is False
+    is_educational = "educational" in content_type or "testimonial" in content_type
+    if not halo.get("any_halo_present", True) and not is_product_photo and not logo_not_present:
+        if is_educational:
+            logger.info("CROSS-VALIDATION: No halo detected but content is educational — skipping LOGO-DONT-01 enforcement (logo may be legitimately absent)")
+        elif "LOGO-DONT-01" not in violation_ids:
             logger.warning("CROSS-VALIDATION: Detection says no halo present but LLM passed LOGO-DONT-01 — forcing violation")
             forced_violations.append({
                 "rule_id": "LOGO-DONT-01",
@@ -1085,7 +1089,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 })
 
     bg_type_str = bg.get("type", "")
-    if logo.get("present"):
+    if logo.get("present") and not is_product_photo:
         logo_colour = logo.get("text_colour", "").lower()
         if bg_type_str in ("white", "solid_colour", "grey_gradient", "gradient") and "dark" not in bg_type_str:
             if logo_colour and "navy" not in logo_colour and "blue" not in logo_colour and "dark" not in logo_colour and logo_colour not in ("not present", "unknown", ""):
