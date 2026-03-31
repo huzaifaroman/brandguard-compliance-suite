@@ -63,13 +63,17 @@ THE CORRECT ZONNIC LOGO looks like this:
 - The Z, O, N, N, and I should have NO circle, ring, or shape behind them whatsoever — they are plain letters on the background with nothing behind them
 - The logo often appears with "| NICOTINE REPLACEMENT THERAPY" tagline — this is the standard official format and is CORRECT
 
-OFFICIAL ACCEPTABLE C HALO COLOURS (these are ALL correct — do NOT flag as violations):
-- Grey/Neutral flavour: grey (#9d9fa1) to teal (#89d0c8) gradient
-- Green/Mint flavour: dark green (#007e47) to light green (#b7da9b) gradient
-- Blue flavour: dark blue (#0061af) to light blue (#75bee9) gradient
-- On gradient/coloured backgrounds: a solid version of the secondary flavour colour is also acceptable
-- The halo gradient blends from the primary (darker) colour to the secondary (lighter) colour
-- On product packaging (tins/cans), these same halo colours and gradients are used — they are official and correct
+OFFICIAL FLAVOUR PALETTES (these are the ONLY approved colour sets):
+- Grey/Neutral: primary dark = grey (#9d9fa1), secondary light = teal (#89d0c8)
+- Green/Mint: primary dark = green (#007e47), secondary light = light green (#b7da9b)
+- Blue: primary dark = blue (#0061af), secondary light = light blue (#75bee9)
+
+C HALO COLOUR RULES BY BACKGROUND TYPE (critical — determines correct vs incorrect):
+1. ON GRADIENT BACKGROUNDS: The C halo must be a SOLID secondary colour (the lighter flavour colour). Example: on a green gradient background, the halo should be solid light green (#b7da9b). A solid secondary-colour halo on a gradient background is CORRECT — do NOT flag it.
+2. ON WHITE OR GREY BACKGROUNDS: The C halo must be a FULL GRADIENT using BOTH primary (dark) + secondary (light) colours. A solid single-colour halo on white/grey is WRONG.
+3. ON DARK IMAGE BACKGROUNDS: The C halo must use the full gradient (primary + secondary).
+4. ON LIGHT IMAGE BACKGROUNDS: The C halo must use the full gradient (primary + secondary).
+- On product packaging (tins/cans), the halo uses the correct flavour colours — these are official and correct
 
 OFFICIAL PRODUCT PACKAGING (tins/cans/boxes) — these are approved designs:
 - Product tins show the ZONNIC logo with C halo using the correct flavour gradient
@@ -247,16 +251,19 @@ IMPORTANT BRAND DESIGN CONTEXT:
 - The HALO is a coloured ring that goes AROUND the C letter (rightmost). The halo should ONLY be on the C. No other letter has any circle or shape around it.
 - On white or grey backgrounds, the C halo MUST be a gradient (two colours), NOT a solid single colour.
 
-OFFICIAL ACCEPTABLE C HALO COLOURS (ALL of these are correct — do NOT flag as violations):
-- Grey/Neutral flavour: grey (#9d9fa1) to teal (#89d0c8) gradient
-- Green/Mint flavour: dark green (#007e47) to light green (#b7da9b) gradient
-- Blue flavour: dark blue (#0061af) to light blue (#75bee9) gradient
-- On gradient/coloured backgrounds: a solid version of the secondary flavour colour is also acceptable
-- On product packaging (tins/cans): these same halo colours and gradients are used — they are official and correct
-- If the detected halo colour matches ANY of these official flavour palettes, it is CORRECT — do not flag it.
+OFFICIAL FLAVOUR PALETTES:
+- Grey/Neutral: primary dark = grey (#9d9fa1), secondary light = teal (#89d0c8)
+- Green/Mint: primary dark = green (#007e47), secondary light = light green (#b7da9b)
+- Blue: primary dark = blue (#0061af), secondary light = light blue (#75bee9)
+
+C HALO COLOUR RULES BY BACKGROUND TYPE (critical — determines correct vs incorrect):
+1. ON GRADIENT BACKGROUNDS: The C halo must be a SOLID secondary colour (the lighter flavour colour). A solid halo on a gradient background is CORRECT — do NOT flag it as a violation. Example: on a green gradient bg, a solid light green (#b7da9b) halo is correct.
+2. ON WHITE OR GREY BACKGROUNDS: The C halo must be a FULL GRADIENT using BOTH primary (dark) + secondary (light) flavour colours. A solid single-colour halo on white/grey IS a violation (LOGO-05).
+3. ON DARK IMAGE BACKGROUNDS: The C halo must use the full gradient (primary + secondary).
+4. ON LIGHT IMAGE BACKGROUNDS: The C halo must use the full gradient (primary + secondary).
 
 PRODUCT PACKAGING — OFFICIAL APPROVED DESIGNS:
-- ZONNIC product tins/cans show the logo with C halo using the correct flavour gradient. These are approved designs.
+- ZONNIC product tins/cans show the logo with C halo using the correct flavour colours. These are approved designs.
 - When the image contains product packaging, the logo on the packaging is official artwork — do NOT flag its C halo colour, gradient, or shape as violations.
 
 ASSETS IN PRACTICE — CONTENT TYPE vs BACKGROUND (critical cross-check):
