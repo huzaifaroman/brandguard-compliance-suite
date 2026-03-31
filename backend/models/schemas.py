@@ -55,6 +55,9 @@ class BatchImageResult(BaseModel):
     image_width: Optional[int] = None
     image_height: Optional[int] = None
     session_id: Optional[str] = None
+    summary: Optional[str] = None
+    content_type_detected: Optional[str] = None
+    background_type_detected: Optional[str] = None
     error: Optional[str] = None
 
 

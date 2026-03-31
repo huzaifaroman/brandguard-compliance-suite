@@ -57,6 +57,9 @@ export interface BatchImageResult {
   image_width: number | null;
   image_height: number | null;
   session_id: string | null;
+  summary: string | null;
+  content_type_detected: string | null;
+  background_type_detected: string | null;
   error?: string;
 }
 

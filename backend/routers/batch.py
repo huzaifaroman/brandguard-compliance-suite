@@ -215,6 +215,9 @@ async def _process_files(file_data: list, rules: dict, batch_id: str | None) -> 
                 image_width=result.get("image_width"),
                 image_height=result.get("image_height"),
                 session_id=result.get("session_id"),
+                summary=result.get("summary"),
+                content_type_detected=result.get("content_type_detected"),
+                background_type_detected=result.get("background_type_detected"),
             )
         except Exception as e:
             logger.error("Batch item error for %s: %s", fd["filename"], e)
