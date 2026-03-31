@@ -1,6 +1,7 @@
 modules = ["python-3.11", "nodejs-20"]
 [agent]
 expertMode = true
+integrations = ["github:1.0.0"]
 
 [networking]
 allowed_outbound_hosts = [
@@ -11,20 +12,7 @@ allowed_outbound_hosts = [
 
 [nix]
 channel = "stable-25_05"
-packages = [
-  "freetype",
-  "lcms2",
-  "libimagequant",
-  "libjpeg",
-  "libtiff",
-  "libwebp",
-  "libxcrypt",
-  "openjpeg",
-  "postgresql",
-  "tcl",
-  "tk",
-  "zlib",
-]
+packages = ["freetype", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "openjpeg", "postgresql", "tcl", "tk", "zlib"]
 
 [workflows]
 runButton = "Project"
