@@ -12,7 +12,10 @@ async def get_pool():
     global _pool
     if _pool is None and settings.database_url:
         try:
-            _pool = await asyncpg.create_pool(settings.database_url)
+            _pool = await asyncpg.create_pool(
+                settings.database_url,
+                statement_cache_size=0,
+            )
         except Exception as e:
             logger.warning(f"Database connection failed — running without DB: {e}")
             return None
