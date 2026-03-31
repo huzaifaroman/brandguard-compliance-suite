@@ -18,7 +18,6 @@ import {
 import { getRules } from "@/lib/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { RulesSkeleton } from "@/components/Skeletons";
 
 type RuleItem = {
@@ -202,7 +201,7 @@ export default function RulesPage() {
                             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                           >
                             <CardContent className="p-0 border-t border-border/50">
-                              <ScrollArea className="max-h-[400px]">
+                              <div className="max-h-[400px] overflow-y-auto">
                                 <div className="divide-y divide-border/30">
                                   {items.map((item, i) => (
                                     <motion.div
@@ -254,7 +253,7 @@ export default function RulesPage() {
                                     </motion.div>
                                   ))}
                                 </div>
-                              </ScrollArea>
+                              </div>
                             </CardContent>
                           </motion.div>
                         )}
