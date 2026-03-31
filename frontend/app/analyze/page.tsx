@@ -133,9 +133,7 @@ export default function AnalyzePage() {
     }
   }, []);
 
-  const onDrop = useCallback((accepted: File[]) => {
-    const f = accepted[0];
-    if (!f) return;
+  const handleFileSelected = useCallback((f: File) => {
     if (preview && !restoredFromSession) URL.revokeObjectURL(preview);
     setFile(f);
     setPreview(URL.createObjectURL(f));
@@ -147,6 +145,33 @@ export default function AnalyzePage() {
     setRestoredFromSession(false);
     clearSession();
   }, [preview, restoredFromSession]);
+
+  const onDrop = useCallback((accepted: File[]) => {
+    const f = accepted[0];
+    if (!f) return;
+    handleFileSelected(f);
+  }, [handleFileSelected]);
+
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      if (loading) return;
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith("image/")) {
+          e.preventDefault();
+          const blob = items[i].getAsFile();
+          if (!blob) continue;
+          const ext = blob.type.split("/")[1] || "png";
+          const pastedFile = new File([blob], `pasted-image.${ext}`, { type: blob.type });
+          handleFileSelected(pastedFile);
+          return;
+        }
+      }
+    };
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, [handleFileSelected, loading]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -454,10 +479,10 @@ export default function AnalyzePage() {
                       <Upload className="w-8 h-8 text-primary/50" />
                     </motion.div>
                     <p className="text-sm font-medium mb-1.5">
-                      {isDragActive ? "Release to upload" : "Drop image or click to browse"}
+                      {isDragActive ? "Release to upload" : "Drop image, click to browse, or paste"}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      PNG, JPG, WEBP up to 20MB
+                      PNG, JPG, WEBP up to 20MB — Ctrl+V / ⌘V to paste from clipboard
                     </p>
                   </motion.div>
                 )}
