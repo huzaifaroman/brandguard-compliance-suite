@@ -66,6 +66,8 @@ async def analyze_single_image(
     passed_details = llm_result.get("passed_details", [])
     passed_count = len(passed_details) if isinstance(passed_details, list) else 0
 
+    checks_performed = llm_result.get("checks_performed", [])
+
     result = {
         "image_url": get_sas_url(blob_url),
         "image_width": width,
@@ -75,6 +77,7 @@ async def analyze_single_image(
         "summary": llm_result.get("summary", ""),
         "passed_details": passed_details,
         "violations": llm_result.get("violations", []),
+        "checks_performed": checks_performed,
         "content_type_detected": llm_result.get("content_type_detected", "unknown"),
         "background_type_detected": llm_result.get("background_type_detected", "unknown"),
         "session_id": session_id,
@@ -179,6 +182,7 @@ async def analyze_single_image_streaming(
     session_id = str(uuid.uuid4())
     passed_details = llm_result.get("passed_details", [])
     passed_count = len(passed_details) if isinstance(passed_details, list) else 0
+    checks_performed = llm_result.get("checks_performed", [])
 
     result = {
         "image_url": get_sas_url(blob_url),
@@ -189,6 +193,7 @@ async def analyze_single_image_streaming(
         "summary": llm_result.get("summary", ""),
         "passed_details": passed_details,
         "violations": violations,
+        "checks_performed": checks_performed,
         "content_type_detected": llm_result.get("content_type_detected", "unknown"),
         "background_type_detected": llm_result.get("background_type_detected", "unknown"),
         "session_id": session_id,

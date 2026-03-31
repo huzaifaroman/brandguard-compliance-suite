@@ -558,6 +558,9 @@ def _format_detection_summary(detection: dict) -> str:
         lines.append(f"  Position: {logo.get('position', 'unknown')}")
         lines.append(f"  Text colour: {logo.get('text_colour', 'unknown')}")
         lines.append(f"  Distorted or modified: {'YES' if logo.get('distorted_or_modified') else 'NO'}")
+        inside = logo.get("inside_shape", "none")
+        if inside and inside.lower() not in ("none", "not present", "n/a", ""):
+            lines.append(f"  Inside shape: {inside}")
         lines.append(f"  Clear space sufficient: {'YES' if logo.get('clear_space_sufficient') else 'NO'}")
         lines.append(f"  Relative size: {logo.get('relative_size', 'unknown')}")
     lines.append("")
@@ -595,6 +598,9 @@ def _format_detection_summary(detection: dict) -> str:
     lines.append(f"  Nicotine warning: {'PRESENT' if reg.get('nicotine_warning_present') else 'NOT PRESENT ⚠'}")
     if reg.get("nicotine_warning_present"):
         lines.append(f"    Position: {reg.get('nicotine_warning_position', 'unknown')}")
+        warning_text = reg.get("nicotine_warning_text", "")
+        if warning_text and warning_text.upper() != "NOT PRESENT":
+            lines.append(f"    Text: {warning_text}")
         lines.append(f"    Bilingual: {'YES' if reg.get('nicotine_warning_bilingual') else 'NO ⚠'}")
     lines.append(f"  18+ age icon: {'PRESENT' if reg.get('age_icon_present') else 'NOT PRESENT ⚠'}")
     if reg.get("age_icon_present"):
