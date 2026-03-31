@@ -23,12 +23,12 @@ const navItems = [
 
 const poweredByIcons = [
   { src: "/icons/azure-color.png", alt: "Microsoft Azure", tooltip: "Microsoft Azure" },
-  { src: "/icons/azure-openai.png", alt: "Azure OpenAI", tooltip: "GPT-4.1" },
-  { src: "/icons/computer-vision.png", alt: "Computer Vision", tooltip: "Computer Vision" },
-  { src: "/icons/ai-studio.png", alt: "AI Studio", tooltip: "AI Studio" },
-  { src: "/icons/azure-blob.png", alt: "Blob Storage", tooltip: "Blob Storage" },
-  { src: "/icons/container-apps.png", alt: "Container Apps", tooltip: "Container Apps" },
-  { src: "/icons/upstash-icon-white-bg.png", alt: "Upstash", tooltip: "Upstash Redis" },
+  { src: "/icons/azure-openai.png", alt: "Azure OpenAI", tooltip: "Azure OpenAI" },
+  { src: "/icons/computer-vision.png", alt: "Azure Computer Vision", tooltip: "Azure Computer Vision" },
+  { src: "/icons/ai-studio.png", alt: "Azure AI Foundry", tooltip: "Azure AI Foundry" },
+  { src: "/icons/azure-blob.png", alt: "Azure Blob Storage", tooltip: "Azure Blob Storage" },
+  { src: "/icons/container-apps.png", alt: "Azure App Container", tooltip: "Azure App Container" },
+  { src: "/icons/upstash-icon-white-bg.png", alt: "Upstash Redis", tooltip: "Upstash Redis" },
 ];
 
 export default function Sidebar() {
