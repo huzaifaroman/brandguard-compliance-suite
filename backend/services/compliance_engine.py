@@ -17,15 +17,16 @@ logger = logging.getLogger("backend.services.engine")
 DEBUG_FILE = Path(__file__).parent.parent / "debug_raw_responses.json"
 
 
-def _save_debug(filename: str, image_hash: str, vision_raw: dict, llm_raw: dict):
+def _save_debug(filename: str, image_hash: str, vision_signals: dict, brand_detection: dict, llm_result: dict):
     try:
         debug_data = {
             "_info": "Raw API responses — overwritten on each new analysis",
             "_timestamp": datetime.now(timezone.utc).isoformat(),
             "_filename": filename,
             "_image_hash": image_hash,
-            "vision_raw": vision_raw,
-            "llm_raw": llm_raw,
+            "step_1_vision_api": vision_signals,
+            "step_2_brand_detection_pass1": brand_detection,
+            "step_3_rule_evaluation_pass2": llm_result,
         }
         DEBUG_FILE.write_text(json.dumps(debug_data, indent=2, default=str))
         logger.info("Debug raw responses saved to %s", DEBUG_FILE)
@@ -75,7 +76,7 @@ async def analyze_single_image(
     logger.info("[%s] └─ LLM done → %s %s%%", short_hash,
                 llm_result.get("verdict"), llm_result.get("confidence"))
 
-    _save_debug(filename, image_hash, {"vision_signals": vision_signals, "brand_detection": brand_detection}, llm_result)
+    _save_debug(filename, image_hash, vision_signals, brand_detection, llm_result)
 
     session_id = str(uuid.uuid4())
 
@@ -207,7 +208,7 @@ async def analyze_single_image_streaming(
     violations = llm_result.get("violations", [])
     logger.info("[%s] └─ LLM done → %s %s%%", short_hash, verdict, confidence)
 
-    _save_debug(filename, image_hash, {"vision_signals": vision_signals, "brand_detection": brand_detection}, llm_result)
+    _save_debug(filename, image_hash, vision_signals, brand_detection, llm_result)
 
     yield {"event": "step", "step": "evaluating", "progress": 85, "message": f"Rule evaluation complete — {verdict} ({confidence}%) with {len(violations)} violation(s)"}
 

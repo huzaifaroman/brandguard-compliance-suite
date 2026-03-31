@@ -157,7 +157,7 @@ async def run_job(job_id: str):
                     llm_result.get("verdict"), llm_result.get("confidence"))
 
         from backend.services.compliance_engine import _save_debug
-        _save_debug(filename, image_hash, {"vision_signals": vision_signals, "brand_detection": brand_detection}, llm_result)
+        _save_debug(filename, image_hash, vision_signals, brand_detection, llm_result)
 
         job["step"] = "persisting"
         job["progress"] = 90
