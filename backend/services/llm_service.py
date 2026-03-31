@@ -48,16 +48,15 @@ LOGO ANALYSIS:
 - Is the ZONNIC logo visible? Describe its position (top/center/bottom, left/center/right)
 - What colour is the logo text? (navy blue, white, other — describe exact colour)
 - Is the logo distorted, stretched, or modified in any way?
-- Is the logo placed inside any shape (circle, square, etc.)?
 - Is there sufficient clear space around the logo?
 - Estimate the logo size relative to the full image
 
 C HALO ANALYSIS (MOST IMPORTANT — BE EXTREMELY DETAILED):
 - The correct ZONNIC logo has "ZONNIC" spelled out. The letters from left to right are: Z-O-N-N-I-C
-- IMPORTANT: The Z letter sits inside a navy blue FILLED circle — this is a DESIGN ELEMENT of the logo, NOT a halo. The Z appears as a white letter on a navy blue circular background. This filled circle is EXPECTED and correct.
-- The HALO is a DIFFERENT element — it is a coloured ring/circle that goes AROUND a letter (not a filled background behind a letter). The halo should only appear around the C (last/rightmost letter).
-- Look at EACH letter carefully. Which letter(s) have a coloured ring/halo AROUND them (not a filled background BEHIND them)?
-- Specifically: Does the Z (first letter, leftmost) have a halo ring around it? Does the C (last letter, rightmost) have a halo ring around it? Does any other letter have a halo?
+- IMPORTANT: The Z is just a regular letter in the logo — there is NO circle, filled shape, or design element behind or around the Z. It is simply a navy blue letter like the other letters.
+- The HALO is a coloured ring/circle that goes AROUND a letter. The halo should ONLY appear around the C (last/rightmost letter). No other letter should have any ring, circle, or shape around or behind it.
+- Look at EACH letter carefully. Which letter(s) have a coloured ring/halo AROUND them?
+- Specifically: Does the C (last letter, rightmost) have a halo ring around it? Does any other letter have a halo? (No letter other than C should have one.)
 - If a halo exists: What colour is it? Is it a single solid colour or a gradient (two colours blending)?
 - If a halo exists: Is it a perfect circle or distorted/oval?
 - If a halo exists: Is it proportional to the letter or oversized/undersized?
@@ -105,11 +104,10 @@ PASS1_SCHEMA = {
                         "position": {"type": "string"},
                         "text_colour": {"type": "string"},
                         "distorted_or_modified": {"type": "boolean"},
-                        "inside_shape": {"type": "string"},
                         "clear_space_sufficient": {"type": "boolean"},
                         "relative_size": {"type": "string"}
                     },
-                    "required": ["present", "position", "text_colour", "distorted_or_modified", "inside_shape", "clear_space_sufficient", "relative_size"],
+                    "required": ["present", "position", "text_colour", "distorted_or_modified", "clear_space_sufficient", "relative_size"],
                     "additionalProperties": False
                 },
                 "halo": {
@@ -208,8 +206,8 @@ YOUR TASK:
 - Double-check: violations + passed_details must total 62
 
 IMPORTANT BRAND DESIGN CONTEXT:
-- The ZONNIC logo has a navy blue FILLED circle behind the Z letter — the Z appears as a white letter on a blue circular background. This is a DESIGN ELEMENT of the logo, NOT a halo. It is expected and correct.
-- The HALO is a SEPARATE element — a coloured ring that goes AROUND the C letter (rightmost). The halo should ONLY be on the C.
+- The ZONNIC logo is the text "ZONNIC" — all letters are simply navy blue text. There is NO circle, filled shape, or design element behind or around the Z or any other letter except the C halo.
+- The HALO is a coloured ring that goes AROUND the C letter (rightmost). The halo should ONLY be on the C. No other letter has any circle or shape around it.
 - On white or grey backgrounds, the C halo MUST be a gradient (two colours), NOT a solid single colour.
 
 USING THE BRAND_DETECTION FACTS:
@@ -574,9 +572,6 @@ def _format_detection_summary(detection: dict) -> str:
         lines.append(f"  Position: {logo.get('position', 'unknown')}")
         lines.append(f"  Text colour: {logo.get('text_colour', 'unknown')}")
         lines.append(f"  Distorted or modified: {'YES' if logo.get('distorted_or_modified') else 'NO'}")
-        inside = logo.get("inside_shape", "none")
-        if inside and inside.lower() not in ("none", "not present", "n/a", ""):
-            lines.append(f"  Inside shape: {inside}")
         lines.append(f"  Clear space sufficient: {'YES' if logo.get('clear_space_sufficient') else 'NO'}")
         lines.append(f"  Relative size: {logo.get('relative_size', 'unknown')}")
     lines.append("")
