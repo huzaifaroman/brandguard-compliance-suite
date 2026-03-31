@@ -11,14 +11,18 @@ _pool = None
 async def get_pool():
     global _pool
     if _pool is None and settings.database_url:
-        _pool = await asyncpg.create_pool(settings.database_url)
+        try:
+            _pool = await asyncpg.create_pool(settings.database_url)
+        except Exception as e:
+            logger.warning(f"Database connection failed — running without DB: {e}")
+            return None
     return _pool
 
 
 async def init_db():
     pool = await get_pool()
     if pool is None:
-        logger.warning("No DATABASE_URL configured — skipping DB init")
+        logger.warning("No database available — skipping DB init (history/chat disabled)")
         return
 
     async with pool.acquire() as conn:
