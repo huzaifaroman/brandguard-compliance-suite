@@ -92,6 +92,7 @@ export interface HistoryItem {
   violations_count: number;
   session_id: string | null;
   timestamp: string;
+  batch_id: string | null;
 }
 
 export interface HistoryResponse {

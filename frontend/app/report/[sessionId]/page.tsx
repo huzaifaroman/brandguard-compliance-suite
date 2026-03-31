@@ -210,8 +210,8 @@ export default function ReportPage() {
               <ShieldAlert className="w-12 h-12 text-red-400 mx-auto mb-4" />
               <h2 className="text-lg font-semibold mb-2">Report Not Found</h2>
               <p className="text-sm text-muted-foreground mb-4">{error || "This analysis could not be loaded."}</p>
-              <Button variant="outline" onClick={() => router.push("/history")} className="gap-2">
-                <ArrowLeft className="w-4 h-4" /> Back to History
+              <Button variant="outline" onClick={() => router.back()} className="gap-2">
+                <ArrowLeft className="w-4 h-4" /> Go Back
               </Button>
             </CardContent>
           </Card>
@@ -229,8 +229,8 @@ export default function ReportPage() {
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div className="flex items-center gap-3">
-              <Button variant="ghost" size="sm" onClick={() => router.push("/history")} className="gap-1.5 print:hidden">
-                <ArrowLeft className="w-4 h-4" /> History
+              <Button variant="ghost" size="sm" onClick={() => router.back()} className="gap-1.5 print:hidden">
+                <ArrowLeft className="w-4 h-4" /> Back
               </Button>
               <Separator orientation="vertical" className="h-6 print:hidden" />
               <div className="flex items-center gap-2">

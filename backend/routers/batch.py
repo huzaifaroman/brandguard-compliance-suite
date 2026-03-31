@@ -251,6 +251,11 @@ async def _persist_batch(batch_id: str, batch_result: BatchResult, summary: Batc
                     "INSERT INTO batches (batch_id, analysis_ids, summary_json) VALUES ($1, $2, $3::jsonb)",
                     batch_id, analysis_ids, json.dumps(summary.model_dump()),
                 )
+                if analysis_ids:
+                    await conn.execute(
+                        "UPDATE analyses SET batch_id = $1 WHERE id = ANY($2::int[])",
+                        batch_id, analysis_ids,
+                    )
         except Exception as e:
             logger.error("Batch DB insert error: %s", e)
 

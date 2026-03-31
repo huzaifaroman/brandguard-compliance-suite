@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Clock,
@@ -12,6 +13,7 @@ import {
   ExternalLink,
   RefreshCw,
   Inbox,
+  Layers,
 } from "lucide-react";
 import { getHistory } from "@/lib/api";
 import { cacheInvalidatePrefix } from "@/lib/cache";
@@ -26,6 +28,60 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+
+interface HistoryGroup {
+  type: "single" | "batch" | "consistency";
+  key: string;
+  items: HistoryItem[];
+  batchId?: string;
+}
+
+function buildGroups(items: HistoryItem[]): HistoryGroup[] {
+  const batchMap = new Map<string, HistoryItem[]>();
+  const singles: HistoryItem[] = [];
+
+  for (const item of items) {
+    if (item.batch_id) {
+      if (!batchMap.has(item.batch_id)) batchMap.set(item.batch_id, []);
+      batchMap.get(item.batch_id)!.push(item);
+    } else {
+      singles.push(item);
+    }
+  }
+
+  const hashMap = new Map<string, HistoryItem[]>();
+  for (const item of singles) {
+    if (!hashMap.has(item.image_hash)) hashMap.set(item.image_hash, []);
+    hashMap.get(item.image_hash)!.push(item);
+  }
+
+  const groups: HistoryGroup[] = [];
+
+  for (const [batchId, batchItems] of batchMap) {
+    groups.push({
+      type: "batch",
+      key: `batch-${batchId}`,
+      items: batchItems,
+      batchId,
+    });
+  }
+
+  for (const [hash, hashItems] of hashMap) {
+    if (hashItems.length > 1) {
+      groups.push({ type: "consistency", key: `hash-${hash}`, items: hashItems });
+    } else {
+      groups.push({ type: "single", key: `single-${hashItems[0].id}`, items: hashItems });
+    }
+  }
+
+  groups.sort((a, b) => {
+    const aTs = Math.max(...a.items.map((i) => new Date(i.timestamp).getTime()));
+    const bTs = Math.max(...b.items.map((i) => new Date(i.timestamp).getTime()));
+    return bTs - aTs;
+  });
+
+  return groups;
+}
 
 export default function HistoryPage() {
   const [items, setItems] = useState<HistoryItem[]>([]);
@@ -50,11 +106,7 @@ export default function HistoryPage() {
     loadHistory();
   }, []);
 
-  const hashGroups = items.reduce<Record<string, HistoryItem[]>>((acc, item) => {
-    if (!acc[item.image_hash]) acc[item.image_hash] = [];
-    acc[item.image_hash].push(item);
-    return acc;
-  }, {});
+  const groups = buildGroups(items);
 
   const verdictIcon = (v: string) => {
     if (v === "PASS") return <ShieldCheck className="w-4 h-4 text-green-400" />;
@@ -64,6 +116,55 @@ export default function HistoryPage() {
 
   const verdictColor = (v: string) =>
     v === "PASS" ? "text-green-400" : v === "FAIL" ? "text-red-400" : "text-amber-400";
+
+  const groupBanner = (group: HistoryGroup) => {
+    if (group.type === "batch") {
+      const passCount = group.items.filter((i) => i.verdict === "PASS").length;
+      const failCount = group.items.filter((i) => i.verdict === "FAIL").length;
+      return (
+        <div className="flex items-center gap-2 px-4 py-2.5 bg-violet-500/5 border-b border-violet-500/20">
+          <Layers className="w-3.5 h-3.5 text-violet-400" />
+          <span className="text-xs font-medium text-violet-400">
+            Batch Scan — {group.items.length} images
+          </span>
+          <div className="flex items-center gap-2 ml-auto">
+            {passCount > 0 && (
+              <Badge variant="outline" className="text-[10px] border-green-500/30 text-green-400">
+                {passCount} passed
+              </Badge>
+            )}
+            {failCount > 0 && (
+              <Badge variant="outline" className="text-[10px] border-red-500/30 text-red-400">
+                {failCount} failed
+              </Badge>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    if (group.type === "consistency") {
+      const allSameVerdict = group.items.every((g) => g.verdict === group.items[0].verdict);
+      return (
+        <div className="flex items-center gap-2 px-4 py-2.5 bg-blue-500/5 border-b border-blue-500/20">
+          <Fingerprint className="w-3.5 h-3.5 text-blue-400" />
+          <span className="text-xs font-medium text-blue-400">
+            Consistency {allSameVerdict ? "verified" : "check"} — analyzed {group.items.length} times
+            {allSameVerdict ? " with same result" : ""}
+          </span>
+          {allSameVerdict && <ShieldCheck className="w-3 h-3 text-green-400 ml-auto" />}
+        </div>
+      );
+    }
+
+    return null;
+  };
+
+  const groupBorderClass = (group: HistoryGroup) => {
+    if (group.type === "batch") return "border-violet-500/30";
+    if (group.type === "consistency") return "border-blue-500/30";
+    return "";
+  };
 
   return (
     <div className="min-h-screen p-6 lg:p-8">
@@ -137,72 +238,58 @@ export default function HistoryPage() {
             <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
               <ScrollArea className="max-h-[calc(100vh-200px)]">
                 <div className="space-y-3">
-                  {Object.values(hashGroups).map((group, groupIdx) => {
-                    const isMultiple = group.length > 1;
-                    const allSameVerdict = group.every((g) => g.verdict === group[0].verdict);
-
-                    return (
-                      <motion.div
-                        key={group[0].image_hash}
-                        initial={{ opacity: 0, y: 15 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: groupIdx * 0.05, duration: 0.3 }}
-                      >
-                        <Card className={`overflow-hidden card-hover ${isMultiple ? "border-blue-500/30" : ""}`}>
-                          {isMultiple && (
-                            <div className="flex items-center gap-2 px-4 py-2.5 bg-blue-500/5 border-b border-blue-500/20">
-                              <Fingerprint className="w-3.5 h-3.5 text-blue-400" />
-                              <span className="text-xs font-medium text-blue-400">
-                                Consistency {allSameVerdict ? "verified" : "check"} — analyzed {group.length} times
-                                {allSameVerdict ? " with same result" : ""}
-                              </span>
-                              {allSameVerdict && <ShieldCheck className="w-3 h-3 text-green-400 ml-auto" />}
-                            </div>
-                          )}
-                          <CardContent className="p-0">
-                            <div className={isMultiple ? "divide-y divide-blue-500/10" : ""}>
-                              {group.map((item) => (
-                                <div key={item.id} className="flex items-center gap-4 p-4 hover:bg-accent/20 transition-colors duration-200">
-                                  <ImageThumbnail url={item.blob_url} />
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2 mb-1">
-                                      {verdictIcon(item.verdict)}
-                                      <span className={`text-sm font-semibold ${verdictColor(item.verdict)}`}>
-                                        {item.verdict}
-                                      </span>
-                                      <span className="text-xs text-muted-foreground tabular-nums">
-                                        {item.confidence}%
-                                      </span>
-                                      <Badge variant="outline" className="text-[10px] ml-auto">
-                                        {item.violations_count} violation{item.violations_count !== 1 ? "s" : ""}
-                                      </Badge>
-                                    </div>
-                                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                      <span>{new Date(item.timestamp).toLocaleString()}</span>
-                                      {item.session_id && (
-                                        <code className="font-mono text-[10px] opacity-60 text-primary">
-                                          RPT-{item.session_id.slice(0, 8).toUpperCase()}
-                                        </code>
-                                      )}
-                                      {item.session_id && (
-                                        <a
-                                          href={`/report/${item.session_id}`}
-                                          className="flex items-center gap-1 text-primary hover:underline transition-colors font-medium"
-                                        >
-                                          <ExternalLink className="w-3 h-3" />
-                                          View Report
-                                        </a>
-                                      )}
-                                    </div>
+                  {groups.map((group, groupIdx) => (
+                    <motion.div
+                      key={group.key}
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: groupIdx * 0.05, duration: 0.3 }}
+                    >
+                      <Card className={`overflow-hidden card-hover ${groupBorderClass(group)}`}>
+                        {groupBanner(group)}
+                        <CardContent className="p-0">
+                          <div className={group.items.length > 1 ? `divide-y ${group.type === "batch" ? "divide-violet-500/10" : "divide-blue-500/10"}` : ""}>
+                            {group.items.map((item) => (
+                              <div key={item.id} className="flex items-center gap-4 p-4 hover:bg-accent/20 transition-colors duration-200">
+                                <ImageThumbnail url={item.blob_url} />
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    {verdictIcon(item.verdict)}
+                                    <span className={`text-sm font-semibold ${verdictColor(item.verdict)}`}>
+                                      {item.verdict}
+                                    </span>
+                                    <span className="text-xs text-muted-foreground tabular-nums">
+                                      {item.confidence}%
+                                    </span>
+                                    <Badge variant="outline" className="text-[10px] ml-auto">
+                                      {item.violations_count} violation{item.violations_count !== 1 ? "s" : ""}
+                                    </Badge>
+                                  </div>
+                                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                    <span>{new Date(item.timestamp).toLocaleString()}</span>
+                                    {item.session_id && (
+                                      <code className="font-mono text-[10px] opacity-60 text-primary">
+                                        RPT-{item.session_id.slice(0, 8).toUpperCase()}
+                                      </code>
+                                    )}
+                                    {item.session_id && (
+                                      <Link
+                                        href={`/report/${item.session_id}`}
+                                        className="flex items-center gap-1 text-primary hover:underline transition-colors font-medium"
+                                      >
+                                        <ExternalLink className="w-3 h-3" />
+                                        View Report
+                                      </Link>
+                                    )}
                                   </div>
                                 </div>
-                              ))}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    );
-                  })}
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
                 </div>
               </ScrollArea>
             </motion.div>

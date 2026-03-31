@@ -41,16 +41,19 @@ async def init_db():
         """)
         await conn.execute("CREATE INDEX IF NOT EXISTS idx_analyses_hash ON analyses(image_hash)")
         await conn.execute("CREATE INDEX IF NOT EXISTS idx_analyses_session ON analyses(session_id)")
+
         for col, defval in [
             ("passed_details_json", "JSONB DEFAULT '[]'"),
             ("summary", "TEXT DEFAULT ''"),
             ("content_type_detected", "TEXT DEFAULT 'unknown'"),
             ("background_type_detected", "TEXT DEFAULT 'unknown'"),
+            ("batch_id", "TEXT"),
         ]:
             try:
                 await conn.execute(f"ALTER TABLE analyses ADD COLUMN IF NOT EXISTS {col} {defval}")
             except Exception:
                 pass
+        await conn.execute("CREATE INDEX IF NOT EXISTS idx_analyses_batch ON analyses(batch_id)")
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS batches (
                 id SERIAL PRIMARY KEY,

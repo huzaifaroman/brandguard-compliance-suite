@@ -30,7 +30,8 @@ async def get_history(limit: int = 50, offset: int = 0):
                 """
                 SELECT id, image_hash, blob_url, verdict, confidence,
                        jsonb_array_length(violations_json) as violations_count,
-                       session_id, timestamp
+                       session_id, timestamp,
+                       COALESCE(batch_id, '') as batch_id
                 FROM analyses
                 ORDER BY timestamp DESC
                 LIMIT $1 OFFSET $2
@@ -52,6 +53,7 @@ async def get_history(limit: int = 50, offset: int = 0):
             violations_count=row["violations_count"] or 0,
             session_id=row["session_id"],
             timestamp=row["timestamp"],
+            batch_id=row["batch_id"] or None,
         )
         for row in rows
     ]

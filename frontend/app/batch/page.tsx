@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
+import Link from "next/link";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -48,6 +49,32 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const MAX_FILES = 10;
 const DONUT_COLORS = { passed: "#22c55e", failed: "#ef4444", warnings: "#f59e0b" };
+const BATCH_SESSION_KEY = "compliance_batch_session";
+
+function saveBatchSession(result: BatchResult) {
+  try {
+    sessionStorage.setItem(BATCH_SESSION_KEY, JSON.stringify({ result, savedAt: Date.now() }));
+  } catch {}
+}
+
+function loadBatchSession(): BatchResult | null {
+  try {
+    const raw = sessionStorage.getItem(BATCH_SESSION_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (Date.now() - data.savedAt > 60 * 60 * 1000) {
+      sessionStorage.removeItem(BATCH_SESSION_KEY);
+      return null;
+    }
+    return data.result;
+  } catch {
+    return null;
+  }
+}
+
+function clearBatchSession() {
+  try { sessionStorage.removeItem(BATCH_SESSION_KEY); } catch {}
+}
 
 const severityConfig: Record<string, { color: string; bg: string; border: string; label: string; weight: number }> = {
   critical: { color: "text-red-600 dark:text-red-400", bg: "bg-red-500/10", border: "border-red-500/20", label: "Critical", weight: 3 },
@@ -104,6 +131,8 @@ export default function BatchPage() {
   };
 
   useEffect(() => {
+    const saved = loadBatchSession();
+    if (saved) setResult(saved);
     return () => { previews.forEach((url) => URL.revokeObjectURL(url)); };
   }, []);
 
@@ -150,6 +179,7 @@ export default function BatchPage() {
       setActiveStep(batchPipelineSteps.length - 1);
       await new Promise((r) => setTimeout(r, 400));
       setResult(res);
+      saveBatchSession(res);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Batch analysis failed");
     } finally {
@@ -173,6 +203,7 @@ export default function BatchPage() {
     setFiles([]);
     setPreviews([]);
     setExpandedRows(new Set());
+    clearBatchSession();
   };
 
   const exportCSV = () => {
@@ -647,16 +678,14 @@ function BatchImageReport({
                 <p className="text-[10px] text-muted-foreground">confidence</p>
               </div>
               {r.session_id && (
-                <a
+                <Link
                   href={`/report/${r.session_id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
                   className="p-1.5 rounded-lg hover:bg-primary/10 transition-colors"
                   title="Open full report"
                 >
                   <ExternalLink className="w-4 h-4 text-primary" />
-                </a>
+                </Link>
               )}
               <motion.div
                 animate={{ rotate: isExpanded ? 180 : 0 }}
@@ -971,11 +1000,11 @@ function BatchImageReport({
 
                 {r.session_id && (
                   <div className="flex justify-end pt-2">
-                    <a href={`/report/${r.session_id}`} target="_blank" rel="noopener noreferrer">
+                    <Link href={`/report/${r.session_id}`}>
                       <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs">
                         <FileText className="w-3.5 h-3.5" /> View Full Report
                       </Button>
-                    </a>
+                    </Link>
                   </div>
                 )}
               </div>

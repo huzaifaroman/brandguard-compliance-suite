@@ -98,6 +98,7 @@ class HistoryItem(BaseModel):
     violations_count: int
     session_id: Optional[str]
     timestamp: datetime
+    batch_id: Optional[str] = None
 
 
 class HistoryResponse(BaseModel):
