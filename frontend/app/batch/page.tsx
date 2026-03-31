@@ -24,6 +24,9 @@ import {
   FileCheck,
   ScanLine,
   ImagePlus,
+  CircleSlash,
+  ExternalLink,
+  AlertTriangle,
 } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
 import { batchAnalyze } from "@/lib/api";
@@ -528,140 +531,226 @@ export default function BatchPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
+                className="space-y-4"
               >
-                <Card>
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-sm">Results</CardTitle>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={exportCSV} className="gap-1.5 h-8 text-xs">
-                          <Download className="w-3.5 h-3.5" /> CSV
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={exportPDF} className="gap-1.5 h-8 text-xs">
-                          <FileText className="w-3.5 h-3.5" /> PDF
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <ScrollArea className="max-h-[600px]">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="border-b border-border bg-muted/30">
-                            <th className="text-left px-4 py-3 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">#</th>
-                            <th className="text-left px-4 py-3 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Image</th>
-                            <th className="text-left px-4 py-3 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Verdict</th>
-                            <th className="text-left px-4 py-3 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Issues</th>
-                            <th className="text-left px-4 py-3 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Confidence</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {result.results.map((r, i) => (
-                            <AnimatePresence key={i}>
-                              <motion.tr
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.6 + i * 0.05 }}
-                                role={r.violations.length > 0 ? "button" : undefined}
-                                tabIndex={r.violations.length > 0 ? 0 : undefined}
-                                aria-expanded={r.violations.length > 0 ? expandedRows.has(i) : undefined}
-                                onClick={() => r.violations.length > 0 && toggleRow(i)}
-                                onKeyDown={(e: React.KeyboardEvent) => {
-                                  if (r.violations.length > 0 && (e.key === "Enter" || e.key === " ")) {
-                                    e.preventDefault();
-                                    toggleRow(i);
-                                  }
-                                }}
-                                className={`border-b border-border/50 transition-colors duration-200 ${
-                                  r.violations.length > 0 ? "cursor-pointer hover:bg-accent/30" : ""
-                                } ${expandedRows.has(i) ? "bg-accent/20" : ""}`}
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-foreground/80">Detailed Results</h2>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={exportCSV} className="gap-1.5 h-8 text-xs">
+                      <Download className="w-3.5 h-3.5" /> CSV
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={exportPDF} className="gap-1.5 h-8 text-xs">
+                      <FileText className="w-3.5 h-3.5" /> PDF
+                    </Button>
+                  </div>
+                </div>
+
+                {result.results.map((r, i) => {
+                  const isExpanded = expandedRows.has(i);
+                  const VerdictIcon = r.verdict === "PASS" ? ShieldCheck : r.verdict === "FAIL" ? ShieldAlert : ShieldQuestion;
+                  const borderColor = r.verdict === "PASS" ? "border-green-500/20" : r.verdict === "FAIL" ? "border-red-500/20" : "border-amber-500/20";
+                  const iconColor = r.verdict === "PASS" ? "text-green-400" : r.verdict === "FAIL" ? "text-red-400" : "text-amber-400";
+                  const passedCount = r.passed_details?.filter((p) => p.status === "passed").length || 0;
+                  const naCount = r.passed_details?.filter((p) => p.status === "not_applicable").length || 0;
+
+                  return (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.5 + i * 0.08 }}
+                    >
+                      <Card className={`overflow-hidden card-hover ${borderColor}`}>
+                        <div
+                          className="flex items-stretch cursor-pointer hover:bg-accent/20 transition-colors"
+                          onClick={() => toggleRow(i)}
+                        >
+                          {r.image_url && (
+                            <div className="w-[140px] min-h-[100px] shrink-0 relative bg-muted/30 border-r border-border/30">
+                              <img
+                                src={r.image_url}
+                                alt={r.image_name}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
+                          <div className="flex-1 p-4 flex items-center">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2.5 mb-1.5">
+                                <VerdictIcon className={`w-5 h-5 ${iconColor} shrink-0`} />
+                                <h3 className="text-sm font-semibold truncate">{r.image_name}</h3>
+                              </div>
+                              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                                <span className={`font-semibold ${iconColor}`}>
+                                  {r.verdict === "PASS" ? "Compliant" : r.verdict === "FAIL" ? "Non-Compliant" : "Needs Review"}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <AlertTriangle className="w-3 h-3 text-red-400" />
+                                  {r.violations.length} violation{r.violations.length !== 1 ? "s" : ""}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <CheckCircle2 className="w-3 h-3 text-green-400" />
+                                  {passedCount} passed
+                                </span>
+                                {naCount > 0 && (
+                                  <span className="flex items-center gap-1">
+                                    <CircleSlash className="w-3 h-3 text-muted-foreground" />
+                                    {naCount} N/A
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3 shrink-0 ml-4">
+                              <div className="text-right">
+                                <p className="text-lg font-bold tabular-nums text-foreground">{r.confidence}%</p>
+                                <p className="text-[10px] text-muted-foreground">confidence</p>
+                              </div>
+                              {r.session_id && (
+                                <a
+                                  href={`/report/${r.session_id}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="p-1.5 rounded-lg hover:bg-primary/10 transition-colors"
+                                  title="Open full report"
+                                >
+                                  <ExternalLink className="w-4 h-4 text-primary" />
+                                </a>
+                              )}
+                              <motion.div
+                                animate={{ rotate: isExpanded ? 180 : 0 }}
+                                transition={{ duration: 0.2 }}
                               >
-                                <td className="px-4 py-3 text-muted-foreground">{i + 1}</td>
-                                <td className="px-4 py-3 font-medium truncate max-w-[200px]">{r.image_name}</td>
-                                <td className="px-4 py-3">
-                                  <div className="flex items-center gap-2">
-                                    {verdictIcon(r.verdict)}
-                                    <span className={`font-semibold ${verdictColor(r.verdict)}`}>{r.verdict}</span>
-                                  </div>
-                                </td>
-                                <td className="px-4 py-3">
-                                  {r.violations.length > 0 ? (
-                                    <Badge variant="outline" className="text-red-400 border-red-500/30 text-xs">
-                                      {r.violations.length}
-                                    </Badge>
-                                  ) : (
-                                    <span className="text-xs text-green-400 flex items-center gap-1">
-                                      <CheckCircle2 className="w-3 h-3" /> None
-                                    </span>
+                                <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                              </motion.div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <AnimatePresence>
+                          {isExpanded && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.3 }}
+                              className="overflow-hidden"
+                            >
+                              <div className="border-t border-border/30 p-4 space-y-4">
+                                <div className="grid grid-cols-1 lg:grid-cols-[200px,1fr] gap-4">
+                                  {r.image_url && (
+                                    <div className="rounded-xl overflow-hidden border border-border/30 bg-muted/20">
+                                      <img
+                                        src={r.image_url}
+                                        alt={r.image_name}
+                                        className="w-full h-auto object-contain max-h-[300px]"
+                                      />
+                                    </div>
                                   )}
-                                </td>
-                                <td className="px-4 py-3">
-                                  <div className="flex items-center gap-2">
-                                    <Progress value={r.confidence} className="w-16 h-1.5" />
-                                    <span className="text-xs text-muted-foreground tabular-nums">{r.confidence}%</span>
+
+                                  <div className="space-y-3">
                                     {r.violations.length > 0 && (
-                                      <motion.div animate={{ rotate: expandedRows.has(i) ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                                        <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
-                                      </motion.div>
+                                      <div>
+                                        <h4 className="text-xs font-semibold text-red-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                          <ShieldAlert className="w-3.5 h-3.5" />
+                                          Violations ({r.violations.length})
+                                        </h4>
+                                        <div className="space-y-2">
+                                          {r.violations.map((v, j) => (
+                                            <motion.div
+                                              key={j}
+                                              initial={{ opacity: 0, x: -10 }}
+                                              animate={{ opacity: 1, x: 0 }}
+                                              transition={{ delay: j * 0.04 }}
+                                              className="rounded-lg px-3.5 py-2.5 bg-red-500/5 border border-red-500/15"
+                                            >
+                                              <div className="flex items-center gap-2 mb-1">
+                                                <span className="text-[13px] font-semibold text-foreground">{getFriendlyName(v.rule_id)}</span>
+                                                <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${
+                                                  v.severity === "critical" ? "text-red-400 border-red-500/30"
+                                                  : v.severity === "high" ? "text-orange-400 border-orange-500/30"
+                                                  : "text-yellow-400 border-yellow-500/30"
+                                                }`}>
+                                                  {v.severity}
+                                                </Badge>
+                                              </div>
+                                              <p className="text-[13px] text-foreground/80 mb-1">{v.issue}</p>
+                                              {v.evidence && (
+                                                <p className="text-xs text-muted-foreground mb-1">
+                                                  <span className="font-medium">Evidence:</span> {v.evidence}
+                                                </p>
+                                              )}
+                                              {v.fix_suggestion && (
+                                                <p className="text-xs text-green-400/80 flex items-center gap-1">
+                                                  <CheckCircle2 className="w-3 h-3 shrink-0" />
+                                                  {v.fix_suggestion}
+                                                </p>
+                                              )}
+                                            </motion.div>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {passedCount > 0 && (
+                                      <details className="group">
+                                        <summary className="text-xs font-semibold text-green-400 uppercase tracking-wider cursor-pointer flex items-center gap-1.5 mb-1">
+                                          <ShieldCheck className="w-3.5 h-3.5" />
+                                          Passed ({passedCount})
+                                          <ChevronDown className="w-3 h-3 ml-auto transition-transform group-open:rotate-180" />
+                                        </summary>
+                                        <div className="mt-2 space-y-1">
+                                          {r.passed_details?.filter((p) => p.status === "passed").map((p, j) => (
+                                            <div key={j} className="flex items-start gap-2 px-3 py-1.5 rounded-md bg-green-500/5 border border-green-500/10">
+                                              <CheckCircle2 className="w-3 h-3 text-green-500 mt-0.5 shrink-0" />
+                                              <div>
+                                                <span className="text-[12px] font-medium text-foreground/80">{getFriendlyName(p.rule_id)}</span>
+                                                {p.detail && <p className="text-[11px] text-muted-foreground">{p.detail}</p>}
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </details>
+                                    )}
+
+                                    {naCount > 0 && (
+                                      <details className="group">
+                                        <summary className="text-xs font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer flex items-center gap-1.5 mb-1">
+                                          <CircleSlash className="w-3.5 h-3.5" />
+                                          Not Applicable ({naCount})
+                                          <ChevronDown className="w-3 h-3 ml-auto transition-transform group-open:rotate-180" />
+                                        </summary>
+                                        <div className="mt-2 space-y-1">
+                                          {r.passed_details?.filter((p) => p.status === "not_applicable").map((p, j) => (
+                                            <div key={j} className="flex items-start gap-2 px-3 py-1.5 rounded-md bg-muted/20 border border-border/20">
+                                              <CircleSlash className="w-3 h-3 text-muted-foreground mt-0.5 shrink-0" />
+                                              <div>
+                                                <span className="text-[12px] font-medium text-foreground/60">{getFriendlyName(p.rule_id)}</span>
+                                                {p.detail && <p className="text-[11px] text-muted-foreground">{p.detail}</p>}
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      </details>
                                     )}
                                   </div>
-                                </td>
-                              </motion.tr>
-                              {expandedRows.has(i) && r.violations.length > 0 && (
-                                <tr>
-                                  <td colSpan={5} className="p-4 bg-muted/10">
-                                    <motion.div
-                                      initial={{ opacity: 0, height: 0 }}
-                                      animate={{ opacity: 1, height: "auto" }}
-                                      transition={{ duration: 0.3 }}
-                                      className="space-y-2"
-                                    >
-                                      {r.violations.map((v, j) => (
-                                        <motion.div
-                                          key={j}
-                                          initial={{ opacity: 0, x: -10 }}
-                                          animate={{ opacity: 1, x: 0 }}
-                                          transition={{ delay: j * 0.05 }}
-                                          className="rounded-lg px-4 py-3 bg-card border border-border/50"
-                                        >
-                                          <div className="flex items-center gap-2 mb-1">
-                                            <span className="text-sm font-semibold text-foreground">{getFriendlyName(v.rule_id)}</span>
-                                            <Badge variant="outline" className={`text-[10px] px-1.5 ${
-                                              v.severity === "critical" ? "text-red-400 border-red-500/30"
-                                              : v.severity === "high" ? "text-orange-400 border-orange-500/30"
-                                              : "text-yellow-400 border-yellow-500/30"
-                                            }`}>
-                                              {v.severity}
-                                            </Badge>
-                                          </div>
-                                          <p className="text-sm mb-1">{v.issue}</p>
-                                          {v.evidence && (
-                                            <p className="text-xs text-muted-foreground mb-1">
-                                              <span className="font-medium">Evidence:</span> {v.evidence}
-                                            </p>
-                                          )}
-                                          {v.fix_suggestion && (
-                                            <p className="text-xs text-green-400/80">Fix: {v.fix_suggestion}</p>
-                                          )}
-                                        </motion.div>
-                                      ))}
-                                    </motion.div>
-                                  </td>
-                                </tr>
-                              )}
-                            </AnimatePresence>
-                          ))}
-                        </tbody>
-                      </table>
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </Card>
+                    </motion.div>
+                  );
+                })}
               </motion.div>
 
-              <Button variant="outline" onClick={handleReset} className="gap-2">
-                <RotateCcw className="w-4 h-4" />
-                New Batch
-              </Button>
+              <div className="flex justify-between">
+                <Button variant="outline" onClick={handleReset} className="gap-2">
+                  <RotateCcw className="w-4 h-4" />
+                  New Batch
+                </Button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
