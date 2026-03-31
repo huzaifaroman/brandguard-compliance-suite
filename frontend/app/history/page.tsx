@@ -9,7 +9,6 @@ import {
   ShieldCheck,
   ShieldAlert,
   ShieldQuestion,
-  Fingerprint,
   ExternalLink,
   RefreshCw,
   Inbox,
@@ -30,7 +29,7 @@ import {
 } from "@/components/ui/tooltip";
 
 interface HistoryGroup {
-  type: "single" | "batch" | "consistency";
+  type: "single" | "batch";
   key: string;
   items: HistoryItem[];
   batchId?: string;
@@ -49,12 +48,6 @@ function buildGroups(items: HistoryItem[]): HistoryGroup[] {
     }
   }
 
-  const hashMap = new Map<string, HistoryItem[]>();
-  for (const item of singles) {
-    if (!hashMap.has(item.image_hash)) hashMap.set(item.image_hash, []);
-    hashMap.get(item.image_hash)!.push(item);
-  }
-
   const groups: HistoryGroup[] = [];
 
   for (const [batchId, batchItems] of batchMap) {
@@ -66,12 +59,8 @@ function buildGroups(items: HistoryItem[]): HistoryGroup[] {
     });
   }
 
-  for (const [hash, hashItems] of hashMap) {
-    if (hashItems.length > 1) {
-      groups.push({ type: "consistency", key: `hash-${hash}`, items: hashItems });
-    } else {
-      groups.push({ type: "single", key: `single-${hashItems[0].id}`, items: hashItems });
-    }
+  for (const item of singles) {
+    groups.push({ type: "single", key: `single-${item.id}`, items: [item] });
   }
 
   groups.sort((a, b) => {
@@ -143,26 +132,11 @@ export default function HistoryPage() {
       );
     }
 
-    if (group.type === "consistency") {
-      const allSameVerdict = group.items.every((g) => g.verdict === group.items[0].verdict);
-      return (
-        <div className="flex items-center gap-2 px-4 py-2.5 bg-blue-500/5 border-b border-blue-500/20">
-          <Fingerprint className="w-3.5 h-3.5 text-blue-400" />
-          <span className="text-xs font-medium text-blue-400">
-            Consistency {allSameVerdict ? "verified" : "check"} — analyzed {group.items.length} times
-            {allSameVerdict ? " with same result" : ""}
-          </span>
-          {allSameVerdict && <ShieldCheck className="w-3 h-3 text-green-400 ml-auto" />}
-        </div>
-      );
-    }
-
     return null;
   };
 
   const groupBorderClass = (group: HistoryGroup) => {
     if (group.type === "batch") return "border-violet-500/30";
-    if (group.type === "consistency") return "border-blue-500/30";
     return "";
   };
 
@@ -248,7 +222,7 @@ export default function HistoryPage() {
                       <Card className={`overflow-hidden card-hover ${groupBorderClass(group)}`}>
                         {groupBanner(group)}
                         <CardContent className="p-0">
-                          <div className={group.items.length > 1 ? `divide-y ${group.type === "batch" ? "divide-violet-500/10" : "divide-blue-500/10"}` : ""}>
+                          <div className={group.items.length > 1 ? "divide-y divide-violet-500/10" : ""}>
                             {group.items.map((item) => (
                               <div key={item.id} className="flex items-center gap-4 p-4 hover:bg-accent/20 transition-colors duration-200">
                                 <ImageThumbnail url={item.blob_url} />

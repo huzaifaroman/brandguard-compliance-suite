@@ -413,8 +413,10 @@ export default function AnalyzePage() {
             <CardContent className="p-0">
               <div
                 {...getRootProps()}
-                className={`relative cursor-pointer transition-all duration-300 ${
-                  isDragActive ? "ring-2 ring-primary/50 bg-primary/5" : ""
+                className={`relative cursor-pointer transition-all duration-300 group/dropzone ${
+                  isDragActive
+                    ? "ring-2 ring-primary/50 bg-primary/5"
+                    : "hover:bg-accent/5"
                 }`}
               >
                 <input {...getInputProps()} />
@@ -522,23 +524,59 @@ export default function AnalyzePage() {
                     </div>
                   </div>
                 ) : (
-                  <motion.div
-                    className={`p-14 text-center transition-all duration-300 ${isDragActive ? "bg-primary/5" : ""}`}
-                  >
+                  <div className="p-4">
                     <motion.div
-                      animate={isDragActive ? { scale: 1.15, y: -8 } : { scale: 1, y: 0 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                      className="inline-flex p-5 rounded-2xl bg-primary/5 mb-5"
+                      className={`relative p-12 text-center rounded-xl border-2 border-dashed transition-all duration-300 ${
+                        isDragActive
+                          ? "border-primary bg-primary/5 shadow-[0_0_30px_-5px_hsl(var(--primary)/0.3)]"
+                          : "border-muted-foreground/20 group-hover/dropzone:border-primary/40 group-hover/dropzone:bg-primary/[0.02] group-hover/dropzone:shadow-[0_0_20px_-5px_hsl(var(--primary)/0.15)]"
+                      }`}
+                      animate={isDragActive ? { scale: 1.01 } : { scale: 1 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
                     >
-                      <Upload className="w-8 h-8 text-primary/50" />
+                      <motion.div
+                        className={`inline-flex p-5 rounded-2xl mb-5 transition-colors duration-300 ${
+                          isDragActive
+                            ? "bg-primary/15"
+                            : "bg-primary/5 group-hover/dropzone:bg-primary/10"
+                        }`}
+                        animate={
+                          isDragActive
+                            ? { scale: 1.15, y: -8, rotate: -5 }
+                            : { scale: 1, y: [0, -4, 0], rotate: 0 }
+                        }
+                        transition={
+                          isDragActive
+                            ? { type: "spring", stiffness: 400, damping: 20 }
+                            : { y: { duration: 2.5, repeat: Infinity, ease: "easeInOut" }, scale: { duration: 0.3 } }
+                        }
+                      >
+                        <Upload
+                          className={`w-8 h-8 transition-colors duration-300 ${
+                            isDragActive
+                              ? "text-primary"
+                              : "text-primary/40 group-hover/dropzone:text-primary/70"
+                          }`}
+                        />
+                      </motion.div>
+                      <p className={`text-sm font-medium mb-1.5 transition-colors duration-300 ${
+                        isDragActive ? "text-primary" : "group-hover/dropzone:text-foreground"
+                      }`}>
+                        {isDragActive ? "Release to upload" : "Drop image, click to browse, or paste"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        PNG, JPG, WEBP up to 20MB — Ctrl+V / ⌘V to paste from clipboard
+                      </p>
+                      {isDragActive && (
+                        <motion.div
+                          className="absolute inset-0 rounded-xl border-2 border-primary/30"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: [0.3, 0.7, 0.3] }}
+                          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                        />
+                      )}
                     </motion.div>
-                    <p className="text-sm font-medium mb-1.5">
-                      {isDragActive ? "Release to upload" : "Drop image, click to browse, or paste"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      PNG, JPG, WEBP up to 20MB — Ctrl+V / ⌘V to paste from clipboard
-                    </p>
-                  </motion.div>
+                  </div>
                 )}
               </div>
             </CardContent>
