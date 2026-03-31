@@ -61,6 +61,20 @@ THE CORRECT ZONNIC LOGO looks like this:
 - All letters are bold sans-serif navy blue
 - ONLY the C (last letter, rightmost) has a circular shape sitting PARTIALLY BEHIND it — this is called the "halo"
 - The Z, O, N, N, and I should have NO circle, ring, or shape behind them whatsoever — they are plain letters on the background with nothing behind them
+- The logo often appears with "| NICOTINE REPLACEMENT THERAPY" tagline — this is the standard official format and is CORRECT
+
+OFFICIAL ACCEPTABLE C HALO COLOURS (these are ALL correct — do NOT flag as violations):
+- Grey/Neutral flavour: grey (#9d9fa1) to teal (#89d0c8) gradient
+- Green/Mint flavour: dark green (#007e47) to light green (#b7da9b) gradient
+- Blue flavour: dark blue (#0061af) to light blue (#75bee9) gradient
+- On gradient/coloured backgrounds: a solid version of the secondary flavour colour is also acceptable
+- The halo gradient blends from the primary (darker) colour to the secondary (lighter) colour
+- On product packaging (tins/cans), these same halo colours and gradients are used — they are official and correct
+
+OFFICIAL PRODUCT PACKAGING (tins/cans/boxes) — these are approved designs:
+- Product tins show the ZONNIC logo with C halo using the correct flavour gradient
+- The product packaging is the official branded product and its logo appearance is CORRECT
+- Do NOT flag the product tin logo's C halo colour, gradient, or shape as violations — these are approved artwork
 
 YOUR TASK — examine EACH letter one by one from left to right.
 IMPORTANT: Only analyze the MARKETING ASSET logo (headline text, standalone logos). If the only ZONNIC logo visible is printed ON a physical product (tin/can/box in a photo), report the halo details from the product but set halo_on_z=false — product packaging logos are pre-approved and do NOT count as violations.
@@ -225,12 +239,25 @@ YOUR TASK:
 
 IMPORTANT BRAND DESIGN CONTEXT:
 - The correct ZONNIC logo: six bold navy blue letters Z-O-N-N-I-C with a circular halo sitting PARTIALLY BEHIND the C (last letter) only.
+- The logo often appears with "| NICOTINE REPLACEMENT THERAPY" tagline — this is the standard official format.
 - NO other letter should have any circle, ring, or shape behind it. The Z, O, N, N, I are plain letters with nothing behind them.
 - If brand detection reports a circle/shape behind the Z → flag LOGO-DONT-02 ("Don't add the halo on the Z instead of the C") AND LOGO-13 ("The logo should never be altered or recreated"). Trust brand detection — if halo_on_z=true, these are violations.
 - If brand detection reports a circle/shape behind any other letter (O, N, I) → flag LOGO-DONT-11 AND LOGO-13.
 - The halo behind the C should be a gradient (two colours) on white/grey backgrounds, or a solid colour matching the flavour on gradient/coloured backgrounds.
 - The HALO is a coloured ring that goes AROUND the C letter (rightmost). The halo should ONLY be on the C. No other letter has any circle or shape around it.
 - On white or grey backgrounds, the C halo MUST be a gradient (two colours), NOT a solid single colour.
+
+OFFICIAL ACCEPTABLE C HALO COLOURS (ALL of these are correct — do NOT flag as violations):
+- Grey/Neutral flavour: grey (#9d9fa1) to teal (#89d0c8) gradient
+- Green/Mint flavour: dark green (#007e47) to light green (#b7da9b) gradient
+- Blue flavour: dark blue (#0061af) to light blue (#75bee9) gradient
+- On gradient/coloured backgrounds: a solid version of the secondary flavour colour is also acceptable
+- On product packaging (tins/cans): these same halo colours and gradients are used — they are official and correct
+- If the detected halo colour matches ANY of these official flavour palettes, it is CORRECT — do not flag it.
+
+PRODUCT PACKAGING — OFFICIAL APPROVED DESIGNS:
+- ZONNIC product tins/cans show the logo with C halo using the correct flavour gradient. These are approved designs.
+- When the image contains product packaging, the logo on the packaging is official artwork — do NOT flag its C halo colour, gradient, or shape as violations.
 
 ASSETS IN PRACTICE — CONTENT TYPE vs BACKGROUND (critical cross-check):
 First classify the content type, then verify the background AND logo requirements match:
