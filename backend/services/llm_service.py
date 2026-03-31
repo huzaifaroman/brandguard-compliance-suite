@@ -54,8 +54,10 @@ LOGO ANALYSIS:
 
 C HALO ANALYSIS (MOST IMPORTANT — BE EXTREMELY DETAILED):
 - The correct ZONNIC logo has "ZONNIC" spelled out. The letters from left to right are: Z-O-N-N-I-C
-- Look at EACH letter carefully. Which letter(s) have a circular ring/halo around them?
-- Specifically: Does the Z (first letter, leftmost) have a halo? Does the C (last letter, rightmost) have a halo? Does any other letter have a halo?
+- IMPORTANT: The Z letter sits inside a navy blue FILLED circle — this is a DESIGN ELEMENT of the logo, NOT a halo. The Z appears as a white letter on a navy blue circular background. This filled circle is EXPECTED and correct.
+- The HALO is a DIFFERENT element — it is a coloured ring/circle that goes AROUND a letter (not a filled background behind a letter). The halo should only appear around the C (last/rightmost letter).
+- Look at EACH letter carefully. Which letter(s) have a coloured ring/halo AROUND them (not a filled background BEHIND them)?
+- Specifically: Does the Z (first letter, leftmost) have a halo ring around it? Does the C (last letter, rightmost) have a halo ring around it? Does any other letter have a halo?
 - If a halo exists: What colour is it? Is it a single solid colour or a gradient (two colours blending)?
 - If a halo exists: Is it a perfect circle or distorted/oval?
 - If a halo exists: Is it proportional to the letter or oversized/undersized?
@@ -205,6 +207,11 @@ YOUR TASK:
 - There are 62 rules total. Every rule_id must appear in EITHER violations OR passed_details
 - Double-check: violations + passed_details must total 62
 
+IMPORTANT BRAND DESIGN CONTEXT:
+- The ZONNIC logo has a navy blue FILLED circle behind the Z letter — the Z appears as a white letter on a blue circular background. This is a DESIGN ELEMENT of the logo, NOT a halo. It is expected and correct.
+- The HALO is a SEPARATE element — a coloured ring that goes AROUND the C letter (rightmost). The halo should ONLY be on the C.
+- On white or grey backgrounds, the C halo MUST be a gradient (two colours), NOT a solid single colour.
+
 USING THE BRAND_DETECTION FACTS:
 - The brand detection has already identified which letter the halo is on, what colour it is, whether it's a gradient, etc.
 - If brand detection says halo_on_z=true and halo_on_c=false → that means the halo is on the WRONG letter → VIOLATION of LOGO-DONT-02
@@ -218,6 +225,13 @@ RULE STATUS — EVERY RULE MUST BE ONE OF THREE:
 3. NOT APPLICABLE (in passed_details with status "not_applicable"): The rule does not apply to this image type (e.g. "dark background rules" on a white background image)
 
 CRITICAL: Do NOT mark a rule as "pass" if the detection facts show it fails. Trust the detection facts.
+
+SUMMARY REQUIREMENTS (the "summary" field):
+Write a 4-6 sentence detailed summary that a marketing team can understand at a glance:
+- Sentence 1-2: Describe what brand elements are visible — the ZONNIC logo position, text colour, the navy blue filled circle behind the Z (this is a design element, NOT the halo), the C halo (colour, shape, whether it's a gradient or solid), and the background type/colour.
+- Sentence 3-4: State what is CORRECT — which brand guidelines are properly followed.
+- Sentence 5-6: State what is WRONG — list the specific violations found and why they fail.
+- Be specific about colours, shapes, and positions. Do NOT be vague.
 
 OVERALL VERDICT:
 - PASS: No violations found
@@ -260,7 +274,7 @@ PASS2_SCHEMA = {
                 },
                 "summary": {
                     "type": "string",
-                    "description": "2-3 sentence summary of findings in plain language"
+                    "description": "4-6 sentence detailed summary. MUST include: (1) What brand elements are present — logo position, text colour, the navy blue filled circle behind the Z letter, C halo colour/shape/gradient status, background type. (2) What is correct — list specific passing elements. (3) What is wrong — list specific violations found. Write for a marketing team."
                 },
                 "checks_performed": {
                     "type": "array",
