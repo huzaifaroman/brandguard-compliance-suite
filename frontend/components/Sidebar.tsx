@@ -10,7 +10,6 @@ import {
   BookOpen,
   Clock,
   ShieldCheck,
-  Zap,
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 
@@ -133,12 +132,9 @@ export default function Sidebar() {
       </div>
 
       <div className="p-4 border-t border-border">
-        <div className="flex items-center gap-2 mb-3">
-          <Zap className="w-3.5 h-3.5 text-primary/70" />
-          <span className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">
-            Powered By
-          </span>
-        </div>
+        <span className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium mb-3 block">
+          Powered By
+        </span>
 
         <div className="flex flex-wrap gap-2.5">
           {poweredByIcons.map((icon, i) => (
