@@ -2,10 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { checkHealth, prefetchRoute } from "@/lib/api";
-import type { HealthStatus } from "@/lib/types";
+import { prefetchRoute } from "@/lib/api";
 import {
   Scan,
   Layers,
@@ -35,20 +33,6 @@ const poweredByIcons = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const [health, setHealth] = useState<HealthStatus | null>(null);
-
-  useEffect(() => {
-    checkHealth().then(setHealth).catch(() => {});
-    const interval = setInterval(() => {
-      checkHealth().then(setHealth).catch(() => {});
-    }, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const servicesUp = health
-    ? [health.azure_vision_configured, health.azure_openai_configured, health.postgres_configured, health.redis_configured].filter(Boolean).length
-    : 0;
-
   return (
     <aside
       className="fixed left-0 top-0 h-screen flex flex-col glass-strong z-50"
@@ -156,7 +140,7 @@ export default function Sidebar() {
           </span>
         </div>
 
-        <div className="flex flex-wrap gap-2 mb-3">
+        <div className="flex flex-wrap gap-2.5">
           {poweredByIcons.map((icon, i) => (
             <motion.div
               key={icon.alt}
@@ -166,16 +150,15 @@ export default function Sidebar() {
               className="group/icon relative"
             >
               <motion.div
-                className="w-8 h-8 rounded-lg bg-background/80 border border-border/50 flex items-center justify-center cursor-default hover:border-primary/30 hover:bg-primary/5 transition-all duration-200"
-                whileHover={{ scale: 1.15, y: -2 }}
+                className="w-10 h-10 rounded-xl bg-background/80 border border-border/50 flex items-center justify-center cursor-default hover:border-primary/30 hover:bg-primary/5 hover:shadow-md transition-all duration-200"
+                whileHover={{ scale: 1.15, y: -3 }}
                 whileTap={{ scale: 0.95 }}
                 transition={{ type: "spring", stiffness: 400, damping: 20 }}
               >
-
                 <img
                   src={icon.src}
                   alt={icon.alt}
-                  className="w-[18px] h-[18px] object-contain"
+                  className="w-[22px] h-[22px] object-contain"
                 />
               </motion.div>
               <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded-md bg-popover border border-border text-[9px] text-foreground whitespace-nowrap opacity-0 group-hover/icon:opacity-100 transition-opacity duration-200 pointer-events-none shadow-lg z-50">
@@ -184,71 +167,8 @@ export default function Sidebar() {
             </motion.div>
           ))}
         </div>
-
-        <div className="pt-2.5 border-t border-border/50">
-          <AnimatePresence mode="wait">
-            {health ? (
-              <motion.div
-                key="health"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="space-y-1.5"
-              >
-                <StatusDot label="Vision API" active={health.azure_vision_configured} delay={0} />
-                <StatusDot label="GPT-4.1" active={health.azure_openai_configured} delay={0.05} />
-                <StatusDot label="Database" active={health.postgres_configured} delay={0.1} />
-                <StatusDot label="Cache" active={health.redis_configured} delay={0.15} />
-              </motion.div>
-            ) : (
-              <motion.div key="loading" className="space-y-1.5">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-muted animate-pulse" />
-                    <div className="h-2 w-14 rounded bg-muted animate-pulse" />
-                  </div>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <div className="mt-2 pt-2 border-t border-border/30">
-            <div className="flex items-center justify-between">
-              <p className="text-[9px] text-muted-foreground">{servicesUp}/4 services active</p>
-              <div className="flex gap-0.5">
-                {[0, 1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className={`w-1.5 h-1.5 rounded-full transition-colors duration-500 ${
-                      i < servicesUp ? "bg-green-500" : "bg-muted-foreground/30"
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </aside>
   );
 }
 
-function StatusDot({ label, active, delay }: { label: string; active: boolean; delay: number }) {
-  return (
-    <motion.div
-      className="flex items-center gap-2"
-      initial={{ opacity: 0, x: -8 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay, duration: 0.3 }}
-    >
-      <div className="relative">
-        <div className={`w-2 h-2 rounded-full transition-colors duration-500 ${active ? "bg-green-500" : "bg-red-500/70"}`} />
-        {active && (
-          <div className="absolute inset-0 w-2 h-2 rounded-full bg-green-500/40 animate-ping" style={{ animationDuration: '3s' }} />
-        )}
-      </div>
-      <span className="text-[10px] text-muted-foreground">{label}</span>
-      <span className={`text-[9px] ml-auto ${active ? "text-green-500/70" : "text-red-500/50"}`}>
-        {active ? "online" : "offline"}
-      </span>
-    </motion.div>
-  );
-}

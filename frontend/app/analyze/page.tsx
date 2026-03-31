@@ -810,16 +810,20 @@ export default function AnalyzePage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Link href={`/report/${result.session_id}`}>
-                    <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5">
-                      <FileText className="w-3.5 h-3.5" /> Full Report
-                    </Button>
+                    <motion.div whileHover={{ scale: 1.04, y: -1 }} whileTap={{ scale: 0.96 }} transition={{ type: "spring", stiffness: 400, damping: 20 }}>
+                      <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5 hover:border-primary/40 hover:bg-primary/5 hover:text-primary transition-all duration-200 cursor-pointer">
+                        <FileText className="w-3.5 h-3.5" /> Full Report
+                      </Button>
+                    </motion.div>
                   </Link>
-                  <Button variant="outline" size="sm" onClick={async () => {
-                    const { generateSingleReportPDF } = await import("@/lib/pdf-generator");
-                    await generateSingleReportPDF(result, result.session_id ? `RPT-${result.session_id.slice(0, 8).toUpperCase()}` : undefined);
-                  }} className="h-8 text-xs gap-1.5">
-                    <FileDown className="w-3.5 h-3.5" /> PDF
-                  </Button>
+                  <motion.div whileHover={{ scale: 1.04, y: -1 }} whileTap={{ scale: 0.96 }} transition={{ type: "spring", stiffness: 400, damping: 20 }}>
+                    <Button variant="outline" size="sm" onClick={async () => {
+                      const { generateSingleReportPDF } = await import("@/lib/pdf-generator");
+                      await generateSingleReportPDF(result, result.session_id ? `RPT-${result.session_id.slice(0, 8).toUpperCase()}` : undefined);
+                    }} className="h-8 text-xs gap-1.5 hover:border-primary/40 hover:bg-primary/5 hover:text-primary transition-all duration-200 cursor-pointer">
+                      <FileDown className="w-3.5 h-3.5" /> PDF
+                    </Button>
+                  </motion.div>
                 </div>
               </div>
 
