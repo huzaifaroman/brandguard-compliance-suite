@@ -1,3357 +1,145 @@
 {
   "_info": "Raw API responses \u2014 overwritten on each new analysis",
-  "_timestamp": "2026-03-31T11:09:39.645700+00:00",
-  "_filename": "pasted-image.png",
-  "_image_hash": "c4ed12758524caa60c84ae284a4ec21ff5fee71d52f84cac9b80f72bb4dee415",
+  "_timestamp": "2026-03-31T11:42:55.943909+00:00",
+  "_filename": "Screenshot 2026-03-30 at 15.07.56.png",
+  "_image_hash": "ad30e645fc7259f92ca5ce8a40870b555692ca705711251e046de36bbda47901",
   "step_1_vision_api": {
-    "caption": "a close-up of a cigarette",
-    "caption_confidence": 0.7680631279945374,
+    "caption": "a logo with blue and white letters",
+    "caption_confidence": 0.6474182605743408,
     "dense_captions": [
       {
-        "text": "a close-up of a cigarette",
-        "confidence": 0.7680631279945374,
+        "text": "a logo with blue and white letters",
+        "confidence": 0.6407061219215393,
         "bbox": {
           "x": 0,
           "y": 0,
-          "w": 1306,
-          "h": 1626
+          "w": 402,
+          "h": 130
         }
       },
       {
-        "text": "a close-up of a container",
-        "confidence": 0.763541042804718,
+        "text": "a blue and white logo",
+        "confidence": 0.7346465587615967,
         "bbox": {
-          "x": 438,
-          "y": 683,
-          "w": 408,
-          "h": 402
+          "x": 84,
+          "y": 22,
+          "w": 235,
+          "h": 64
         }
       },
       {
-        "text": "a blue letter on a white background",
-        "confidence": 0.7797356247901917,
+        "text": "a blue and white logo",
+        "confidence": 0.777586817741394,
         "bbox": {
-          "x": 438,
-          "y": 540,
-          "w": 418,
-          "h": 85
+          "x": 0,
+          "y": 0,
+          "w": 394,
+          "h": 123
         }
       },
       {
-        "text": "a blue circle with a number and a plus in it",
-        "confidence": 0.7156859040260315,
+        "text": "a blue and white logo",
+        "confidence": 0.7255710363388062,
         "bbox": {
-          "x": 32,
-          "y": 1495,
-          "w": 73,
-          "h": 71
+          "x": 261,
+          "y": 24,
+          "w": 55,
+          "h": 60
         }
       },
       {
-        "text": "a close-up of a sign",
-        "confidence": 0.7019476890563965,
+        "text": "a white letter in a blue circle",
+        "confidence": 0.8563531637191772,
         "bbox": {
-          "x": 435,
-          "y": 421,
-          "w": 414,
-          "h": 201
+          "x": 93,
+          "y": 24,
+          "w": 56,
+          "h": 59
         }
       }
     ],
     "tags": [
       {
-        "name": "text",
-        "confidence": 0.9999860525131226
-      },
-      {
-        "name": "screenshot",
-        "confidence": 0.9591666460037231
+        "name": "font",
+        "confidence": 0.9556117653846741
       },
       {
         "name": "logo",
-        "confidence": 0.9241703748703003
+        "confidence": 0.9371316432952881
       },
       {
-        "name": "font",
-        "confidence": 0.9021151065826416
+        "name": "graphics",
+        "confidence": 0.9289461374282837
       },
       {
-        "name": "trademark",
-        "confidence": 0.8486761450767517
-      }
-    ],
-    "objects": [
+        "name": "text",
+        "confidence": 0.865831732749939
+      },
       {
-        "tags": [
-          {
-            "name": "text",
-            "confidence": 0.539
-          }
-        ],
-        "bbox": {
-          "x": 90,
-          "y": 52,
-          "w": 1130,
-          "h": 236
-        }
+        "name": "graphic design",
+        "confidence": 0.8626120090484619
+      },
+      {
+        "name": "brand",
+        "confidence": 0.8456436395645142
+      },
+      {
+        "name": "symbol",
+        "confidence": 0.8422143459320068
+      },
+      {
+        "name": "design",
+        "confidence": 0.7848429679870605
+      },
+      {
+        "name": "typography",
+        "confidence": 0.6555070281028748
       }
     ],
+    "objects": [],
     "ocr_text": [
       {
-        "text": "WARNING: This product contains nicotine. Nicotine is highly addictive.",
-        "words": [
-          {
-            "text": "WARNING:",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 145,
-                "y": 60
-              },
-              {
-                "x": 321,
-                "y": 60
-              },
-              {
-                "x": 321,
-                "y": 99
-              },
-              {
-                "x": 145,
-                "y": 98
-              }
-            ]
-          },
-          {
-            "text": "This",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 329,
-                "y": 60
-              },
-              {
-                "x": 386,
-                "y": 60
-              },
-              {
-                "x": 386,
-                "y": 99
-              },
-              {
-                "x": 329,
-                "y": 99
-              }
-            ]
-          },
-          {
-            "text": "product",
-            "confidence": 0.994,
-            "bounding_polygon": [
-              {
-                "x": 394,
-                "y": 60
-              },
-              {
-                "x": 502,
-                "y": 60
-              },
-              {
-                "x": 502,
-                "y": 100
-              },
-              {
-                "x": 393,
-                "y": 99
-              }
-            ]
-          },
-          {
-            "text": "contains",
-            "confidence": 0.994,
-            "bounding_polygon": [
-              {
-                "x": 510,
-                "y": 60
-              },
-              {
-                "x": 632,
-                "y": 60
-              },
-              {
-                "x": 631,
-                "y": 100
-              },
-              {
-                "x": 510,
-                "y": 100
-              }
-            ]
-          },
-          {
-            "text": "nicotine.",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 639,
-                "y": 60
-              },
-              {
-                "x": 758,
-                "y": 60
-              },
-              {
-                "x": 758,
-                "y": 100
-              },
-              {
-                "x": 639,
-                "y": 100
-              }
-            ]
-          },
-          {
-            "text": "Nicotine",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 766,
-                "y": 60
-              },
-              {
-                "x": 883,
-                "y": 60
-              },
-              {
-                "x": 882,
-                "y": 100
-              },
-              {
-                "x": 766,
-                "y": 100
-              }
-            ]
-          },
-          {
-            "text": "is",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 890,
-                "y": 60
-              },
-              {
-                "x": 914,
-                "y": 60
-              },
-              {
-                "x": 913,
-                "y": 100
-              },
-              {
-                "x": 890,
-                "y": 100
-              }
-            ]
-          },
-          {
-            "text": "highly",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 921,
-                "y": 60
-              },
-              {
-                "x": 1009,
-                "y": 60
-              },
-              {
-                "x": 1009,
-                "y": 100
-              },
-              {
-                "x": 921,
-                "y": 100
-              }
-            ]
-          },
-          {
-            "text": "addictive.",
-            "confidence": 0.994,
-            "bounding_polygon": [
-              {
-                "x": 1017,
-                "y": 60
-              },
-              {
-                "x": 1157,
-                "y": 60
-              },
-              {
-                "x": 1156,
-                "y": 99
-              },
-              {
-                "x": 1016,
-                "y": 100
-              }
-            ]
-          }
-        ],
-        "bounding_polygon": [
-          {
-            "x": 145,
-            "y": 59
-          },
-          {
-            "x": 1157,
-            "y": 60
-          },
-          {
-            "x": 1157,
-            "y": 99
-          },
-          {
-            "x": 145,
-            "y": 98
-          }
-        ]
-      },
-      {
-        "text": "Only to be used by adults who are trying to quit smoking.",
-        "words": [
-          {
-            "text": "Only",
-            "confidence": 0.989,
-            "bounding_polygon": [
-              {
-                "x": 246,
-                "y": 102
-              },
-              {
-                "x": 311,
-                "y": 101
-              },
-              {
-                "x": 311,
-                "y": 140
-              },
-              {
-                "x": 246,
-                "y": 140
-              }
-            ]
-          },
-          {
-            "text": "to",
-            "confidence": 0.998,
-            "bounding_polygon": [
-              {
-                "x": 320,
-                "y": 101
-              },
-              {
-                "x": 344,
-                "y": 101
-              },
-              {
-                "x": 344,
-                "y": 141
-              },
-              {
-                "x": 320,
-                "y": 141
-              }
-            ]
-          },
-          {
-            "text": "be",
-            "confidence": 0.998,
-            "bounding_polygon": [
-              {
-                "x": 352,
-                "y": 101
-              },
-              {
-                "x": 390,
-                "y": 100
-              },
-              {
-                "x": 390,
-                "y": 141
-              },
-              {
-                "x": 352,
-                "y": 141
-              }
-            ]
-          },
-          {
-            "text": "used",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 399,
-                "y": 100
-              },
-              {
-                "x": 469,
-                "y": 100
-              },
-              {
-                "x": 469,
-                "y": 142
-              },
-              {
-                "x": 399,
-                "y": 141
-              }
-            ]
-          },
-          {
-            "text": "by",
-            "confidence": 0.999,
-            "bounding_polygon": [
-              {
-                "x": 478,
-                "y": 100
-              },
-              {
-                "x": 513,
-                "y": 100
-              },
-              {
-                "x": 513,
-                "y": 142
-              },
-              {
-                "x": 478,
-                "y": 142
-              }
-            ]
-          },
-          {
-            "text": "adults",
-            "confidence": 0.994,
-            "bounding_polygon": [
-              {
-                "x": 521,
-                "y": 100
-              },
-              {
-                "x": 606,
-                "y": 99
-              },
-              {
-                "x": 606,
-                "y": 143
-              },
-              {
-                "x": 521,
-                "y": 142
-              }
-            ]
-          },
-          {
-            "text": "who",
-            "confidence": 0.999,
-            "bounding_polygon": [
-              {
-                "x": 614,
-                "y": 99
-              },
-              {
-                "x": 676,
-                "y": 99
-              },
-              {
-                "x": 676,
-                "y": 143
-              },
-              {
-                "x": 614,
-                "y": 143
-              }
-            ]
-          },
-          {
-            "text": "are",
-            "confidence": 0.999,
-            "bounding_polygon": [
-              {
-                "x": 685,
-                "y": 99
-              },
-              {
-                "x": 731,
-                "y": 100
-              },
-              {
-                "x": 731,
-                "y": 143
-              },
-              {
-                "x": 685,
-                "y": 143
-              }
-            ]
-          },
-          {
-            "text": "trying",
-            "confidence": 0.994,
-            "bounding_polygon": [
-              {
-                "x": 739,
-                "y": 100
-              },
-              {
-                "x": 818,
-                "y": 100
-              },
-              {
-                "x": 818,
-                "y": 143
-              },
-              {
-                "x": 739,
-                "y": 143
-              }
-            ]
-          },
-          {
-            "text": "to",
-            "confidence": 0.999,
-            "bounding_polygon": [
-              {
-                "x": 826,
-                "y": 100
-              },
-              {
-                "x": 854,
-                "y": 100
-              },
-              {
-                "x": 854,
-                "y": 143
-              },
-              {
-                "x": 826,
-                "y": 143
-              }
-            ]
-          },
-          {
-            "text": "quit",
-            "confidence": 0.986,
-            "bounding_polygon": [
-              {
-                "x": 862,
-                "y": 100
-              },
-              {
-                "x": 916,
-                "y": 101
-              },
-              {
-                "x": 916,
-                "y": 143
-              },
-              {
-                "x": 862,
-                "y": 143
-              }
-            ]
-          },
-          {
-            "text": "smoking.",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 924,
-                "y": 101
-              },
-              {
-                "x": 1055,
-                "y": 102
-              },
-              {
-                "x": 1055,
-                "y": 142
-              },
-              {
-                "x": 924,
-                "y": 143
-              }
-            ]
-          }
-        ],
-        "bounding_polygon": [
-          {
-            "x": 246,
-            "y": 99
-          },
-          {
-            "x": 1056,
-            "y": 99
-          },
-          {
-            "x": 1056,
-            "y": 142
-          },
-          {
-            "x": 246,
-            "y": 141
-          }
-        ]
-      },
-      {
-        "text": "AVERTISSEMENT : Ce produit contient de la nicotine.",
-        "words": [
-          {
-            "text": "AVERTISSEMENT",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 266,
-                "y": 141
-              },
-              {
-                "x": 536,
-                "y": 140
-              },
-              {
-                "x": 535,
-                "y": 180
-              },
-              {
-                "x": 265,
-                "y": 177
-              }
-            ]
-          },
-          {
-            "text": ":",
-            "confidence": 0.964,
-            "bounding_polygon": [
-              {
-                "x": 544,
-                "y": 140
-              },
-              {
-                "x": 556,
-                "y": 140
-              },
-              {
-                "x": 555,
-                "y": 180
-              },
-              {
-                "x": 543,
-                "y": 180
-              }
-            ]
-          },
-          {
-            "text": "Ce",
-            "confidence": 0.994,
-            "bounding_polygon": [
-              {
-                "x": 564,
-                "y": 140
-              },
-              {
-                "x": 605,
-                "y": 140
-              },
-              {
-                "x": 604,
-                "y": 181
-              },
-              {
-                "x": 563,
-                "y": 180
-              }
-            ]
-          },
-          {
-            "text": "produit",
-            "confidence": 0.987,
-            "bounding_polygon": [
-              {
-                "x": 612,
-                "y": 140
-              },
-              {
-                "x": 712,
-                "y": 140
-              },
-              {
-                "x": 711,
-                "y": 181
-              },
-              {
-                "x": 611,
-                "y": 181
-              }
-            ]
-          },
-          {
-            "text": "contient",
-            "confidence": 0.994,
-            "bounding_polygon": [
-              {
-                "x": 719,
-                "y": 140
-              },
-              {
-                "x": 832,
-                "y": 141
-              },
-              {
-                "x": 830,
-                "y": 181
-              },
-              {
-                "x": 718,
-                "y": 181
-              }
-            ]
-          },
-          {
-            "text": "de",
-            "confidence": 0.998,
-            "bounding_polygon": [
-              {
-                "x": 839,
-                "y": 141
-              },
-              {
-                "x": 872,
-                "y": 141
-              },
-              {
-                "x": 871,
-                "y": 180
-              },
-              {
-                "x": 838,
-                "y": 180
-              }
-            ]
-          },
-          {
-            "text": "la",
-            "confidence": 0.991,
-            "bounding_polygon": [
-              {
-                "x": 880,
-                "y": 141
-              },
-              {
-                "x": 908,
-                "y": 141
-              },
-              {
-                "x": 907,
-                "y": 180
-              },
-              {
-                "x": 879,
-                "y": 180
-              }
-            ]
-          },
-          {
-            "text": "nicotine.",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 916,
-                "y": 141
-              },
-              {
-                "x": 1041,
-                "y": 142
-              },
-              {
-                "x": 1039,
-                "y": 178
-              },
-              {
-                "x": 915,
-                "y": 180
-              }
-            ]
-          }
-        ],
-        "bounding_polygon": [
-          {
-            "x": 259,
-            "y": 140
-          },
-          {
-            "x": 1041,
-            "y": 140
-          },
-          {
-            "x": 1041,
-            "y": 180
-          },
-          {
-            "x": 259,
-            "y": 179
-          }
-        ]
-      },
-      {
-        "text": "La nicotine cr\u00e9e une forte d\u00e9pendance. \u00c0 utiliser uniquement par des adultes",
-        "words": [
-          {
-            "text": "La",
-            "confidence": 0.998,
-            "bounding_polygon": [
-              {
-                "x": 106,
-                "y": 185
-              },
-              {
-                "x": 140,
-                "y": 184
-              },
-              {
-                "x": 140,
-                "y": 219
-              },
-              {
-                "x": 106,
-                "y": 218
-              }
-            ]
-          },
-          {
-            "text": "nicotine",
-            "confidence": 0.988,
-            "bounding_polygon": [
-              {
-                "x": 148,
-                "y": 184
-              },
-              {
-                "x": 261,
-                "y": 183
-              },
-              {
-                "x": 261,
-                "y": 220
-              },
-              {
-                "x": 148,
-                "y": 219
-              }
-            ]
-          },
-          {
-            "text": "cr\u00e9e",
-            "confidence": 0.958,
-            "bounding_polygon": [
-              {
-                "x": 269,
-                "y": 183
-              },
-              {
-                "x": 329,
-                "y": 182
-              },
-              {
-                "x": 329,
-                "y": 221
-              },
-              {
-                "x": 269,
-                "y": 220
-              }
-            ]
-          },
-          {
-            "text": "une",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 337,
-                "y": 182
-              },
-              {
-                "x": 392,
-                "y": 181
-              },
-              {
-                "x": 392,
-                "y": 222
-              },
-              {
-                "x": 337,
-                "y": 221
-              }
-            ]
-          },
-          {
-            "text": "forte",
-            "confidence": 0.994,
-            "bounding_polygon": [
-              {
-                "x": 400,
-                "y": 181
-              },
-              {
-                "x": 465,
-                "y": 181
-              },
-              {
-                "x": 465,
-                "y": 222
-              },
-              {
-                "x": 399,
-                "y": 222
-              }
-            ]
-          },
-          {
-            "text": "d\u00e9pendance.",
-            "confidence": 0.966,
-            "bounding_polygon": [
-              {
-                "x": 473,
-                "y": 181
-              },
-              {
-                "x": 659,
-                "y": 180
-              },
-              {
-                "x": 659,
-                "y": 223
-              },
-              {
-                "x": 473,
-                "y": 222
-              }
-            ]
-          },
-          {
-            "text": "\u00c0",
-            "confidence": 0.963,
-            "bounding_polygon": [
-              {
-                "x": 667,
-                "y": 180
-              },
-              {
-                "x": 688,
-                "y": 180
-              },
-              {
-                "x": 687,
-                "y": 223
-              },
-              {
-                "x": 666,
-                "y": 223
-              }
-            ]
-          },
-          {
-            "text": "utiliser",
-            "confidence": 0.973,
-            "bounding_polygon": [
-              {
-                "x": 696,
-                "y": 180
-              },
-              {
-                "x": 787,
-                "y": 180
-              },
-              {
-                "x": 787,
-                "y": 223
-              },
-              {
-                "x": 695,
-                "y": 223
-              }
-            ]
-          },
-          {
-            "text": "uniquement",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 795,
-                "y": 180
-              },
-              {
-                "x": 963,
-                "y": 181
-              },
-              {
-                "x": 962,
-                "y": 223
-              },
-              {
-                "x": 795,
-                "y": 223
-              }
-            ]
-          },
-          {
-            "text": "par",
-            "confidence": 0.994,
-            "bounding_polygon": [
-              {
-                "x": 971,
-                "y": 181
-              },
-              {
-                "x": 1021,
-                "y": 181
-              },
-              {
-                "x": 1020,
-                "y": 223
-              },
-              {
-                "x": 970,
-                "y": 223
-              }
-            ]
-          },
-          {
-            "text": "des",
-            "confidence": 0.997,
-            "bounding_polygon": [
-              {
-                "x": 1028,
-                "y": 181
-              },
-              {
-                "x": 1081,
-                "y": 182
-              },
-              {
-                "x": 1080,
-                "y": 222
-              },
-              {
-                "x": 1027,
-                "y": 223
-              }
-            ]
-          },
-          {
-            "text": "adultes",
-            "confidence": 0.992,
-            "bounding_polygon": [
-              {
-                "x": 1089,
-                "y": 182
-              },
-              {
-                "x": 1196,
-                "y": 183
-              },
-              {
-                "x": 1195,
-                "y": 221
-              },
-              {
-                "x": 1088,
-                "y": 222
-              }
-            ]
-          }
-        ],
-        "bounding_polygon": [
-          {
-            "x": 106,
-            "y": 180
-          },
-          {
-            "x": 1196,
-            "y": 180
-          },
-          {
-            "x": 1196,
-            "y": 222
-          },
-          {
-            "x": 106,
-            "y": 222
-          }
-        ]
-      },
-      {
-        "text": "qui d\u00e9sirent cesser de fumer.",
-        "words": [
-          {
-            "text": "qui",
-            "confidence": 0.998,
-            "bounding_polygon": [
-              {
-                "x": 444,
-                "y": 223
-              },
-              {
-                "x": 487,
-                "y": 223
-              },
-              {
-                "x": 487,
-                "y": 264
-              },
-              {
-                "x": 444,
-                "y": 264
-              }
-            ]
-          },
-          {
-            "text": "d\u00e9sirent",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 495,
-                "y": 223
-              },
-              {
-                "x": 609,
-                "y": 223
-              },
-              {
-                "x": 608,
-                "y": 262
-              },
-              {
-                "x": 495,
-                "y": 263
-              }
-            ]
-          },
-          {
-            "text": "cesser",
-            "confidence": 0.995,
-            "bounding_polygon": [
-              {
-                "x": 616,
-                "y": 223
-              },
-              {
-                "x": 710,
-                "y": 223
-              },
-              {
-                "x": 710,
-                "y": 261
-              },
-              {
-                "x": 616,
-                "y": 262
-              }
-            ]
-          },
-          {
-            "text": "de",
-            "confidence": 0.998,
-            "bounding_polygon": [
-              {
-                "x": 718,
-                "y": 223
-              },
-              {
-                "x": 756,
-                "y": 223
-              },
-              {
-                "x": 755,
-                "y": 261
-              },
-              {
-                "x": 717,
-                "y": 261
-              }
-            ]
-          },
-          {
-            "text": "fumer.",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 763,
-                "y": 223
-              },
-              {
-                "x": 857,
-                "y": 224
-              },
-              {
-                "x": 856,
-                "y": 260
-              },
-              {
-                "x": 763,
-                "y": 261
-              }
-            ]
-          }
-        ],
-        "bounding_polygon": [
-          {
-            "x": 443,
-            "y": 223
-          },
-          {
-            "x": 857,
-            "y": 222
-          },
-          {
-            "x": 857,
-            "y": 261
-          },
-          {
-            "x": 443,
-            "y": 263
-          }
-        ]
-      },
-      {
-        "text": "New to",
-        "words": [
-          {
-            "text": "New",
-            "confidence": 0.998,
-            "bounding_polygon": [
-              {
-                "x": 506,
-                "y": 435
-              },
-              {
-                "x": 652,
-                "y": 436
-              },
-              {
-                "x": 651,
-                "y": 508
-              },
-              {
-                "x": 506,
-                "y": 508
-              }
-            ]
-          },
-          {
-            "text": "to",
-            "confidence": 0.999,
-            "bounding_polygon": [
-              {
-                "x": 715,
-                "y": 436
-              },
-              {
-                "x": 785,
-                "y": 436
-              },
-              {
-                "x": 783,
-                "y": 508
-              },
-              {
-                "x": 714,
-                "y": 508
-              }
-            ]
-          }
-        ],
-        "bounding_polygon": [
-          {
-            "x": 505,
-            "y": 435
-          },
-          {
-            "x": 798,
-            "y": 435
-          },
-          {
-            "x": 798,
-            "y": 507
-          },
-          {
-            "x": 505,
-            "y": 507
-          }
-        ]
-      },
-      {
-        "text": "ZONNIC?",
-        "words": [
-          {
-            "text": "ZONNIC?",
-            "confidence": 0.989,
-            "bounding_polygon": [
-              {
-                "x": 456,
-                "y": 542
-              },
-              {
-                "x": 849,
-                "y": 543
-              },
-              {
-                "x": 849,
-                "y": 618
-              },
-              {
-                "x": 456,
-                "y": 614
-              }
-            ]
-          }
-        ],
-        "bounding_polygon": [
-          {
-            "x": 446,
-            "y": 541
-          },
-          {
-            "x": 851,
-            "y": 543
-          },
-          {
-            "x": 851,
-            "y": 619
-          },
-          {
-            "x": 446,
-            "y": 616
-          }
-        ]
-      },
-      {
-        "text": "peel / tires",
-        "words": [
-          {
-            "text": "peel",
-            "confidence": 0.57,
-            "bounding_polygon": [
-              {
-                "x": 576,
-                "y": 732
-              },
-              {
-                "x": 590,
-                "y": 727
-              },
-              {
-                "x": 590,
-                "y": 738
-              },
-              {
-                "x": 576,
-                "y": 744
-              }
-            ]
-          },
-          {
-            "text": "/",
-            "confidence": 0.398,
-            "bounding_polygon": [
-              {
-                "x": 592,
-                "y": 726
-              },
-              {
-                "x": 595,
-                "y": 725
-              },
-              {
-                "x": 596,
-                "y": 736
-              },
-              {
-                "x": 592,
-                "y": 737
-              }
-            ]
-          },
-          {
-            "text": "tires",
-            "confidence": 0.573,
-            "bounding_polygon": [
-              {
-                "x": 597,
-                "y": 724
-              },
-              {
-                "x": 615,
-                "y": 718
-              },
-              {
-                "x": 616,
-                "y": 727
-              },
-              {
-                "x": 598,
-                "y": 735
-              }
-            ]
-          }
-        ],
-        "bounding_polygon": [
-          {
-            "x": 575,
-            "y": 734
-          },
-          {
-            "x": 617,
-            "y": 717
-          },
-          {
-            "x": 620,
-            "y": 725
-          },
-          {
-            "x": 575,
-            "y": 744
-          }
-        ]
-      },
-      {
-        "text": ">",
-        "words": [
-          {
-            "text": ">",
-            "confidence": 0.734,
-            "bounding_polygon": [
-              {
-                "x": 1244,
-                "y": 790
-              },
-              {
-                "x": 1265,
-                "y": 791
-              },
-              {
-                "x": 1264,
-                "y": 827
-              },
-              {
-                "x": 1243,
-                "y": 826
-              }
-            ]
-          }
-        ],
-        "bounding_polygon": [
-          {
-            "x": 1239,
-            "y": 790
-          },
-          {
-            "x": 1271,
-            "y": 791
-          },
-          {
-            "x": 1270,
-            "y": 827
-          },
-          {
-            "x": 1236,
-            "y": 826
-          }
-        ]
-      },
-      {
-        "text": "24 Nicotine Pouches/",
-        "words": [
-          {
-            "text": "24",
-            "confidence": 0.988,
-            "bounding_polygon": [
-              {
-                "x": 563,
-                "y": 800
-              },
-              {
-                "x": 574,
-                "y": 797
-              },
-              {
-                "x": 576,
-                "y": 807
-              },
-              {
-                "x": 564,
-                "y": 811
-              }
-            ]
-          },
-          {
-            "text": "Nicotine",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 579,
-                "y": 795
-              },
-              {
-                "x": 623,
-                "y": 782
-              },
-              {
-                "x": 625,
-                "y": 791
-              },
-              {
-                "x": 581,
-                "y": 805
-              }
-            ]
-          },
-          {
-            "text": "Pouches/",
-            "confidence": 0.645,
-            "bounding_polygon": [
-              {
-                "x": 628,
-                "y": 780
-              },
-              {
-                "x": 675,
-                "y": 764
-              },
-              {
-                "x": 678,
-                "y": 773
-              },
-              {
-                "x": 631,
-                "y": 789
-              }
-            ]
-          }
-        ],
-        "bounding_polygon": [
-          {
-            "x": 561,
-            "y": 801
-          },
-          {
-            "x": 675,
-            "y": 764
-          },
-          {
-            "x": 678,
-            "y": 773
-          },
-          {
-            "x": 562,
-            "y": 811
-          }
-        ]
-      },
-      {
-        "text": "Sachets de nicotine",
-        "words": [
-          {
-            "text": "Sachets",
-            "confidence": 0.976,
-            "bounding_polygon": [
-              {
-                "x": 570,
-                "y": 813
-              },
-              {
-                "x": 612,
-                "y": 798
-              },
-              {
-                "x": 617,
-                "y": 806
-              },
-              {
-                "x": 574,
-                "y": 821
-              }
-            ]
-          },
-          {
-            "text": "de",
-            "confidence": 0.992,
-            "bounding_polygon": [
-              {
-                "x": 616,
-                "y": 797
-              },
-              {
-                "x": 628,
-                "y": 793
-              },
-              {
-                "x": 632,
-                "y": 800
-              },
-              {
-                "x": 621,
-                "y": 804
-              }
-            ]
-          },
-          {
-            "text": "nicotine",
-            "confidence": 0.91,
-            "bounding_polygon": [
-              {
-                "x": 632,
-                "y": 792
-              },
-              {
-                "x": 673,
-                "y": 777
-              },
-              {
-                "x": 677,
-                "y": 784
-              },
-              {
-                "x": 636,
-                "y": 799
-              }
-            ]
-          }
-        ],
-        "bounding_polygon": [
-          {
-            "x": 568,
-            "y": 813
-          },
-          {
-            "x": 678,
-            "y": 775
-          },
-          {
-            "x": 681,
-            "y": 783
-          },
-          {
-            "x": 571,
-            "y": 821
-          }
-        ]
-      },
-      {
-        "text": "NPN 80125630",
-        "words": [
-          {
-            "text": "NPN",
-            "confidence": 0.987,
-            "bounding_polygon": [
-              {
-                "x": 488,
-                "y": 822
-              },
-              {
-                "x": 497,
-                "y": 804
-              },
-              {
-                "x": 509,
-                "y": 810
-              },
-              {
-                "x": 500,
-                "y": 828
-              }
-            ]
-          },
-          {
-            "text": "80125630",
-            "confidence": 0.97,
-            "bounding_polygon": [
-              {
-                "x": 499,
-                "y": 800
-              },
-              {
-                "x": 526,
-                "y": 761
-              },
-              {
-                "x": 540,
-                "y": 764
-              },
-              {
-                "x": 511,
-                "y": 805
-              }
-            ]
-          }
-        ],
-        "bounding_polygon": [
-          {
-            "x": 485,
-            "y": 824
-          },
-          {
-            "x": 528,
-            "y": 759
-          },
-          {
-            "x": 542,
-            "y": 762
-          },
-          {
-            "x": 497,
-            "y": 833
-          }
-        ]
-      },
-      {
         "text": "ZONNIC",
         "words": [
           {
             "text": "ZONNIC",
-            "confidence": 0.975,
-            "bounding_polygon": [
-              {
-                "x": 481,
-                "y": 878
-              },
-              {
-                "x": 761,
-                "y": 783
-              },
-              {
-                "x": 785,
-                "y": 844
-              },
-              {
-                "x": 497,
-                "y": 939
-              }
-            ]
-          }
-        ],
-        "bounding_polygon": [
-          {
-            "x": 468,
-            "y": 881
-          },
-          {
-            "x": 802,
-            "y": 768
-          },
-          {
-            "x": 823,
-            "y": 830
-          },
-          {
-            "x": 484,
-            "y": 943
-          }
-        ]
-      },
-      {
-        "text": "MENTHE",
-        "words": [
-          {
-            "text": "MENTHE",
-            "confidence": 0.959,
-            "bounding_polygon": [
-              {
-                "x": 643,
-                "y": 920
-              },
-              {
-                "x": 702,
-                "y": 898
-              },
-              {
-                "x": 705,
-                "y": 908
-              },
-              {
-                "x": 646,
-                "y": 932
-              }
-            ]
-          }
-        ],
-        "bounding_polygon": [
-          {
-            "x": 643,
-            "y": 921
-          },
-          {
-            "x": 703,
-            "y": 897
-          },
-          {
-            "x": 708,
-            "y": 907
-          },
-          {
-            "x": 645,
-            "y": 933
-          }
-        ]
-      },
-      {
-        "text": "WARNING: Nicotine is highly adoles",
-        "words": [
-          {
-            "text": "WARNING:",
-            "confidence": 0.96,
-            "bounding_polygon": [
-              {
-                "x": 606,
-                "y": 949
-              },
-              {
-                "x": 657,
-                "y": 956
-              },
-              {
-                "x": 657,
-                "y": 967
-              },
-              {
-                "x": 605,
-                "y": 962
-              }
-            ]
-          },
-          {
-            "text": "Nicotine",
-            "confidence": 0.991,
-            "bounding_polygon": [
-              {
-                "x": 659,
-                "y": 956
-              },
-              {
-                "x": 695,
-                "y": 947
-              },
-              {
-                "x": 697,
-                "y": 957
-              },
-              {
-                "x": 660,
-                "y": 967
-              }
-            ]
-          },
-          {
-            "text": "is",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 697,
-                "y": 946
-              },
-              {
-                "x": 705,
-                "y": 943
-              },
-              {
-                "x": 707,
-                "y": 952
-              },
-              {
-                "x": 699,
-                "y": 956
-              }
-            ]
-          },
-          {
-            "text": "highly",
-            "confidence": 0.484,
-            "bounding_polygon": [
-              {
-                "x": 707,
-                "y": 942
-              },
-              {
-                "x": 731,
-                "y": 929
-              },
-              {
-                "x": 734,
-                "y": 937
-              },
-              {
-                "x": 709,
-                "y": 951
-              }
-            ]
-          },
-          {
-            "text": "adoles",
-            "confidence": 0.121,
-            "bounding_polygon": [
-              {
-                "x": 733,
-                "y": 927
-              },
-              {
-                "x": 756,
-                "y": 910
-              },
-              {
-                "x": 759,
-                "y": 918
-              },
-              {
-                "x": 736,
-                "y": 936
-              }
-            ]
-          }
-        ],
-        "bounding_polygon": [
-          {
-            "x": 585,
-            "y": 942
-          },
-          {
-            "x": 767,
-            "y": 900
-          },
-          {
-            "x": 771,
-            "y": 937
-          },
-          {
-            "x": 592,
-            "y": 968
-          }
-        ]
-      },
-      {
-        "text": "AVERTISSEMENT : La nicotine cr\u00e9e une forte ovy",
-        "words": [
-          {
-            "text": "AVERTISSEMENT",
-            "confidence": 0.939,
-            "bounding_polygon": [
-              {
-                "x": 569,
-                "y": 942
-              },
-              {
-                "x": 646,
-                "y": 969
-              },
-              {
-                "x": 646,
-                "y": 980
-              },
-              {
-                "x": 566,
-                "y": 956
-              }
-            ]
-          },
-          {
-            "text": ":",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 648,
-                "y": 969
-              },
-              {
-                "x": 653,
-                "y": 970
-              },
-              {
-                "x": 653,
-                "y": 980
-              },
-              {
-                "x": 648,
-                "y": 980
-              }
-            ]
-          },
-          {
-            "text": "La",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 655,
-                "y": 970
-              },
-              {
-                "x": 666,
-                "y": 968
-              },
-              {
-                "x": 666,
-                "y": 979
-              },
-              {
-                "x": 655,
-                "y": 981
-              }
-            ]
-          },
-          {
-            "text": "nicotine",
-            "confidence": 0.855,
-            "bounding_polygon": [
-              {
-                "x": 669,
-                "y": 968
-              },
-              {
-                "x": 704,
-                "y": 958
-              },
-              {
-                "x": 705,
-                "y": 966
-              },
-              {
-                "x": 669,
-                "y": 978
-              }
-            ]
-          },
-          {
-            "text": "cr\u00e9e",
-            "confidence": 0.576,
-            "bounding_polygon": [
-              {
-                "x": 707,
-                "y": 957
-              },
-              {
-                "x": 724,
-                "y": 947
-              },
-              {
-                "x": 726,
-                "y": 955
-              },
-              {
-                "x": 708,
-                "y": 965
-              }
-            ]
-          },
-          {
-            "text": "une",
-            "confidence": 0.384,
-            "bounding_polygon": [
-              {
-                "x": 726,
-                "y": 946
-              },
-              {
-                "x": 740,
-                "y": 937
-              },
-              {
-                "x": 742,
-                "y": 944
-              },
-              {
-                "x": 728,
-                "y": 954
-              }
-            ]
-          },
-          {
-            "text": "forte",
-            "confidence": 0.917,
-            "bounding_polygon": [
-              {
-                "x": 742,
-                "y": 936
-              },
-              {
-                "x": 757,
-                "y": 923
-              },
-              {
-                "x": 760,
-                "y": 929
-              },
-              {
-                "x": 744,
-                "y": 943
-              }
-            ]
-          },
-          {
-            "text": "ovy",
-            "confidence": 0.205,
-            "bounding_polygon": [
-              {
-                "x": 759,
-                "y": 921
-              },
-              {
-                "x": 771,
-                "y": 911
-              },
-              {
-                "x": 774,
-                "y": 916
-              },
-              {
-                "x": 762,
-                "y": 927
-              }
-            ]
-          }
-        ],
-        "bounding_polygon": [
-          {
-            "x": 566,
-            "y": 943
-          },
-          {
-            "x": 772,
-            "y": 909
-          },
-          {
-            "x": 776,
-            "y": 956
-          },
-          {
-            "x": 573,
-            "y": 981
-          }
-        ]
-      },
-      {
-        "text": "Nicotine Replacement Therapy",
-        "words": [
-          {
-            "text": "Nicotine",
-            "confidence": 0.959,
-            "bounding_polygon": [
-              {
-                "x": 559,
-                "y": 971
-              },
-              {
-                "x": 589,
-                "y": 983
-              },
-              {
-                "x": 587,
-                "y": 994
-              },
-              {
-                "x": 555,
-                "y": 982
-              }
-            ]
-          },
-          {
-            "text": "Replacement",
-            "confidence": 0.791,
-            "bounding_polygon": [
-              {
-                "x": 591,
-                "y": 984
-              },
-              {
-                "x": 644,
-                "y": 995
-              },
-              {
-                "x": 642,
-                "y": 1006
-              },
-              {
-                "x": 589,
-                "y": 995
-              }
-            ]
-          },
-          {
-            "text": "Therapy",
-            "confidence": 0.988,
-            "bounding_polygon": [
-              {
-                "x": 646,
-                "y": 995
-              },
-              {
-                "x": 679,
-                "y": 995
-              },
-              {
-                "x": 678,
-                "y": 1006
-              },
-              {
-                "x": 644,
-                "y": 1006
-              }
-            ]
-          }
-        ],
-        "bounding_polygon": [
-          {
-            "x": 556,
-            "y": 970
-          },
-          {
-            "x": 680,
-            "y": 994
-          },
-          {
-            "x": 676,
-            "y": 1007
-          },
-          {
-            "x": 553,
-            "y": 988
-          }
-        ]
-      },
-      {
-        "text": "Therapie de remplacement de la nicotine",
-        "words": [
-          {
-            "text": "Therapie",
-            "confidence": 0.467,
-            "bounding_polygon": [
-              {
-                "x": 735,
-                "y": 979
-              },
-              {
-                "x": 758,
-                "y": 959
-              },
-              {
-                "x": 767,
-                "y": 961
-              },
-              {
-                "x": 744,
-                "y": 982
-              }
-            ]
-          },
-          {
-            "text": "de",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 759,
-                "y": 957
-              },
-              {
-                "x": 765,
-                "y": 951
-              },
-              {
-                "x": 775,
-                "y": 953
-              },
-              {
-                "x": 768,
-                "y": 960
-              }
-            ]
-          },
-          {
-            "text": "remplacement",
-            "confidence": 0.546,
-            "bounding_polygon": [
-              {
-                "x": 767,
-                "y": 949
-              },
-              {
-                "x": 796,
-                "y": 906
-              },
-              {
-                "x": 807,
-                "y": 909
-              },
-              {
-                "x": 776,
-                "y": 952
-              }
-            ]
-          },
-          {
-            "text": "de",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 797,
-                "y": 904
-              },
-              {
-                "x": 800,
-                "y": 896
-              },
-              {
-                "x": 811,
-                "y": 899
-              },
-              {
-                "x": 808,
-                "y": 907
-              }
-            ]
-          },
-          {
-            "text": "la",
-            "confidence": 0.91,
-            "bounding_polygon": [
-              {
-                "x": 801,
-                "y": 894
-              },
-              {
-                "x": 803,
-                "y": 888
-              },
-              {
-                "x": 814,
-                "y": 891
-              },
-              {
-                "x": 812,
-                "y": 897
-              }
-            ]
-          },
-          {
-            "text": "nicotine",
-            "confidence": 0.899,
-            "bounding_polygon": [
-              {
-                "x": 803,
-                "y": 886
-              },
-              {
-                "x": 806,
-                "y": 857
-              },
-              {
-                "x": 819,
-                "y": 860
-              },
-              {
-                "x": 814,
-                "y": 889
-              }
-            ]
-          }
-        ],
-        "bounding_polygon": [
-          {
-            "x": 735,
-            "y": 977
-          },
-          {
-            "x": 808,
-            "y": 853
-          },
-          {
-            "x": 819,
-            "y": 865
-          },
-          {
-            "x": 756,
-            "y": 982
-          }
-        ]
-      },
-      {
-        "text": "4 MG",
-        "words": [
-          {
-            "text": "4",
-            "confidence": 0.994,
-            "bounding_polygon": [
-              {
-                "x": 693,
-                "y": 987
-              },
-              {
-                "x": 698,
-                "y": 986
-              },
-              {
-                "x": 701,
-                "y": 998
-              },
-              {
-                "x": 695,
-                "y": 999
-              }
-            ]
-          },
-          {
-            "text": "MG",
-            "confidence": 0.997,
-            "bounding_polygon": [
-              {
-                "x": 703,
-                "y": 985
-              },
-              {
-                "x": 721,
-                "y": 981
-              },
-              {
-                "x": 724,
-                "y": 992
-              },
-              {
-                "x": 706,
-                "y": 996
-              }
-            ]
-          }
-        ],
-        "bounding_polygon": [
-          {
-            "x": 693,
-            "y": 988
-          },
-          {
-            "x": 726,
-            "y": 981
-          },
-          {
-            "x": 727,
-            "y": 991
-          },
-          {
-            "x": 693,
-            "y": 1000
-          }
-        ]
-      },
-      {
-        "text": "ZONNIC",
-        "words": [
-          {
-            "text": "ZONNIC",
-            "confidence": 0.66,
-            "bounding_polygon": [
-              {
-                "x": 641,
-                "y": 1065
-              },
-              {
-                "x": 780,
-                "y": 1025
-              },
-              {
-                "x": 787,
-                "y": 1039
-              },
-              {
-                "x": 643,
-                "y": 1087
-              }
-            ]
-          }
-        ],
-        "bounding_polygon": [
-          {
-            "x": 640,
-            "y": 1066
-          },
-          {
-            "x": 798,
-            "y": 1012
-          },
-          {
-            "x": 806,
-            "y": 1039
-          },
-          {
-            "x": 647,
-            "y": 1087
-          }
-        ]
-      },
-      {
-        "text": "Here's how it works ...",
-        "words": [
-          {
-            "text": "Here's",
-            "confidence": 0.994,
-            "bounding_polygon": [
-              {
-                "x": 401,
-                "y": 1209
-              },
-              {
-                "x": 549,
-                "y": 1210
-              },
-              {
-                "x": 549,
-                "y": 1254
-              },
-              {
-                "x": 401,
-                "y": 1257
-              }
-            ]
-          },
-          {
-            "text": "how",
-            "confidence": 0.999,
-            "bounding_polygon": [
-              {
-                "x": 559,
-                "y": 1210
-              },
-              {
-                "x": 639,
-                "y": 1210
-              },
-              {
-                "x": 639,
-                "y": 1254
-              },
-              {
-                "x": 559,
-                "y": 1254
-              }
-            ]
-          },
-          {
-            "text": "it",
-            "confidence": 0.998,
-            "bounding_polygon": [
-              {
-                "x": 667,
-                "y": 1210
-              },
-              {
-                "x": 702,
-                "y": 1210
-              },
-              {
-                "x": 702,
-                "y": 1254
-              },
-              {
-                "x": 667,
-                "y": 1254
-              }
-            ]
-          },
-          {
-            "text": "works",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 711,
-                "y": 1210
-              },
-              {
-                "x": 843,
-                "y": 1210
-              },
-              {
-                "x": 843,
-                "y": 1256
-              },
-              {
-                "x": 711,
-                "y": 1254
-              }
-            ]
-          },
-          {
-            "text": "...",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 852,
-                "y": 1210
-              },
-              {
-                "x": 903,
-                "y": 1209
-              },
-              {
-                "x": 903,
-                "y": 1257
-              },
-              {
-                "x": 852,
-                "y": 1256
-              }
-            ]
-          }
-        ],
-        "bounding_polygon": [
-          {
-            "x": 400,
-            "y": 1209
-          },
-          {
-            "x": 902,
-            "y": 1209
-          },
-          {
-            "x": 902,
-            "y": 1256
-          },
-          {
-            "x": 400,
-            "y": 1256
-          }
-        ]
-      },
-      {
-        "text": "18",
-        "words": [
-          {
-            "text": "18",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 52,
-                "y": 1517
-              },
-              {
-                "x": 79,
-                "y": 1518
-              },
-              {
-                "x": 79,
-                "y": 1548
-              },
-              {
-                "x": 51,
-                "y": 1547
-              }
-            ]
-          }
-        ],
-        "bounding_polygon": [
-          {
-            "x": 48,
-            "y": 1517
-          },
-          {
-            "x": 86,
-            "y": 1518
-          },
-          {
-            "x": 87,
-            "y": 1548
-          },
-          {
-            "x": 48,
-            "y": 1547
-          }
-        ]
-      },
-      {
-        "text": "This product may not be right for you. Always read and follow the label.",
-        "words": [
-          {
-            "text": "This",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 116,
-                "y": 1507
-              },
-              {
-                "x": 163,
-                "y": 1507
-              },
-              {
-                "x": 163,
-                "y": 1536
-              },
-              {
-                "x": 116,
-                "y": 1536
-              }
-            ]
-          },
-          {
-            "text": "product",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 168,
-                "y": 1507
-              },
-              {
-                "x": 261,
-                "y": 1507
-              },
-              {
-                "x": 261,
-                "y": 1537
-              },
-              {
-                "x": 168,
-                "y": 1536
-              }
-            ]
-          },
-          {
-            "text": "may",
-            "confidence": 0.998,
-            "bounding_polygon": [
-              {
-                "x": 267,
-                "y": 1507
-              },
-              {
-                "x": 319,
-                "y": 1507
-              },
-              {
-                "x": 319,
-                "y": 1537
-              },
-              {
-                "x": 267,
-                "y": 1537
-              }
-            ]
-          },
-          {
-            "text": "not",
-            "confidence": 0.998,
-            "bounding_polygon": [
-              {
-                "x": 324,
-                "y": 1507
-              },
-              {
-                "x": 365,
-                "y": 1507
-              },
-              {
-                "x": 365,
-                "y": 1537
-              },
-              {
-                "x": 324,
-                "y": 1537
-              }
-            ]
-          },
-          {
-            "text": "be",
-            "confidence": 0.998,
-            "bounding_polygon": [
-              {
-                "x": 371,
-                "y": 1507
-              },
-              {
-                "x": 401,
-                "y": 1507
-              },
-              {
-                "x": 401,
-                "y": 1537
-              },
-              {
-                "x": 371,
-                "y": 1537
-              }
-            ]
-          },
-          {
-            "text": "right",
-            "confidence": 0.997,
-            "bounding_polygon": [
-              {
-                "x": 407,
-                "y": 1507
-              },
-              {
-                "x": 465,
-                "y": 1506
-              },
-              {
-                "x": 465,
-                "y": 1537
-              },
-              {
-                "x": 407,
-                "y": 1537
-              }
-            ]
-          },
-          {
-            "text": "for",
-            "confidence": 0.999,
-            "bounding_polygon": [
-              {
-                "x": 471,
-                "y": 1506
-              },
-              {
-                "x": 505,
-                "y": 1506
-              },
-              {
-                "x": 505,
-                "y": 1537
-              },
-              {
-                "x": 471,
-                "y": 1537
-              }
-            ]
-          },
-          {
-            "text": "you.",
-            "confidence": 0.983,
-            "bounding_polygon": [
-              {
-                "x": 511,
-                "y": 1506
-              },
-              {
-                "x": 565,
-                "y": 1506
-              },
-              {
-                "x": 565,
-                "y": 1536
-              },
-              {
-                "x": 511,
-                "y": 1537
-              }
-            ]
-          },
-          {
-            "text": "Always",
-            "confidence": 0.994,
-            "bounding_polygon": [
-              {
-                "x": 571,
-                "y": 1506
-              },
-              {
-                "x": 653,
-                "y": 1506
-              },
-              {
-                "x": 653,
-                "y": 1536
-              },
-              {
-                "x": 571,
-                "y": 1536
-              }
-            ]
-          },
-          {
-            "text": "read",
-            "confidence": 0.991,
-            "bounding_polygon": [
-              {
-                "x": 659,
-                "y": 1506
-              },
-              {
-                "x": 716,
-                "y": 1506
-              },
-              {
-                "x": 716,
-                "y": 1536
-              },
-              {
-                "x": 659,
-                "y": 1536
-              }
-            ]
-          },
-          {
-            "text": "and",
-            "confidence": 0.998,
-            "bounding_polygon": [
-              {
-                "x": 723,
-                "y": 1506
-              },
-              {
-                "x": 766,
-                "y": 1506
-              },
-              {
-                "x": 766,
-                "y": 1536
-              },
-              {
-                "x": 723,
-                "y": 1536
-              }
-            ]
-          },
-          {
-            "text": "follow",
-            "confidence": 0.996,
-            "bounding_polygon": [
-              {
-                "x": 775,
-                "y": 1506
-              },
-              {
-                "x": 840,
-                "y": 1506
-              },
-              {
-                "x": 840,
-                "y": 1535
-              },
-              {
-                "x": 775,
-                "y": 1535
-              }
-            ]
-          },
-          {
-            "text": "the",
-            "confidence": 0.999,
-            "bounding_polygon": [
-              {
-                "x": 852,
-                "y": 1506
-              },
-              {
-                "x": 890,
-                "y": 1506
-              },
-              {
-                "x": 890,
-                "y": 1535
-              },
-              {
-                "x": 852,
-                "y": 1535
-              }
-            ]
-          },
-          {
-            "text": "label.",
-            "confidence": 0.994,
-            "bounding_polygon": [
-              {
-                "x": 896,
-                "y": 1506
-              },
-              {
-                "x": 965,
-                "y": 1507
-              },
-              {
-                "x": 965,
-                "y": 1534
-              },
-              {
-                "x": 896,
-                "y": 1535
-              }
-            ]
-          }
-        ],
-        "bounding_polygon": [
-          {
-            "x": 110,
-            "y": 1507
-          },
-          {
-            "x": 964,
-            "y": 1506
-          },
-          {
-            "x": 964,
-            "y": 1535
-          },
-          {
-            "x": 110,
-            "y": 1536
-          }
-        ]
-      },
-      {
-        "text": "Ce produit peut ne pas vous convenir. Toujours lire l'\u00e9tiquette et suivre le mode d'emploi.",
-        "words": [
-          {
-            "text": "Ce",
-            "confidence": 0.994,
-            "bounding_polygon": [
-              {
-                "x": 115,
-                "y": 1537
-              },
-              {
-                "x": 146,
-                "y": 1537
-              },
-              {
-                "x": 147,
-                "y": 1565
-              },
-              {
-                "x": 116,
-                "y": 1565
-              }
-            ]
-          },
-          {
-            "text": "produit",
-            "confidence": 0.986,
-            "bounding_polygon": [
-              {
-                "x": 152,
-                "y": 1537
-              },
-              {
-                "x": 241,
-                "y": 1537
-              },
-              {
-                "x": 241,
-                "y": 1565
-              },
-              {
-                "x": 153,
-                "y": 1565
-              }
-            ]
-          },
-          {
-            "text": "peut",
-            "confidence": 0.989,
-            "bounding_polygon": [
-              {
-                "x": 246,
-                "y": 1537
-              },
-              {
-                "x": 299,
-                "y": 1537
-              },
-              {
-                "x": 300,
-                "y": 1565
-              },
-              {
-                "x": 247,
-                "y": 1565
-              }
-            ]
-          },
-          {
-            "text": "ne",
-            "confidence": 0.994,
-            "bounding_polygon": [
-              {
-                "x": 305,
-                "y": 1537
-              },
-              {
-                "x": 334,
-                "y": 1537
-              },
-              {
-                "x": 335,
-                "y": 1565
-              },
-              {
-                "x": 305,
-                "y": 1565
-              }
-            ]
-          },
-          {
-            "text": "pas",
-            "confidence": 0.994,
-            "bounding_polygon": [
-              {
-                "x": 342,
-                "y": 1537
-              },
-              {
-                "x": 383,
-                "y": 1537
-              },
-              {
-                "x": 384,
-                "y": 1565
-              },
-              {
-                "x": 343,
-                "y": 1565
-              }
-            ]
-          },
-          {
-            "text": "vous",
-            "confidence": 0.989,
-            "bounding_polygon": [
-              {
-                "x": 389,
-                "y": 1537
-              },
-              {
-                "x": 444,
-                "y": 1537
-              },
-              {
-                "x": 444,
-                "y": 1565
-              },
-              {
-                "x": 390,
-                "y": 1565
-              }
-            ]
-          },
-          {
-            "text": "convenir.",
-            "confidence": 0.979,
-            "bounding_polygon": [
-              {
-                "x": 449,
-                "y": 1537
-              },
-              {
-                "x": 560,
-                "y": 1536
-              },
-              {
-                "x": 560,
-                "y": 1565
-              },
-              {
-                "x": 450,
-                "y": 1565
-              }
-            ]
-          },
-          {
-            "text": "Toujours",
-            "confidence": 0.992,
-            "bounding_polygon": [
-              {
-                "x": 566,
-                "y": 1536
-              },
-              {
-                "x": 662,
-                "y": 1536
-              },
-              {
-                "x": 662,
-                "y": 1565
-              },
-              {
-                "x": 566,
-                "y": 1565
-              }
-            ]
-          },
-          {
-            "text": "lire",
-            "confidence": 0.988,
-            "bounding_polygon": [
-              {
-                "x": 667,
-                "y": 1536
-              },
-              {
-                "x": 706,
-                "y": 1536
-              },
-              {
-                "x": 706,
-                "y": 1565
-              },
-              {
-                "x": 667,
-                "y": 1565
-              }
-            ]
-          },
-          {
-            "text": "l'\u00e9tiquette",
-            "confidence": 0.979,
-            "bounding_polygon": [
-              {
-                "x": 712,
-                "y": 1536
-              },
-              {
-                "x": 832,
-                "y": 1536
-              },
-              {
-                "x": 832,
-                "y": 1565
-              },
-              {
-                "x": 712,
-                "y": 1565
-              }
-            ]
-          },
-          {
-            "text": "et",
-            "confidence": 0.994,
-            "bounding_polygon": [
-              {
-                "x": 838,
-                "y": 1536
-              },
-              {
-                "x": 865,
-                "y": 1536
-              },
-              {
-                "x": 864,
-                "y": 1565
-              },
-              {
-                "x": 838,
-                "y": 1565
-              }
-            ]
-          },
-          {
-            "text": "suivre",
-            "confidence": 0.993,
-            "bounding_polygon": [
-              {
-                "x": 870,
-                "y": 1536
-              },
-              {
-                "x": 940,
-                "y": 1536
-              },
-              {
-                "x": 939,
-                "y": 1565
-              },
-              {
-                "x": 870,
-                "y": 1565
-              }
-            ]
-          },
-          {
-            "text": "le",
-            "confidence": 0.996,
-            "bounding_polygon": [
-              {
-                "x": 945,
-                "y": 1536
-              },
-              {
-                "x": 968,
-                "y": 1536
-              },
-              {
-                "x": 967,
-                "y": 1565
-              },
-              {
-                "x": 945,
-                "y": 1565
-              }
-            ]
-          },
-          {
-            "text": "mode",
             "confidence": 0.99,
             "bounding_polygon": [
               {
-                "x": 974,
-                "y": 1536
+                "x": 106,
+                "y": 30
               },
               {
-                "x": 1041,
-                "y": 1535
+                "x": 290,
+                "y": 33
               },
               {
-                "x": 1040,
-                "y": 1565
+                "x": 290,
+                "y": 79
               },
               {
-                "x": 973,
-                "y": 1565
-              }
-            ]
-          },
-          {
-            "text": "d'emploi.",
-            "confidence": 0.989,
-            "bounding_polygon": [
-              {
-                "x": 1047,
-                "y": 1535
-              },
-              {
-                "x": 1154,
-                "y": 1535
-              },
-              {
-                "x": 1153,
-                "y": 1565
-              },
-              {
-                "x": 1046,
-                "y": 1565
+                "x": 104,
+                "y": 81
               }
             ]
           }
         ],
         "bounding_polygon": [
           {
-            "x": 112,
-            "y": 1536
+            "x": 101,
+            "y": 30
           },
           {
-            "x": 1154,
-            "y": 1535
+            "x": 307,
+            "y": 30
           },
           {
-            "x": 1154,
-            "y": 1564
+            "x": 307,
+            "y": 80
           },
           {
-            "x": 112,
-            "y": 1565
+            "x": 101,
+            "y": 80
           }
         ]
       }
@@ -3360,20 +148,20 @@
   "step_2_brand_detection_pass1": {
     "logo": {
       "present": true,
-      "position": "center (on product tin), also top center (headline)",
+      "position": "center left",
       "text_colour": "navy blue",
-      "distorted_or_modified": false,
+      "distorted_or_modified": true,
       "clear_space_sufficient": true,
-      "relative_size": "medium (on tin), large (headline)"
+      "relative_size": "medium"
     },
     "halo": {
       "any_halo_present": true,
       "halo_on_z": false,
       "halo_on_c": true,
       "halo_on_other_letters": "none",
-      "halo_colour": "green (matches Green/Mint palette)",
+      "halo_colour": "#89d0c8 (mint/teal, matches Grey/Neutral secondary light palette)",
       "halo_is_gradient": false,
-      "halo_gradient_colours": "green",
+      "halo_gradient_colours": "#89d0c8",
       "halo_shape": "circle",
       "halo_proportional": true,
       "halo_has_outline": false,
@@ -3381,62 +169,62 @@
     },
     "background": {
       "type": "white",
-      "colours": "white with subtle light grey shadow under tin",
+      "colours": "white",
       "gradient_direction": "NOT PRESENT",
-      "description": "Solid white background with a slight shadow under the product tin"
+      "description": "solid white background"
     },
     "regulatory": {
-      "nicotine_warning_present": true,
-      "nicotine_warning_position": "top of image (large block), also on tin",
-      "nicotine_warning_text": "WARNING: This product contains nicotine. Nicotine is highly addictive. Only to be used by adults who are trying to quit smoking. AVERTISSEMENT : Ce produit contient de la nicotine. La nicotine cr\u00e9e une forte d\u00e9pendance. \u00c0 utiliser uniquement par des adultes qui d\u00e9sirent cesser de fumer.",
-      "nicotine_warning_bilingual": true,
-      "age_icon_present": true,
-      "age_icon_position": "bottom left",
-      "risk_communication_present": true,
-      "risk_communication_position": "bottom of image"
+      "nicotine_warning_present": false,
+      "nicotine_warning_position": "NOT PRESENT",
+      "nicotine_warning_text": "NOT PRESENT",
+      "nicotine_warning_bilingual": false,
+      "age_icon_present": false,
+      "age_icon_position": "NOT PRESENT",
+      "risk_communication_present": false,
+      "risk_communication_position": "NOT PRESENT"
     },
     "typography": {
-      "fonts_visible": "bold sans-serif (logo and headline), regular sans-serif (body and regulatory text)",
+      "fonts_visible": "bold sans-serif",
       "is_sans_serif": true,
-      "additional_text": "New to ZONNIC? Here's how it works..."
+      "additional_text": "NOT PRESENT"
     },
     "colours": {
-      "dominant_colours": "navy blue, green, white",
-      "matches_flavour_palette": "Green/Mint",
-      "secondary_colour_usage": "accent (green used for C halo and tin edge, not dominant)"
+      "dominant_colours": "navy blue, mint/teal, white",
+      "matches_flavour_palette": "Grey/Neutral",
+      "secondary_colour_usage": "used as accent (halo around C)"
     },
-    "content_type": "educational",
-    "overall_description": "The image features a ZONNIC product tin centered on a white background, with the ZONNIC logo in navy blue and a green halo around the C. Regulatory warnings are prominent at the top and bottom, and the headline asks 'New to ZONNIC?' with a brief instructional prompt. The colour palette matches the Green/Mint flavour."
+    "content_type": "logo_only",
+    "overall_description": "The image shows the ZONNIC logo in navy blue, with a mint/teal halo circle around the C. The background is solid white, and there is no regulatory or additional text. The logo is centered left and uses bold sans-serif typography."
   },
-  "step_2b_formatted_detection_sent_to_pass2": "OVERVIEW: The image features a ZONNIC product tin centered on a white background, with the ZONNIC logo in navy blue and a green halo around the C. Regulatory warnings are prominent at the top and bottom, and the headline asks 'New to ZONNIC?' with a brief instructional prompt. The colour palette matches the Green/Mint flavour.\nCONTENT TYPE: educational\n\n\u2500\u2500 LOGO \u2500\u2500\n  Present: YES\n  Position: center (on product tin), also top center (headline)\n  Text colour: navy blue\n  Distorted or modified: NO\n  Clear space sufficient: YES\n  Relative size: medium (on tin), large (headline)\n\n\u2500\u2500 C HALO (CRITICAL) \u2500\u2500\n  Any halo present: YES\n  Halo on Z (leftmost letter): NO (correct)\n  Halo on C (rightmost letter): YES (correct)\n  Halo on other letters: none\n  Halo colour: green (matches Green/Mint palette)\n  Halo is gradient (two colours): NO \u2014 solid single colour \u26a0\n  Gradient colours: green\n  Shape: circle\n  Proportional: YES\n  Has outline: NO\n\n\u2500\u2500 BACKGROUND \u2500\u2500\n  Type: white\n  Colours: white with subtle light grey shadow under tin\n  Description: Solid white background with a slight shadow under the product tin\n\n\u2500\u2500 REGULATORY ELEMENTS \u2500\u2500\n  Nicotine warning: PRESENT\n    Position: top of image (large block), also on tin\n    Text: WARNING: This product contains nicotine. Nicotine is highly addictive. Only to be used by adults who are trying to quit smoking. AVERTISSEMENT : Ce produit contient de la nicotine. La nicotine cr\u00e9e une forte d\u00e9pendance. \u00c0 utiliser uniquement par des adultes qui d\u00e9sirent cesser de fumer.\n    Bilingual: YES\n  18+ age icon: PRESENT\n    Position: bottom left\n  Risk communication: PRESENT\n    Position: bottom of image\n\n\u2500\u2500 TYPOGRAPHY \u2500\u2500\n  Fonts: bold sans-serif (logo and headline), regular sans-serif (body and regulatory text)\n  Sans-serif: YES\n  Additional text: New to ZONNIC? Here's how it works...\n\n\u2500\u2500 COLOURS \u2500\u2500\n  Dominant: navy blue, green, white\n  Flavour palette match: Green/Mint\n  Secondary colour usage: accent (green used for C halo and tin edge, not dominant)",
+  "step_2b_formatted_detection_sent_to_pass2": "OVERVIEW: The image shows the ZONNIC logo in navy blue, with a mint/teal halo circle around the C. The background is solid white, and there is no regulatory or additional text. The logo is centered left and uses bold sans-serif typography.\nCONTENT TYPE: logo_only\n\n\u2500\u2500 LOGO \u2500\u2500\n  Present: YES\n  Position: center left\n  Text colour: navy blue\n  Distorted or modified: YES\n  Clear space sufficient: YES\n  Relative size: medium\n\n\u2500\u2500 C HALO (CRITICAL) \u2500\u2500\n  Any halo present: YES\n  Halo on Z (leftmost letter): NO (correct)\n  Halo on C (rightmost letter): YES (correct)\n  Halo on other letters: none\n  Halo colour: #89d0c8 (mint/teal, matches Grey/Neutral secondary light palette)\n  Halo is gradient (two colours): NO \u2014 solid single colour (on white/grey background the halo MUST be a gradient per LOGO-05)\n  Gradient colours: #89d0c8\n  Shape: circle\n  Proportional: YES\n  Has outline: NO\n\n\u2500\u2500 BACKGROUND \u2500\u2500\n  Type: white\n  Colours: white\n  Description: solid white background\n\n\u2500\u2500 REGULATORY ELEMENTS \u2500\u2500\n  Nicotine warning: NOT PRESENT \u26a0\n  18+ age icon: NOT PRESENT \u26a0\n  Risk communication: NOT PRESENT \u26a0\n\n\u2500\u2500 TYPOGRAPHY \u2500\u2500\n  Fonts: bold sans-serif\n  Sans-serif: YES\n  Additional text: NOT PRESENT\n\n\u2500\u2500 COLOURS \u2500\u2500\n  Dominant: navy blue, mint/teal, white\n  Flavour palette match: Grey/Neutral\n  Secondary colour usage: used as accent (halo around C)",
   "step_3_rule_evaluation_pass2": {
-    "verdict": "FAIL",
-    "confidence": 98,
-    "summary": "The image features the ZONNIC logo in navy blue, centered on a white background, with a green halo around the C. The logo is shown both in the headline and on the product tin, and the halo is circular and proportional. Regulatory elements are present: a bilingual nicotine warning at the top, an 18+ icon at the bottom left, and risk communication text at the bottom. The colour palette matches the Green/Mint flavour, and the secondary green is used as an accent. Typography is consistent with bold and regular sans-serif fonts. However, the halo around the C is a solid green colour, not a gradient, which is required for white backgrounds. All other elements follow the guidelines, but the halo's lack of gradient is a critical issue that must be corrected for compliance.",
+    "verdict": "WARNING",
+    "confidence": 95,
+    "summary": "The image displays the ZONNIC logo in navy blue text, positioned center left on a solid white background. The logo features a mint/teal circular halo around the C, which is correctly placed and proportioned. The logo text is bold and sans-serif, matching brand standards, and the secondary colour is used as an accent for the halo. However, the halo around the C is a solid colour rather than a gradient, which is required for white backgrounds. There are no regulatory elements present, such as the nicotine warning, 18+ icon, or risk communication text. The logo is visually clear and uses the correct colours, but the missing regulatory elements and the incorrect halo treatment need to be addressed for full compliance. Overall, the image follows most brand standards but requires minor and critical corrections.",
     "checks_performed": [
       {
         "check_id": "CHECK-01",
         "check_name": "Regulatory: Nicotine Warning Present",
-        "status": "pass",
-        "detail": "Nicotine warning is present at the top and is bilingual (English and French)."
+        "status": "fail",
+        "detail": "No nicotine warning statement is present at the top of the image."
       },
       {
         "check_id": "CHECK-02",
         "check_name": "Regulatory: 18+ Icon Present",
-        "status": "pass",
-        "detail": "18+ icon is visible at the bottom left of the image."
+        "status": "fail",
+        "detail": "No 18+ age restriction icon is present in the image."
       },
       {
         "check_id": "CHECK-03",
         "check_name": "Regulatory: Risk Communication Present",
-        "status": "pass",
-        "detail": "Risk communication text is present at the bottom of the image."
+        "status": "fail",
+        "detail": "No risk communication text is present at the bottom of the image."
       },
       {
         "check_id": "CHECK-04",
         "check_name": "Logo Presence",
         "status": "pass",
-        "detail": "ZONNIC logo is clearly visible in the headline and on the product tin."
+        "detail": "ZONNIC logo is present and correctly positioned."
       },
       {
         "check_id": "CHECK-05",
@@ -3448,43 +236,43 @@
         "check_id": "CHECK-06",
         "check_name": "C Halo Presence and Correctness",
         "status": "fail",
-        "detail": "Halo is present and correctly placed on the C, but it is a solid colour instead of a gradient, which is required for white backgrounds."
+        "detail": "Halo around the C is a solid colour instead of a gradient, which is required on white backgrounds."
       },
       {
         "check_id": "CHECK-07",
         "check_name": "Logo Integrity",
-        "status": "pass",
-        "detail": "Logo is unmodified, no gradients in text, no outlines, no distortion, and no stacking."
+        "status": "fail",
+        "detail": "Logo is distorted or modified, which is not allowed."
       },
       {
         "check_id": "CHECK-08",
         "check_name": "Background Type Detection",
         "status": "pass",
-        "detail": "Background is solid white, not a gradient or image."
+        "detail": "Background is solid white, which matches the logo requirements."
       },
       {
         "check_id": "CHECK-09",
         "check_name": "Gradient Compliance",
         "status": "not_applicable",
-        "detail": "No gradient background is used, so gradient direction and split rules do not apply."
+        "detail": "No gradient background is present, so gradient direction and split rules do not apply."
       },
       {
         "check_id": "CHECK-10",
         "check_name": "Content Type vs Background Match",
         "status": "pass",
-        "detail": "Educational content uses a white background with secondary colour as accent, which is allowed."
+        "detail": "Logo-only content on white background is acceptable for brand visuals."
       },
       {
         "check_id": "CHECK-11",
         "check_name": "Colour Palette Compliance",
         "status": "pass",
-        "detail": "Only approved brand colours are used, matching the Green/Mint flavour palette."
+        "detail": "Only approved brand colours are used; halo matches Grey/Neutral palette."
       },
       {
         "check_id": "CHECK-12",
         "check_name": "Typography Check",
         "status": "pass",
-        "detail": "Santral sans-serif font is used throughout, with correct weights and formatting."
+        "detail": "Bold sans-serif font is used, matching Santral style. No NRT lockup text present."
       },
       {
         "check_id": "CHECK-13",
@@ -3496,124 +284,108 @@
         "check_id": "CHECK-14",
         "check_name": "Logo Safety Zone",
         "status": "pass",
-        "detail": "Logo has sufficient clear space around it; no elements intrude into the safety zone."
+        "detail": "Logo has sufficient clear space around it."
       },
       {
         "check_id": "CHECK-15",
         "check_name": "Logo on Background Dont's",
         "status": "pass",
-        "detail": "Halo does not blend into the background, flavour matches, and logo is not placed in any shape or container."
+        "detail": "Halo does not blend into background, flavour matches, and logo is not placed in any shape."
       }
     ],
     "violations": [
       {
+        "rule_id": "REG-01",
+        "rule_text": "Every marketing asset MUST include a bilingual nicotine warning statement banner at the TOP of the creative.",
+        "severity": "critical",
+        "issue": "No nicotine warning statement is present at the top of the image.",
+        "fix_suggestion": "Add the required bilingual nicotine warning statement at the top of the image.",
+        "evidence": "No warning text visible in the image.",
+        "bbox": null
+      },
+      {
+        "rule_id": "REG-02",
+        "rule_text": "The 18+ icon must be present on marketing materials to indicate age restriction.",
+        "severity": "critical",
+        "issue": "No 18+ age restriction icon is present in the image.",
+        "fix_suggestion": "Add the 18+ icon at the bottom of the image.",
+        "evidence": "No age icon visible in the image.",
+        "bbox": null
+      },
+      {
+        "rule_id": "REG-03",
+        "rule_text": "Every marketing asset MUST include risk communication text at the BOTTOM of the creative.",
+        "severity": "critical",
+        "issue": "No risk communication text is present at the bottom of the image.",
+        "fix_suggestion": "Add the required risk communication text at the bottom of the image.",
+        "evidence": "No risk text visible in the image.",
+        "bbox": null
+      },
+      {
+        "rule_id": "REG-04",
+        "rule_text": "The nicotine warning banner must be positioned at the TOP of the asset. The risk communication and 18+ icon must be at the BOTTOM.",
+        "severity": "critical",
+        "issue": "Required regulatory elements are missing from their designated positions.",
+        "fix_suggestion": "Add the nicotine warning at the top and risk communication plus 18+ icon at the bottom.",
+        "evidence": "No regulatory elements visible in the image.",
+        "bbox": null
+      },
+      {
+        "rule_id": "REG-05",
+        "rule_text": "The nicotine warning must appear in BOTH English and French on every asset.",
+        "severity": "critical",
+        "issue": "No bilingual nicotine warning is present.",
+        "fix_suggestion": "Add both English and French nicotine warning statements at the top.",
+        "evidence": "No warning text visible in the image.",
+        "bbox": null
+      },
+      {
         "rule_id": "LOGO-05",
         "rule_text": "On a white or grey gradient background, the C halo must always use the full gradient, consisting of both the primary and secondary colours.",
         "severity": "critical",
-        "issue": "The halo around the C is a solid green colour instead of a gradient, which is required for white backgrounds.",
-        "fix_suggestion": "Update the C halo to use a gradient consisting of both the primary and secondary Green/Mint colours, not a solid colour.",
-        "evidence": "Halo is detected as solid green, not gradient, on a white background.",
+        "issue": "Halo around the C is a solid colour instead of a gradient, which is required on white backgrounds.",
+        "fix_suggestion": "Change the C halo to a gradient using both the primary and secondary colours from the flavour palette.",
+        "evidence": "Halo is mint/teal solid, not a gradient.",
         "bbox": {
-          "x": 650,
-          "y": 850,
-          "w": 80,
-          "h": 80
+          "x": 261,
+          "y": 24,
+          "w": 55,
+          "h": 60
         }
       },
       {
-        "rule_id": "COLOR-04",
-        "rule_text": "Secondary/accent colours must not be used as the dominant background colour.",
-        "severity": "high",
-        "issue": "A secondary/accent colour is being used as the main background colour instead of as a small accent.",
-        "fix_suggestion": "Use the secondary colour only for small accents (halo, icons). Use white, navy, or a brand gradient as the background.",
-        "evidence": "Brand detection found secondary colour usage: 'accent (green used for c halo and tin edge, not dominant)'.",
-        "bbox": null
+        "rule_id": "LOGO-13",
+        "rule_text": "The logo should never be altered or recreated in any way.",
+        "severity": "critical",
+        "issue": "Logo is distorted or modified, which is not allowed.",
+        "fix_suggestion": "Use the official, unmodified ZONNIC logo asset.",
+        "evidence": "Brand detection flagged logo as distorted or modified.",
+        "bbox": {
+          "x": 101,
+          "y": 30,
+          "w": 206,
+          "h": 50
+        }
       }
     ],
     "passed_details": [
       {
-        "rule_id": "REG-01",
-        "category": "Regulatory",
-        "detail": "Nicotine warning is present at the top and is bilingual.",
-        "status": "pass"
-      },
-      {
-        "rule_id": "REG-02",
-        "category": "Regulatory",
-        "detail": "18+ icon is present at the bottom left.",
-        "status": "pass"
-      },
-      {
-        "rule_id": "REG-03",
-        "category": "Regulatory",
-        "detail": "Risk communication text is present at the bottom.",
-        "status": "pass"
-      },
-      {
-        "rule_id": "REG-04",
-        "category": "Regulatory",
-        "detail": "Nicotine warning is at the top, risk communication and 18+ icon are at the bottom.",
-        "status": "pass"
-      },
-      {
-        "rule_id": "REG-05",
-        "category": "Regulatory",
-        "detail": "Nicotine warning is bilingual (English and French).",
-        "status": "pass"
-      },
-      {
         "rule_id": "LOGO-01",
         "category": "Logo",
-        "detail": "Logo consists of navy blue text with a circular halo around the C.",
-        "status": "pass"
-      },
-      {
-        "rule_id": "LOGO-02",
-        "category": "Logo",
-        "detail": "Not applicable as background is not a gradient.",
-        "status": "not_applicable"
-      },
-      {
-        "rule_id": "LOGO-03",
-        "category": "Logo",
-        "detail": "Logo text is navy blue on a light background.",
+        "detail": "ZONNIC logo consists of navy blue text with a circular halo around the C, matching brand standards.",
         "status": "pass"
       },
       {
         "rule_id": "LOGO-04",
         "category": "Logo",
-        "detail": "Colour logo is used, not monochrome.",
+        "detail": "Colour logo is used, not monochrome, which is correct for this asset type.",
         "status": "pass"
       },
       {
         "rule_id": "LOGO-06",
         "category": "Logo",
-        "detail": "Logo text is navy blue on white background.",
+        "detail": "Logo text is navy blue on a white background, which is correct.",
         "status": "pass"
-      },
-      {
-        "rule_id": "LOGO-07",
-        "category": "Logo",
-        "detail": "Not applicable as background is not a light image.",
-        "status": "not_applicable"
-      },
-      {
-        "rule_id": "LOGO-08",
-        "category": "Logo",
-        "detail": "Not applicable as background is not a light image.",
-        "status": "not_applicable"
-      },
-      {
-        "rule_id": "LOGO-09",
-        "category": "Logo",
-        "detail": "Not applicable as background is not a dark image.",
-        "status": "not_applicable"
-      },
-      {
-        "rule_id": "LOGO-10",
-        "category": "Logo",
-        "detail": "Not applicable as background is not a dark image.",
-        "status": "not_applicable"
       },
       {
         "rule_id": "LOGO-11",
@@ -3624,37 +396,19 @@
       {
         "rule_id": "LOGO-12",
         "category": "Logo",
-        "detail": "Logo size is above minimum required for screen.",
+        "detail": "Logo size is medium and meets minimum size requirements.",
         "status": "pass"
-      },
-      {
-        "rule_id": "LOGO-13",
-        "category": "Logo",
-        "detail": "Logo is not altered or recreated.",
-        "status": "pass"
-      },
-      {
-        "rule_id": "LOGO-14",
-        "category": "Logo",
-        "detail": "No NRT lockup text is present, so rule is not applicable.",
-        "status": "not_applicable"
-      },
-      {
-        "rule_id": "LOGO-15",
-        "category": "Logo",
-        "detail": "No NRT lockup text is present, so rule is not applicable.",
-        "status": "not_applicable"
       },
       {
         "rule_id": "LOGO-DONT-01",
         "category": "Logo",
-        "detail": "C halo is present.",
+        "detail": "C halo is present and visible.",
         "status": "pass"
       },
       {
         "rule_id": "LOGO-DONT-02",
         "category": "Logo",
-        "detail": "Halo is not on the Z; only on the C.",
+        "detail": "Halo is not on the Z; only on the C, which is correct.",
         "status": "pass"
       },
       {
@@ -3666,31 +420,19 @@
       {
         "rule_id": "LOGO-DONT-04",
         "category": "Logo",
-        "detail": "Halo is proportional to the logo text.",
-        "status": "pass"
-      },
-      {
-        "rule_id": "LOGO-DONT-05",
-        "category": "Logo",
-        "detail": "No gradients in logo text.",
+        "detail": "Halo is proportionally sized to the logo text.",
         "status": "pass"
       },
       {
         "rule_id": "LOGO-DONT-06",
         "category": "Logo",
-        "detail": "Halo does not blend into the background.",
-        "status": "pass"
-      },
-      {
-        "rule_id": "LOGO-DONT-07",
-        "category": "Logo",
-        "detail": "Logo text does not have an outline.",
+        "detail": "Halo does not blend into the background; it is clearly visible.",
         "status": "pass"
       },
       {
         "rule_id": "LOGO-DONT-08",
         "category": "Logo",
-        "detail": "Halo does not have reversed outline styling.",
+        "detail": "Halo does not have a reversed outline.",
         "status": "pass"
       },
       {
@@ -3700,153 +442,123 @@
         "status": "pass"
       },
       {
-        "rule_id": "LOGO-DONT-10",
-        "category": "Logo",
-        "detail": "Logo is not used on a dark background.",
-        "status": "pass"
-      },
-      {
         "rule_id": "LOGO-DONT-11",
         "category": "Logo",
         "detail": "No outline or halo on other letters besides C.",
         "status": "pass"
       },
       {
-        "rule_id": "LOGO-DONT-12",
-        "category": "Logo",
-        "detail": "Logo colour is not reversed; navy blue is used on white.",
-        "status": "pass"
-      },
-      {
-        "rule_id": "LOGO-DONT-13",
-        "category": "Logo",
-        "detail": "Logo layout is not modified or rearranged.",
-        "status": "pass"
-      },
-      {
         "rule_id": "LOGO-DONT-14",
         "category": "Logo",
-        "detail": "Halo colour matches the Green/Mint flavour palette.",
+        "detail": "Halo colour matches the Grey/Neutral flavour palette.",
         "status": "pass"
       },
       {
         "rule_id": "LOGO-DONT-15",
         "category": "Logo",
-        "detail": "Halo shape is circular, not distorted.",
+        "detail": "Halo shape is circular and not distorted.",
         "status": "pass"
       },
       {
-        "rule_id": "LOGOBG-DONT-01",
+        "rule_id": "LOGO-DONT-05",
         "category": "Logo",
-        "detail": "Halo and background are not the same colour.",
+        "detail": "Logo text does not use gradients; only solid navy blue.",
         "status": "pass"
       },
       {
-        "rule_id": "LOGOBG-DONT-02",
+        "rule_id": "LOGO-DONT-07",
         "category": "Logo",
-        "detail": "Halo and flat background are not the same colour.",
+        "detail": "Logo text does not have an outline.",
         "status": "pass"
       },
       {
-        "rule_id": "LOGOBG-DONT-03",
+        "rule_id": "LOGO-DONT-10",
         "category": "Logo",
-        "detail": "Halo colour matches flavour palette; no mismatch.",
+        "detail": "Logo is not used on a dark background.",
         "status": "pass"
       },
       {
-        "rule_id": "LOGOBG-DONT-04",
+        "rule_id": "LOGO-DONT-12",
         "category": "Logo",
-        "detail": "No secondary halo is white.",
+        "detail": "Logo colour is not reversed; navy blue on white is correct.",
         "status": "pass"
       },
       {
-        "rule_id": "LOGOBG-DONT-05",
+        "rule_id": "LOGO-DONT-13",
         "category": "Logo",
-        "detail": "No gradients in logo text on gradient backgrounds.",
-        "status": "pass"
-      },
-      {
-        "rule_id": "LOGOBG-DONT-06",
-        "category": "Logo",
-        "detail": "Logo is not navy blue on a dark image.",
-        "status": "pass"
-      },
-      {
-        "rule_id": "LOGOBG-DONT-07",
-        "category": "Logo",
-        "detail": "Logo is not white on a light image.",
-        "status": "pass"
-      },
-      {
-        "rule_id": "LOGOBG-DONT-08",
-        "category": "Logo",
-        "detail": "Logo is not placed in any shape or container over an image.",
+        "detail": "Logo text is not stacked or rearranged.",
         "status": "pass"
       },
       {
         "rule_id": "GRAD-01",
         "category": "Gradient",
-        "detail": "No gradient background is used, so rule is not applicable.",
+        "detail": "No gradient background is present, so gradient direction rule does not apply.",
         "status": "not_applicable"
       },
       {
         "rule_id": "GRAD-02",
         "category": "Gradient",
-        "detail": "No gradient background is used, so rule is not applicable.",
+        "detail": "No gradient background is present, so gradient split rule does not apply.",
         "status": "not_applicable"
       },
       {
         "rule_id": "GRAD-03",
         "category": "Gradient",
-        "detail": "No gradient background is used, so rule is not applicable.",
+        "detail": "No gradient background is present, so logo position on gradient rule does not apply.",
         "status": "not_applicable"
       },
       {
         "rule_id": "GRAD-04",
         "category": "Gradient",
-        "detail": "No grey gradient background is used, so rule is not applicable.",
+        "detail": "No grey gradient background is used, so this rule does not apply.",
         "status": "not_applicable"
       },
       {
         "rule_id": "GRAD-05",
         "category": "Gradient",
-        "detail": "No gradient background is used, so rule is not applicable.",
+        "detail": "No gradient background is used, so format rules do not apply.",
         "status": "not_applicable"
       },
       {
         "rule_id": "COLOR-01",
         "category": "Colors",
-        "detail": "Primary colour is used as main visual cue for flavour.",
+        "detail": "Primary colour (navy blue) is used for logo text, matching brand palette.",
         "status": "pass"
       },
       {
         "rule_id": "COLOR-02",
         "category": "Colors",
-        "detail": "Secondary colour is used as accent (halo and tin edge), not dominant.",
+        "detail": "Secondary colour (mint/teal) is used as an accent for the C halo.",
         "status": "pass"
       },
       {
         "rule_id": "COLOR-03",
         "category": "Colors",
-        "detail": "Not applicable as asset is not flavour-led.",
+        "detail": "Not a flavour-led asset, so full gradient background is not required.",
         "status": "not_applicable"
+      },
+      {
+        "rule_id": "COLOR-04",
+        "category": "Colors",
+        "detail": "Secondary colour is used only as an accent, not as a full background.",
+        "status": "pass"
       },
       {
         "rule_id": "CONTENT-01",
         "category": "Content",
-        "detail": "Not applicable as asset is not flavour-led.",
-        "status": "not_applicable"
+        "detail": "Logo-only content does not require flavour-led background.",
+        "status": "pass"
       },
       {
         "rule_id": "CONTENT-02",
         "category": "Content",
-        "detail": "Educational content uses secondary colour as accent only.",
-        "status": "pass"
+        "detail": "Not educational content, so grey background rules do not apply.",
+        "status": "not_applicable"
       },
       {
         "rule_id": "CONTENT-03",
         "category": "Content",
-        "detail": "Not applicable as asset is not brand purpose content.",
+        "detail": "Not brand purpose content, so grey & white background rules do not apply.",
         "status": "not_applicable"
       },
       {
@@ -3858,41 +570,137 @@
       {
         "rule_id": "CONTENT-DONT-02",
         "category": "Content",
-        "detail": "No gradient background is used for educational content.",
+        "detail": "No gradient background is used for non-flavour content.",
         "status": "pass"
       },
       {
         "rule_id": "CONTENT-DONT-03",
         "category": "Content",
         "detail": "No grey gradient background is used.",
-        "status": "pass"
+        "status": "not_applicable"
       },
       {
         "rule_id": "CONTENT-DONT-04",
         "category": "Content",
-        "detail": "Not applicable as asset is not flavour-led.",
-        "status": "not_applicable"
+        "detail": "Solid white background is acceptable for logo-only visuals.",
+        "status": "pass"
       },
       {
         "rule_id": "TYPO-01",
         "category": "Typography",
-        "detail": "Santral font is used in correct weights.",
+        "detail": "Bold sans-serif font is used, matching Santral style.",
         "status": "pass"
       },
       {
         "rule_id": "TYPO-02",
         "category": "Typography",
-        "detail": "Santral is used across all communications.",
+        "detail": "Santral style font is used for logo text.",
         "status": "pass"
       },
       {
         "rule_id": "TYPO-03",
         "category": "Typography",
-        "detail": "No NRT lockup text is present, so rule is not applicable.",
+        "detail": "No NRT lockup text present, so rule does not apply.",
+        "status": "not_applicable"
+      },
+      {
+        "rule_id": "LOGO-14",
+        "category": "Typography",
+        "detail": "No NRT lockup text present, so rule does not apply.",
+        "status": "not_applicable"
+      },
+      {
+        "rule_id": "LOGO-15",
+        "category": "Typography",
+        "detail": "No NRT lockup text present, so rule does not apply.",
+        "status": "not_applicable"
+      },
+      {
+        "rule_id": "LOGOBG-DONT-01",
+        "category": "Logo",
+        "detail": "Halo does not disappear into the background; colours are distinct.",
+        "status": "pass"
+      },
+      {
+        "rule_id": "LOGOBG-DONT-02",
+        "category": "Logo",
+        "detail": "Halo does not disappear into a flat background; colours are distinct.",
+        "status": "pass"
+      },
+      {
+        "rule_id": "LOGOBG-DONT-03",
+        "category": "Logo",
+        "detail": "Halo colour matches the flavour palette; no mismatch.",
+        "status": "pass"
+      },
+      {
+        "rule_id": "LOGOBG-DONT-04",
+        "category": "Logo",
+        "detail": "No secondary halo is white; only mint/teal is used.",
+        "status": "pass"
+      },
+      {
+        "rule_id": "LOGOBG-DONT-05",
+        "category": "Logo",
+        "detail": "Logo text does not use gradients on gradient backgrounds.",
+        "status": "pass"
+      },
+      {
+        "rule_id": "LOGOBG-DONT-06",
+        "category": "Logo",
+        "detail": "Logo is not used on a dark image background.",
+        "status": "pass"
+      },
+      {
+        "rule_id": "LOGOBG-DONT-07",
+        "category": "Logo",
+        "detail": "Logo is not used in white on a light image background.",
+        "status": "pass"
+      },
+      {
+        "rule_id": "LOGOBG-DONT-08",
+        "category": "Logo",
+        "detail": "Logo is not placed in any shape or container over an image.",
+        "status": "pass"
+      },
+      {
+        "rule_id": "LOGO-02",
+        "category": "Content",
+        "detail": "Rule was not evaluated by the model",
+        "status": "not_applicable"
+      },
+      {
+        "rule_id": "LOGO-03",
+        "category": "Content",
+        "detail": "Rule was not evaluated by the model",
+        "status": "not_applicable"
+      },
+      {
+        "rule_id": "LOGO-07",
+        "category": "Content",
+        "detail": "Rule was not evaluated by the model",
+        "status": "not_applicable"
+      },
+      {
+        "rule_id": "LOGO-08",
+        "category": "Content",
+        "detail": "Rule was not evaluated by the model",
+        "status": "not_applicable"
+      },
+      {
+        "rule_id": "LOGO-09",
+        "category": "Content",
+        "detail": "Rule was not evaluated by the model",
+        "status": "not_applicable"
+      },
+      {
+        "rule_id": "LOGO-10",
+        "category": "Content",
+        "detail": "Rule was not evaluated by the model",
         "status": "not_applicable"
       }
     ],
-    "content_type_detected": "educational",
+    "content_type_detected": "unknown",
     "background_type_detected": "white"
   }
 }
