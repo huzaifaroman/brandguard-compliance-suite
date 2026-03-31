@@ -185,6 +185,7 @@ async def analyze_single_image(
 
     if result["confidence"] > 0:
         await redis_client.cache_analysis(image_hash, result)
+    await redis_client.invalidate_history_cache()
     return result
 
 

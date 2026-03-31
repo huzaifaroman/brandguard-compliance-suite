@@ -9,7 +9,7 @@ import { cacheGet, cacheSet, cacheInvalidatePrefix } from "./cache";
 const API_BASE = "";
 
 const RULES_TTL = 5 * 60 * 1000;
-const HISTORY_TTL = 30 * 1000;
+const HISTORY_TTL = 60 * 60 * 1000;
 const HEALTH_TTL = 15 * 1000;
 
 export async function analyzeImage(

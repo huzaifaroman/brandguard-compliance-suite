@@ -25,6 +25,22 @@ async def get_client() -> Optional[Redis]:
     return _client
 
 
+async def cache_delete(key: str):
+    client = await get_client()
+    if client is None:
+        return
+    try:
+        await client.delete(key)
+    except Exception as e:
+        logger.error(f"Redis cache_delete error for key '{key}': {e}")
+
+
+async def invalidate_history_cache():
+    for limit in [50, 100]:
+        await cache_delete(f"history:{limit}:0")
+    logger.info("History cache invalidated")
+
+
 async def cache_set(key: str, value, ttl: Optional[int] = None):
     client = await get_client()
     if client is None:

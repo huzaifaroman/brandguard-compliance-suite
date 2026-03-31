@@ -205,6 +205,7 @@ async def run_job(job_id: str):
 
         if result["confidence"] > 0:
             await redis_client.cache_analysis(image_hash, result)
+        await redis_client.invalidate_history_cache()
 
         job["status"] = "done"
         job["step"] = "done"

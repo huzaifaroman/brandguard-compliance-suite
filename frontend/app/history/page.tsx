@@ -14,6 +14,7 @@ import {
   Inbox,
 } from "lucide-react";
 import { getHistory } from "@/lib/api";
+import { cacheInvalidatePrefix } from "@/lib/cache";
 import type { HistoryItem } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,8 @@ export default function HistoryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadHistory = () => {
+  const loadHistory = useCallback((forceRefresh = false) => {
+    if (forceRefresh) cacheInvalidatePrefix("history:");
     setLoading(true);
     getHistory()
       .then((res) => {
@@ -42,7 +44,7 @@ export default function HistoryPage() {
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
-  };
+  }, []);
 
   useEffect(() => {
     loadHistory();
@@ -79,7 +81,7 @@ export default function HistoryPage() {
                 </p>
               </div>
             </div>
-            <Button variant="outline" size="sm" onClick={loadHistory} disabled={loading} className="gap-2">
+            <Button variant="outline" size="sm" onClick={() => loadHistory(true)} disabled={loading} className="gap-2">
               <RefreshCw className={`w-3.5 h-3.5 transition-transform duration-500 ${loading ? "animate-spin" : ""}`} />
               Refresh
             </Button>
