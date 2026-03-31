@@ -227,11 +227,12 @@ RULE STATUS — EVERY RULE MUST BE ONE OF THREE:
 CRITICAL: Do NOT mark a rule as "pass" if the detection facts show it fails. Trust the detection facts.
 
 SUMMARY REQUIREMENTS (the "summary" field):
-Write a 4-6 sentence detailed summary that a marketing team can understand at a glance:
-- Sentence 1-2: Describe what brand elements are visible — the ZONNIC logo position, text colour, the navy blue filled circle behind the Z (this is a design element, NOT the halo), the C halo (colour, shape, whether it's a gradient or solid), and the background type/colour.
-- Sentence 3-4: State what is CORRECT — which brand guidelines are properly followed.
-- Sentence 5-6: State what is WRONG — list the specific violations found and why they fail.
-- Be specific about colours, shapes, and positions. Do NOT be vague.
+Write a detailed visual assessment (4-6 sentences) for a marketing team:
+- FIRST: Describe exactly what you see — logo text colour, position, any shapes/circles around or behind letters, the C halo (colour, gradient vs solid, shape), background colour/type, any regulatory text visible, any other design elements.
+- THEN: State what follows brand guidelines correctly.
+- THEN: State what violates brand guidelines — be specific about which rule IDs fail and why.
+- Be PRECISE about colours (navy blue, teal, white), shapes (circle, gradient ring), and positions (top, bottom, around which letter).
+- If there's anything unusual around the brand name or logo (wrong colours, extra elements, missing elements, wrong shapes), call it out explicitly.
 
 OVERALL VERDICT:
 - PASS: No violations found
@@ -274,7 +275,7 @@ PASS2_SCHEMA = {
                 },
                 "summary": {
                     "type": "string",
-                    "description": "4-6 sentence detailed summary. MUST include: (1) What brand elements are present — logo position, text colour, the navy blue filled circle behind the Z letter, C halo colour/shape/gradient status, background type. (2) What is correct — list specific passing elements. (3) What is wrong — list specific violations found. Write for a marketing team."
+                    "description": "4-6 sentence visual assessment. Describe what you see (logo, colours, shapes around letters, halo details, background, regulatory text), then what is correct, then what violates guidelines with specific rule IDs. Be precise about colours, shapes, positions."
                 },
                 "checks_performed": {
                     "type": "array",
