@@ -62,14 +62,15 @@ const verdictConfig: Record<string, { icon: typeof ShieldCheck; color: string; b
   WARNING: { icon: ShieldQuestion, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/30", label: "Needs Review" },
 };
 const pipelineSteps = [
-  { icon: Cloud, label: "Uploading Image", sublabel: "Cloud storage" },
-  { icon: ScanEye, label: "Scanning Image", sublabel: "Reading elements" },
-  { icon: Brain, label: "Checking Rules", sublabel: "Brand guidelines" },
+  { icon: Cloud, label: "Uploading", sublabel: "Cloud storage" },
+  { icon: ScanEye, label: "Vision Analysis", sublabel: "Reading elements" },
+  { icon: Brain, label: "Brand Detection", sublabel: "Identifying elements" },
+  { icon: Scan, label: "Rule Evaluation", sublabel: "62 brand rules" },
   { icon: FileCheck, label: "Building Report", sublabel: "Final results" },
 ];
 
 const stepToIndex: Record<string, number> = {
-  uploading: 0, vision: 1, llm: 2, persisting: 3, done: 3,
+  uploading: 0, vision: 1, detecting: 2, llm: 3, evaluating: 3, persisting: 4, done: 4,
 };
 
 const SESSION_KEY = "compliance_analyze_session";
@@ -176,7 +177,7 @@ export default function AnalyzePage() {
       },
       (res) => {
         setLoadingProgress(100);
-        setActiveStep(3);
+        setActiveStep(4);
         setStreamMessage("Analysis complete");
         saveSession(res, preview);
         setTimeout(() => {
@@ -513,29 +514,65 @@ export default function AnalyzePage() {
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-5 gap-1.5">
                     {pipelineSteps.map((step, i) => {
                       const Icon = step.icon;
                       const isActive = i === activeStep;
                       const isDone = i < activeStep || loadingProgress === 100;
                       return (
-                        <div
+                        <motion.div
                           key={i}
-                          className={`flex flex-col items-center gap-1.5 rounded-lg p-2.5 transition-all duration-300 ${
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.08, duration: 0.3 }}
+                          className={`flex flex-col items-center gap-1.5 rounded-xl p-2.5 transition-all duration-500 ${
                             isActive
-                              ? "bg-primary/10 ring-1 ring-primary/30"
+                              ? "bg-primary/10 ring-1 ring-primary/30 shadow-lg shadow-primary/10"
                               : isDone
-                              ? "bg-green-500/10"
-                              : "bg-muted/50 opacity-50"
+                              ? "bg-green-500/5 ring-1 ring-green-500/20"
+                              : "bg-muted/30 opacity-40"
                           }`}
                         >
-                          <div className="relative">
-                            {isActive ? (
-                              <Loader2 className="w-5 h-5 text-primary animate-spin" />
-                            ) : isDone ? (
-                              <CheckCircle2 className="w-5 h-5 text-green-500" />
-                            ) : (
-                              <Icon className="w-5 h-5 text-muted-foreground" />
+                          <div className="relative flex items-center justify-center w-8 h-8">
+                            {isActive && (
+                              <motion.div
+                                className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary"
+                                animate={{ rotate: 360 }}
+                                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                              />
+                            )}
+                            {isActive && (
+                              <motion.div
+                                className="absolute inset-[-2px] rounded-full border-2 border-transparent border-b-primary/30"
+                                animate={{ rotate: -360 }}
+                                transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                              />
+                            )}
+                            {isDone && (
+                              <motion.div
+                                className="absolute inset-0 rounded-full bg-green-500/10"
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                              />
+                            )}
+                            <motion.div
+                              animate={isActive ? { scale: [1, 1.1, 1] } : { scale: 1 }}
+                              transition={isActive ? { repeat: Infinity, duration: 2, ease: "easeInOut" } : {}}
+                            >
+                              <Icon className={`w-4 h-4 relative z-10 ${
+                                isActive ? "text-primary" : isDone ? "text-green-500" : "text-muted-foreground"
+                              }`} />
+                            </motion.div>
+                            {isDone && (
+                              <motion.div
+                                className="absolute -bottom-0.5 -right-0.5 z-20"
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ type: "spring", stiffness: 500, damping: 20, delay: 0.15 }}
+                              >
+                                <CheckCircle2 className="w-3 h-3 text-green-500 fill-green-500/20" />
+                              </motion.div>
                             )}
                           </div>
                           <span className={`text-[10px] font-medium text-center leading-tight ${
@@ -544,7 +581,7 @@ export default function AnalyzePage() {
                             {step.label}
                           </span>
                           <span className="text-[9px] text-muted-foreground text-center leading-tight">{step.sublabel}</span>
-                        </div>
+                        </motion.div>
                       );
                     })}
                   </div>
