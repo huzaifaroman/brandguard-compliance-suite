@@ -21,8 +21,7 @@ import {
   ChevronRight,
   MessageSquare,
   Send,
-  Printer,
-  Download,
+  FileDown,
   Info,
   Lightbulb,
   Scan,
@@ -245,8 +244,12 @@ export default function ReportPage() {
               </div>
             </div>
             <div className="flex items-center gap-2 print:hidden">
-              <Button variant="outline" size="sm" onClick={() => window.print()} className="gap-1.5">
-                <Printer className="w-3.5 h-3.5" /> Print
+              <Button variant="outline" size="sm" onClick={async () => {
+                if (!result) return;
+                const { generateSingleReportPDF } = await import("@/lib/pdf-generator");
+                await generateSingleReportPDF(result, reportId);
+              }} className="gap-1.5">
+                <FileDown className="w-3.5 h-3.5" /> PDF
               </Button>
             </div>
           </div>

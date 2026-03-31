@@ -15,7 +15,6 @@ import {
   ShieldQuestion,
   X,
   RotateCcw,
-  Download,
   FileText,
   CheckCircle2,
   Cloud,
@@ -246,59 +245,6 @@ export default function BatchPage() {
     clearBatchSession();
   };
 
-  const exportCSV = () => {
-    if (!result) return;
-    const headers = ["Image", "Verdict", "Confidence", "Violations", "Checks", "Issues"];
-    const rows = result.results.map((r) => [
-      r.image_name,
-      r.verdict,
-      String(r.confidence),
-      String(r.violations.length),
-      r.violations.map((v) => getFriendlyName(v.rule_id)).join("; "),
-      r.violations.map((v) => v.issue).join("; "),
-    ]);
-    const csv = [headers, ...rows].map((row) => row.map((c) => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `compliance-batch-${result.batch_id.slice(0, 8)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const exportPDF = async () => {
-    if (!result) return;
-    const { jsPDF } = await import("jspdf");
-    const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text("Compliance Batch Report", 14, 20);
-    doc.setFontSize(10);
-    doc.text(`Batch ID: ${result.batch_id}`, 14, 30);
-    doc.text(`Total: ${result.total_images} | Passed: ${result.summary.passed} | Failed: ${result.summary.failed} | Warnings: ${result.summary.warnings}`, 14, 38);
-
-    let y = 50;
-    result.results.forEach((r, i) => {
-      if (y > 260) { doc.addPage(); y = 20; }
-      doc.setFontSize(12);
-      doc.text(`${i + 1}. ${r.image_name} — ${r.verdict} (${r.confidence}%)`, 14, y);
-      y += 8;
-      if (r.violations.length > 0) {
-        doc.setFontSize(9);
-        r.violations.forEach((v) => {
-          if (y > 270) { doc.addPage(); y = 20; }
-          doc.text(`  ${getFriendlyName(v.rule_id)} (${v.severity}): ${v.issue}`, 18, y);
-          y += 6;
-          if (v.fix_suggestion) {
-            doc.text(`    Fix: ${v.fix_suggestion}`, 22, y);
-            y += 6;
-          }
-        });
-      }
-      y += 4;
-    });
-    doc.save(`compliance-batch-${result.batch_id.slice(0, 8)}.pdf`);
-  };
 
   const donutData = result
     ? [
@@ -606,14 +552,6 @@ export default function BatchPage() {
               >
                 <div className="flex items-center justify-between">
                   <h2 className="text-sm font-semibold text-foreground/80">Individual Reports</h2>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={exportCSV} className="gap-1.5 h-8 text-xs">
-                      <Download className="w-3.5 h-3.5" /> CSV
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={exportPDF} className="gap-1.5 h-8 text-xs">
-                      <FileText className="w-3.5 h-3.5" /> PDF
-                    </Button>
-                  </div>
                 </div>
 
                 {result.results.map((r, i) => (
@@ -631,6 +569,14 @@ export default function BatchPage() {
                 <Button variant="outline" onClick={handleReset} className="gap-2">
                   <RotateCcw className="w-4 h-4" />
                   New Batch
+                </Button>
+                <Button variant="outline" onClick={async () => {
+                  if (!result) return;
+                  const { generateBatchReportPDF } = await import("@/lib/pdf-generator");
+                  await generateBatchReportPDF(result);
+                }} className="gap-2">
+                  <FileText className="w-4 h-4" />
+                  Download Batch PDF
                 </Button>
               </div>
             </motion.div>
@@ -745,6 +691,32 @@ function BatchImageReport({
                 <p className="text-lg font-bold tabular-nums text-foreground">{r.confidence}%</p>
                 <p className="text-[10px] text-muted-foreground">confidence</p>
               </div>
+              <button
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  const { generateSingleReportPDF } = await import("@/lib/pdf-generator");
+                  const asResult = {
+                    image_url: r.image_url,
+                    image_width: r.image_width,
+                    image_height: r.image_height,
+                    verdict: r.verdict,
+                    confidence: r.confidence,
+                    violations: r.violations,
+                    passed_details: r.passed_details,
+                    summary: r.summary || "",
+                    content_type_detected: r.content_type_detected || "",
+                    background_type_detected: r.background_type_detected || "",
+                    session_id: r.session_id,
+                    cached: false,
+                    image_hash: null,
+                  };
+                  await generateSingleReportPDF(asResult, r.session_id ? `RPT-${r.session_id.slice(0, 8).toUpperCase()}` : r.image_name);
+                }}
+                className="p-1.5 rounded-lg hover:bg-primary/10 transition-colors"
+                title="Download PDF report"
+              >
+                <FileText className="w-4 h-4 text-primary" />
+              </button>
               {r.session_id && (
                 <Link
                   href={`/report/${r.session_id}`}

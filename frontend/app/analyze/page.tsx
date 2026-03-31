@@ -31,7 +31,7 @@ import {
   Scan,
   BookOpen,
   Lightbulb,
-  Printer,
+  FileDown,
   ChevronDown,
   CircleSlash,
   Sparkles,
@@ -814,8 +814,11 @@ export default function AnalyzePage() {
                       <FileText className="w-3.5 h-3.5" /> Full Report
                     </Button>
                   </Link>
-                  <Button variant="outline" size="sm" onClick={() => window.print()} className="h-8 text-xs gap-1.5">
-                    <Printer className="w-3.5 h-3.5" /> Print
+                  <Button variant="outline" size="sm" onClick={async () => {
+                    const { generateSingleReportPDF } = await import("@/lib/pdf-generator");
+                    await generateSingleReportPDF(result, result.session_id ? `RPT-${result.session_id.slice(0, 8).toUpperCase()}` : undefined);
+                  }} className="h-8 text-xs gap-1.5">
+                    <FileDown className="w-3.5 h-3.5" /> PDF
                   </Button>
                 </div>
               </div>
