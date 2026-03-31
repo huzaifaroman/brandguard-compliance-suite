@@ -3,7 +3,7 @@ import uuid
 import json
 import logging
 from fastapi import APIRouter, UploadFile, File, Request, HTTPException
-from typing import List
+from typing import List, Dict, Any
 
 from backend.models.schemas import BatchResult, BatchSummary, BatchImageResult
 from backend.services.compliance_engine import analyze_single_image
@@ -17,76 +17,94 @@ MAX_BATCH_SIZE = 10
 MAX_FILE_SIZE = 20 * 1024 * 1024
 ALLOWED_TYPES = {"image/png", "image/jpeg", "image/webp", "image/gif"}
 
+_batch_jobs: Dict[str, Dict[str, Any]] = {}
+
+
+@router.post("/batch/start")
+async def batch_start(
+    request: Request,
+    files: List[UploadFile] = File(...),
+):
+    if len(files) > MAX_BATCH_SIZE:
+        raise HTTPException(status_code=400, detail=f"Maximum {MAX_BATCH_SIZE} files allowed")
+    if len(files) == 0:
+        raise HTTPException(status_code=400, detail="No files provided")
+
+    batch_id = str(uuid.uuid4())
+    rules = getattr(request.app.state, "rules", {})
+
+    file_data = []
+    for f in files:
+        content = await f.read()
+        file_data.append({
+            "filename": f.filename or "image.png",
+            "content_type": f.content_type,
+            "bytes": content,
+        })
+
+    _batch_jobs[batch_id] = {
+        "status": "processing",
+        "total": len(file_data),
+        "completed": 0,
+        "step": "uploading",
+        "result": None,
+    }
+
+    logger.info("Batch %s: %d file(s) — job started", batch_id[:8], len(file_data))
+
+    asyncio.create_task(_run_batch(batch_id, file_data, rules))
+
+    return {"batch_id": batch_id, "total": len(file_data)}
+
+
+@router.get("/batch/status/{batch_id}")
+async def batch_status(batch_id: str):
+    job = _batch_jobs.get(batch_id)
+    if not job:
+        cached = await redis_client.cache_get(f"batch:{batch_id}")
+        if cached:
+            return {
+                "status": "done",
+                "total": cached.get("total_images", 0),
+                "completed": cached.get("total_images", 0),
+                "step": "done",
+                "result": cached,
+            }
+        raise HTTPException(status_code=404, detail="Batch not found")
+    return {
+        "status": job["status"],
+        "total": job["total"],
+        "completed": job["completed"],
+        "step": job["step"],
+        "result": job["result"],
+    }
+
 
 @router.post("/batch", response_model=BatchResult)
 async def batch_analyze(
     request: Request,
     files: List[UploadFile] = File(...),
 ):
-    logger.info("Batch: %d file(s)", len(files))
+    logger.info("Batch (legacy sync): %d file(s)", len(files))
 
     if len(files) > MAX_BATCH_SIZE:
-        logger.warning("Rejected — too many files: %d", len(files))
         raise HTTPException(status_code=400, detail=f"Maximum {MAX_BATCH_SIZE} files allowed")
     if len(files) == 0:
-        logger.warning("Rejected — no files")
         raise HTTPException(status_code=400, detail="No files provided")
 
     rules = getattr(request.app.state, "rules", {})
     batch_id = str(uuid.uuid4())
 
-    async def process_one(file: UploadFile) -> BatchImageResult:
-        try:
-            if file.content_type and file.content_type not in ALLOWED_TYPES:
-                return BatchImageResult(
-                    image_name=file.filename or "image.png",
-                    verdict="WARNING",
-                    confidence=0,
-                    error=f"Unsupported file type: {file.content_type}",
-                )
+    file_data = []
+    for f in files:
+        content = await f.read()
+        file_data.append({
+            "filename": f.filename or "image.png",
+            "content_type": f.content_type,
+            "bytes": content,
+        })
 
-            file_bytes = await file.read()
-
-            if len(file_bytes) == 0:
-                return BatchImageResult(
-                    image_name=file.filename or "image.png",
-                    verdict="WARNING",
-                    confidence=0,
-                    error="Empty file",
-                )
-
-            if len(file_bytes) > MAX_FILE_SIZE:
-                return BatchImageResult(
-                    image_name=file.filename or "image.png",
-                    verdict="WARNING",
-                    confidence=0,
-                    error="File too large (max 20MB)",
-                )
-
-            result = await analyze_single_image(file_bytes, file.filename or "image.png", rules)
-            return BatchImageResult(
-                image_name=file.filename or "image.png",
-                verdict=result["verdict"],
-                confidence=result["confidence"],
-                violations=result.get("violations", []),
-                passed_details=result.get("passed_details", []),
-                image_url=result.get("image_url"),
-                image_width=result.get("image_width"),
-                image_height=result.get("image_height"),
-                session_id=result.get("session_id"),
-            )
-        except Exception as e:
-            logger.error(f"Batch item error for {file.filename}: {e}")
-            return BatchImageResult(
-                image_name=file.filename or "image.png",
-                verdict="WARNING",
-                confidence=0,
-                error=str(e),
-            )
-
-    results = await asyncio.gather(*[process_one(f) for f in files])
-
-    logger.info("Batch %s done — %d images", batch_id[:8], len(results))
+    results = await _process_files(file_data, rules, None)
 
     summary = BatchSummary(
         passed=sum(1 for r in results if r.verdict == "PASS"),
@@ -101,12 +119,124 @@ async def batch_analyze(
         results=list(results),
     )
 
+    await _persist_batch(batch_id, batch_result, summary)
+    return batch_result
+
+
+async def _run_batch(batch_id: str, file_data: list, rules: dict):
+    try:
+        job = _batch_jobs[batch_id]
+        job["step"] = "vision"
+
+        results = await _process_files(file_data, rules, batch_id)
+
+        summary = BatchSummary(
+            passed=sum(1 for r in results if r.verdict == "PASS"),
+            failed=sum(1 for r in results if r.verdict == "FAIL"),
+            warnings=sum(1 for r in results if r.verdict == "WARNING"),
+        )
+
+        batch_result = BatchResult(
+            batch_id=batch_id,
+            total_images=len(results),
+            summary=summary,
+            results=list(results),
+        )
+
+        await _persist_batch(batch_id, batch_result, summary)
+
+        job["status"] = "done"
+        job["step"] = "done"
+        job["completed"] = job["total"]
+        job["result"] = batch_result.model_dump()
+
+        logger.info("Batch %s complete: pass=%d fail=%d warn=%d",
+                    batch_id[:8], summary.passed, summary.failed, summary.warnings)
+
+        asyncio.get_event_loop().call_later(600, lambda: _batch_jobs.pop(batch_id, None))
+    except Exception as e:
+        logger.error("Batch %s failed: %s", batch_id[:8], e)
+        job = _batch_jobs.get(batch_id)
+        if job:
+            job["status"] = "error"
+            job["step"] = "error"
+            job["result"] = {"error": str(e)}
+
+
+async def _process_files(file_data: list, rules: dict, batch_id: str | None) -> list:
+    async def process_one(fd: dict, index: int) -> BatchImageResult:
+        try:
+            if fd["content_type"] and fd["content_type"] not in ALLOWED_TYPES:
+                return BatchImageResult(
+                    image_name=fd["filename"],
+                    verdict="WARNING",
+                    confidence=0,
+                    error=f"Unsupported file type: {fd['content_type']}",
+                )
+
+            if len(fd["bytes"]) == 0:
+                return BatchImageResult(
+                    image_name=fd["filename"],
+                    verdict="WARNING",
+                    confidence=0,
+                    error="Empty file",
+                )
+
+            if len(fd["bytes"]) > MAX_FILE_SIZE:
+                return BatchImageResult(
+                    image_name=fd["filename"],
+                    verdict="WARNING",
+                    confidence=0,
+                    error="File too large (max 20MB)",
+                )
+
+            result = await analyze_single_image(fd["bytes"], fd["filename"], rules)
+
+            if batch_id and batch_id in _batch_jobs:
+                job = _batch_jobs[batch_id]
+                job["completed"] = job.get("completed", 0) + 1
+                progress = job["completed"] / job["total"]
+                if progress < 0.3:
+                    job["step"] = "vision"
+                elif progress < 0.6:
+                    job["step"] = "evaluating"
+                elif progress < 0.9:
+                    job["step"] = "cross_validation"
+                else:
+                    job["step"] = "building_report"
+
+            return BatchImageResult(
+                image_name=fd["filename"],
+                verdict=result["verdict"],
+                confidence=result["confidence"],
+                violations=result.get("violations", []),
+                passed_details=result.get("passed_details", []),
+                image_url=result.get("image_url"),
+                image_width=result.get("image_width"),
+                image_height=result.get("image_height"),
+                session_id=result.get("session_id"),
+            )
+        except Exception as e:
+            logger.error("Batch item error for %s: %s", fd["filename"], e)
+            if batch_id and batch_id in _batch_jobs:
+                _batch_jobs[batch_id]["completed"] = _batch_jobs[batch_id].get("completed", 0) + 1
+            return BatchImageResult(
+                image_name=fd["filename"],
+                verdict="WARNING",
+                confidence=0,
+                error=str(e),
+            )
+
+    return list(await asyncio.gather(*[process_one(fd, i) for i, fd in enumerate(file_data)]))
+
+
+async def _persist_batch(batch_id: str, batch_result: BatchResult, summary: BatchSummary):
     pool = await database.get_pool()
     if pool:
         try:
             analysis_ids = []
             async with pool.acquire() as conn:
-                for r in results:
+                for r in batch_result.results:
                     if r.session_id:
                         row = await conn.fetchrow(
                             "SELECT a.id FROM analyses a JOIN chat_sessions cs ON cs.analysis_id = a.id WHERE cs.session_id = $1",
@@ -119,10 +249,6 @@ async def batch_analyze(
                     batch_id, analysis_ids, json.dumps(summary.model_dump()),
                 )
         except Exception as e:
-            logger.error(f"Batch DB insert error: {e}")
+            logger.error("Batch DB insert error: %s", e)
 
     await redis_client.cache_set(f"batch:{batch_id}", batch_result.model_dump(), ttl=86400)
-
-    logger.info("Batch %s summary: pass=%d fail=%d warn=%d",
-                batch_id[:8], summary.passed, summary.failed, summary.warnings)
-    return batch_result

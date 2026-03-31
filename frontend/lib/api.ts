@@ -117,18 +117,39 @@ export function pollAnalysis(
 }
 
 
-export async function batchAnalyze(files: File[]): Promise<BatchResult> {
+export async function batchAnalyze(
+  files: File[],
+  onProgress?: (completed: number, total: number, step: string) => void,
+): Promise<BatchResult> {
   const formData = new FormData();
   files.forEach((f) => formData.append("files", f));
 
-  const res = await fetch(`${API_BASE}/api/batch`, {
+  const startRes = await fetch(`${API_BASE}/api/batch/start`, {
     method: "POST",
     body: formData,
   });
-  if (!res.ok) throw new Error(`Batch analysis failed: ${res.statusText}`);
-  const result = await res.json();
-  cacheInvalidatePrefix("history:");
-  return result;
+  if (!startRes.ok) throw new Error(`Batch analysis failed: ${startRes.statusText}`);
+  const { batch_id, total } = await startRes.json();
+
+  while (true) {
+    await new Promise((r) => setTimeout(r, 2000));
+    const statusRes = await fetch(`${API_BASE}/api/batch/status/${batch_id}`);
+    if (!statusRes.ok) throw new Error(`Batch status check failed`);
+    const status = await statusRes.json();
+
+    if (onProgress) {
+      onProgress(status.completed || 0, status.total || total, status.step || "processing");
+    }
+
+    if (status.status === "done" && status.result) {
+      cacheInvalidatePrefix("history:");
+      return status.result as BatchResult;
+    }
+
+    if (status.status === "error") {
+      throw new Error(status.result?.error || "Batch analysis failed");
+    }
+  }
 }
 
 export async function getRules(): Promise<{ rules: unknown }> {

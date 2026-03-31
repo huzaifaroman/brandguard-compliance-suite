@@ -107,32 +107,32 @@ export default function BatchPage() {
     return () => window.removeEventListener("paste", handlePaste);
   }, [onDrop]);
 
-  useEffect(() => {
-    if (!loading) { setBatchProgress(0); setActiveStep(0); return; }
-    setBatchProgress(5);
-    setActiveStep(0);
-    const progressInterval = setInterval(() => {
-      setBatchProgress((prev) => Math.min(prev + Math.random() * 6, 92));
-    }, 800);
-    const stepInterval = setInterval(() => {
-      setActiveStep((prev) => Math.min(prev + 1, batchPipelineSteps.length - 1));
-    }, Math.max(2000, (files.length * 8000) / batchPipelineSteps.length));
-    return () => { clearInterval(progressInterval); clearInterval(stepInterval); };
-  }, [loading, files.length]);
+  const stepMap: Record<string, number> = {
+    uploading: 0, vision: 1, evaluating: 2, cross_validation: 3, building_report: 4, done: 4,
+  };
 
   const handleSubmit = async () => {
     if (!files.length) return;
     setLoading(true);
     setError(null);
+    setBatchProgress(5);
+    setActiveStep(0);
     try {
-      const res = await batchAnalyze(files);
+      const res = await batchAnalyze(files, (completed, total, step) => {
+        const pct = Math.max(5, Math.min(95, (completed / total) * 90 + 5));
+        setBatchProgress(pct);
+        setActiveStep(stepMap[step] ?? 1);
+      });
       setBatchProgress(100);
+      setActiveStep(batchPipelineSteps.length - 1);
       await new Promise((r) => setTimeout(r, 400));
       setResult(res);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Batch analysis failed");
     } finally {
       setLoading(false);
+      setBatchProgress(0);
+      setActiveStep(0);
     }
   };
 
