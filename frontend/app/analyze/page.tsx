@@ -122,6 +122,8 @@ export default function AnalyzePage() {
   const [activeStep, setActiveStep] = useState(0);
   const [streamMessage, setStreamMessage] = useState("");
   const [expandedViolations, setExpandedViolations] = useState<Set<number>>(new Set());
+  const [expandedPassed, setExpandedPassed] = useState<Set<string>>(new Set());
+  const [expandedNA, setExpandedNA] = useState<Set<string>>(new Set());
   const cancelRef = useRef<{ cancel: () => void } | null>(null);
   const [restoredFromSession, setRestoredFromSession] = useState(false);
 
@@ -143,6 +145,8 @@ export default function AnalyzePage() {
     setShowChat(false);
     setChatMessages([]);
     setExpandedViolations(new Set());
+    setExpandedPassed(new Set());
+    setExpandedNA(new Set());
     setRestoredFromSession(false);
     clearSession();
   }, [preview, restoredFromSession]);
@@ -191,6 +195,8 @@ export default function AnalyzePage() {
     setActiveStep(0);
     setStreamMessage("Starting analysis...");
     setExpandedViolations(new Set());
+    setExpandedPassed(new Set());
+    setExpandedNA(new Set());
     setRestoredFromSession(false);
 
     cancelRef.current = pollAnalysis(
@@ -287,6 +293,8 @@ export default function AnalyzePage() {
     setRestoredFromSession(false);
     setChatMessages([]);
     setExpandedViolations(new Set());
+    setExpandedPassed(new Set());
+    setExpandedNA(new Set());
     setLoadingProgress(0);
     setActiveStep(0);
     setStreamMessage("");
@@ -837,7 +845,7 @@ export default function AnalyzePage() {
                     ) : (
                       <div className="space-y-4">
                         {Object.entries(passedByCategory).map(([category, items]) => (
-                          <Card key={category} className="border-green-500/20">
+                          <Card key={category} className="border-green-500/20 overflow-hidden">
                             <CardHeader className="pb-2">
                               <CardTitle className="text-sm flex items-center gap-2 text-green-600 dark:text-green-400">
                                 <CheckCircle2 className="w-4 h-4" />
@@ -849,15 +857,57 @@ export default function AnalyzePage() {
                             </CardHeader>
                             <CardContent className="pt-0">
                               <div className="space-y-1.5">
-                                {items.map((pd, i) => (
-                                  <div key={`${pd.rule_id}-${i}`} className="flex items-start gap-2.5 rounded-md px-3 py-2.5 bg-green-500/5 border border-green-500/10">
-                                    <CheckCircle2 className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" />
-                                    <div className="min-w-0">
-                                      <p className="text-xs font-medium text-foreground/90 mb-0.5">{getFriendlyName(pd.rule_id)}</p>
-                                      <p className="text-xs text-muted-foreground leading-relaxed">{pd.detail}</p>
-                                    </div>
-                                  </div>
-                                ))}
+                                {items.map((pd, i) => {
+                                  const key = `${pd.rule_id}-${i}`;
+                                  const isOpen = expandedPassed.has(key);
+                                  return (
+                                    <motion.div
+                                      key={key}
+                                      initial={{ opacity: 0, y: 6 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      transition={{ delay: i * 0.02 }}
+                                    >
+                                      <div className="rounded-lg border border-green-500/15 overflow-hidden bg-green-500/[0.03]">
+                                        <div
+                                          role="button"
+                                          tabIndex={0}
+                                          onClick={() => setExpandedPassed(prev => { const n = new Set(prev); n.has(key) ? n.delete(key) : n.add(key); return n; })}
+                                          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setExpandedPassed(prev => { const n = new Set(prev); n.has(key) ? n.delete(key) : n.add(key); return n; }); }}}
+                                          className="flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-green-500/[0.06] transition-colors"
+                                        >
+                                          <div className="w-5 h-5 rounded-full bg-green-500/15 flex items-center justify-center shrink-0">
+                                            <CheckCircle2 className="w-3 h-3 text-green-500" />
+                                          </div>
+                                          <span className="text-sm font-medium text-foreground/90 flex-1">{getFriendlyName(pd.rule_id)}</span>
+                                          <motion.div animate={{ rotate: isOpen ? 90 : 0 }} transition={{ duration: 0.2 }}>
+                                            <ChevronRight className="w-3.5 h-3.5 text-green-500/50" />
+                                          </motion.div>
+                                        </div>
+                                        <AnimatePresence>
+                                          {isOpen && (
+                                            <motion.div
+                                              initial={{ height: 0, opacity: 0 }}
+                                              animate={{ height: "auto", opacity: 1 }}
+                                              exit={{ height: 0, opacity: 0 }}
+                                              transition={{ duration: 0.2 }}
+                                              className="overflow-hidden"
+                                            >
+                                              <div className="px-3 pb-3 pt-1 ml-8 border-t border-green-500/10">
+                                                <div className="flex items-start gap-2 mt-2">
+                                                  <CheckCircle2 className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" />
+                                                  <div>
+                                                    <p className="text-[11px] font-medium text-green-600 dark:text-green-400 mb-1">Why it passed</p>
+                                                    <p className="text-sm text-foreground/75 leading-relaxed">{pd.detail}</p>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </motion.div>
+                                          )}
+                                        </AnimatePresence>
+                                      </div>
+                                    </motion.div>
+                                  );
+                                })}
                               </div>
                             </CardContent>
                           </Card>
@@ -868,35 +918,77 @@ export default function AnalyzePage() {
 
                   {naCount > 0 && (
                     <TabsContent value="na" className="mt-4">
-                      <div className="flex items-start gap-2.5 rounded-lg px-4 py-3 mb-4 bg-amber-500/5 border border-amber-500/15">
-                        <Info className="w-4 h-4 text-amber-500/70 mt-0.5 shrink-0" />
+                      <div className="flex items-start gap-2.5 rounded-lg px-4 py-3 mb-4 bg-violet-500/5 border border-violet-500/15">
+                        <Info className="w-4 h-4 text-violet-400/70 mt-0.5 shrink-0" />
                         <p className="text-xs text-muted-foreground leading-relaxed">
-                          These rules don&apos;t apply to this particular image. For example, rules about dark backgrounds won&apos;t apply to a light background image, or educational content rules won&apos;t apply to a flavour-led design. They are excluded from the pass rate calculation.
+                          These rules don&apos;t apply to this particular image type. For example, dark background rules are skipped for light images, and educational content rules are skipped for flavour-led designs. Excluded from the pass rate.
                         </p>
                       </div>
                       <div className="space-y-4">
                         {Object.entries(naByCategory).map(([category, items]) => (
-                          <Card key={category} className="border-muted-foreground/20">
+                          <Card key={category} className="border-violet-500/15 overflow-hidden">
                             <CardHeader className="pb-2">
-                              <CardTitle className="text-sm flex items-center gap-2 text-muted-foreground">
-                                <Info className="w-4 h-4" />
+                              <CardTitle className="text-sm flex items-center gap-2 text-violet-400 dark:text-violet-400">
+                                <Layers className="w-4 h-4" />
                                 {category}
-                                <Badge variant="outline" className="text-[10px] border-muted-foreground/30 text-muted-foreground ml-auto">
+                                <Badge variant="outline" className="text-[10px] border-violet-500/25 text-violet-400 ml-auto">
                                   {items.length} skipped
                                 </Badge>
                               </CardTitle>
                             </CardHeader>
                             <CardContent className="pt-0">
                               <div className="space-y-1.5">
-                                {items.map((pd, i) => (
-                                  <div key={`${pd.rule_id}-${i}`} className="flex items-start gap-2.5 rounded-md px-3 py-2.5 bg-muted/20 border border-muted-foreground/10">
-                                    <span className="text-xs text-muted-foreground/60 mt-0.5 shrink-0">—</span>
-                                    <div className="min-w-0">
-                                      <p className="text-xs font-medium text-muted-foreground mb-0.5">{getFriendlyName(pd.rule_id)}</p>
-                                      <p className="text-xs text-muted-foreground/70 leading-relaxed">{pd.detail}</p>
-                                    </div>
-                                  </div>
-                                ))}
+                                {items.map((pd, i) => {
+                                  const key = `na-${pd.rule_id}-${i}`;
+                                  const isOpen = expandedNA.has(key);
+                                  return (
+                                    <motion.div
+                                      key={key}
+                                      initial={{ opacity: 0, y: 6 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      transition={{ delay: i * 0.02 }}
+                                    >
+                                      <div className="rounded-lg border border-violet-500/10 overflow-hidden bg-violet-500/[0.02]">
+                                        <div
+                                          role="button"
+                                          tabIndex={0}
+                                          onClick={() => setExpandedNA(prev => { const n = new Set(prev); n.has(key) ? n.delete(key) : n.add(key); return n; })}
+                                          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setExpandedNA(prev => { const n = new Set(prev); n.has(key) ? n.delete(key) : n.add(key); return n; }); }}}
+                                          className="flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-violet-500/[0.05] transition-colors"
+                                        >
+                                          <div className="w-5 h-5 rounded-full bg-violet-500/10 flex items-center justify-center shrink-0">
+                                            <span className="text-[10px] text-violet-400 font-medium">N/A</span>
+                                          </div>
+                                          <span className="text-sm font-medium text-foreground/70 flex-1">{getFriendlyName(pd.rule_id)}</span>
+                                          <motion.div animate={{ rotate: isOpen ? 90 : 0 }} transition={{ duration: 0.2 }}>
+                                            <ChevronRight className="w-3.5 h-3.5 text-violet-400/40" />
+                                          </motion.div>
+                                        </div>
+                                        <AnimatePresence>
+                                          {isOpen && (
+                                            <motion.div
+                                              initial={{ height: 0, opacity: 0 }}
+                                              animate={{ height: "auto", opacity: 1 }}
+                                              exit={{ height: 0, opacity: 0 }}
+                                              transition={{ duration: 0.2 }}
+                                              className="overflow-hidden"
+                                            >
+                                              <div className="px-3 pb-3 pt-1 ml-8 border-t border-violet-500/10">
+                                                <div className="flex items-start gap-2 mt-2">
+                                                  <Info className="w-3.5 h-3.5 text-violet-400/60 mt-0.5 shrink-0" />
+                                                  <div>
+                                                    <p className="text-[11px] font-medium text-violet-400 mb-1">Why it was skipped</p>
+                                                    <p className="text-sm text-foreground/60 leading-relaxed">{pd.detail}</p>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </motion.div>
+                                          )}
+                                        </AnimatePresence>
+                                      </div>
+                                    </motion.div>
+                                  );
+                                })}
                               </div>
                             </CardContent>
                           </Card>
