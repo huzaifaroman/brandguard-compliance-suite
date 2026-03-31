@@ -20,3 +20,5 @@ out/
 .DS_Store
 *.log
 .local/
+attached_assets/
+proxy3000.js
