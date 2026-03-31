@@ -552,6 +552,7 @@ async def analyze_compliance(
 
     result = await evaluate_compliance(brand_detection, vision_signals, rules, prompt, image_bytes)
 
+    _enforce_detection_violations(result, brand_detection)
     _validate_rule_coverage(result, rules)
 
     result["_brand_detection"] = brand_detection
@@ -559,13 +560,135 @@ async def analyze_compliance(
     return result
 
 
+def _enforce_detection_violations(result: dict, detection: dict):
+    if not detection:
+        return
+
+    halo = detection.get("halo", {})
+    bg = detection.get("background", {})
+    reg = detection.get("regulatory", {})
+    logo = detection.get("logo", {})
+
+    violation_ids = {v["rule_id"] for v in result.get("violations", []) if "rule_id" in v}
+
+    forced_violations = []
+
+    if halo.get("halo_on_z") is True:
+        if "LOGO-DONT-02" not in violation_ids:
+            logger.warning("CROSS-VALIDATION: Detection says halo_on_z=true but LLM passed LOGO-DONT-02 — forcing violation")
+            forced_violations.append({
+                "rule_id": "LOGO-DONT-02",
+                "rule_text": "Don't add the halo on the Z instead of the C.",
+                "severity": "critical",
+                "issue": "The halo/circle is on the Z (first letter) instead of the C (last letter). Only the C should have a halo.",
+                "fix_suggestion": "Move the halo from the Z to the C (the last letter in ZONNIC).",
+                "evidence": "Brand detection confirmed halo is present on the Z letter.",
+                "bbox": None,
+            })
+
+    if not halo.get("any_halo_present", True):
+        if "LOGO-DONT-01" not in violation_ids:
+            logger.warning("CROSS-VALIDATION: Detection says no halo present but LLM passed LOGO-DONT-01 — forcing violation")
+            forced_violations.append({
+                "rule_id": "LOGO-DONT-01",
+                "rule_text": "Don't lose the C halo (logo without any halo on the C).",
+                "severity": "critical",
+                "issue": "The C halo is missing from the ZONNIC logo.",
+                "fix_suggestion": "Add a circular halo around the letter C using the correct flavour gradient colours.",
+                "evidence": "No halo was detected on any letter in the logo.",
+                "bbox": None,
+            })
+
+    bg_type = bg.get("type", "")
+    if bg_type in ("white", "grey_gradient", "solid_colour") and halo.get("any_halo_present") and not halo.get("halo_is_gradient", True):
+        if "LOGO-05" not in violation_ids:
+            halo_col = halo.get("halo_colour", "unknown colour")
+            logger.warning("CROSS-VALIDATION: Solid halo on white/grey bg but LLM passed LOGO-05 — forcing violation")
+            forced_violations.append({
+                "rule_id": "LOGO-05",
+                "rule_text": "On a white or grey gradient background, the C halo must always use the full gradient (primary + secondary colours).",
+                "severity": "critical",
+                "issue": f"The C halo is a solid {halo_col}, not a gradient. On white or grey backgrounds, the halo must use both the primary and secondary flavour colours as a visible gradient.",
+                "fix_suggestion": "Replace the solid halo with a gradient using both the primary (dark) and secondary (light) flavour colours.",
+                "evidence": f"Brand detection confirmed the halo is a single solid colour ({halo_col}) on a {bg_type} background.",
+                "bbox": None,
+            })
+
+    if halo.get("halo_on_other_letters", "none").lower() not in ("none", "not present", ""):
+        if "LOGO-DONT-11" not in violation_ids:
+            other = halo.get("halo_on_other_letters", "")
+            logger.warning("CROSS-VALIDATION: Halo on other letters '%s' but LLM passed LOGO-DONT-11 — forcing violation", other)
+            forced_violations.append({
+                "rule_id": "LOGO-DONT-11",
+                "rule_text": "Don't outline other letters in the logo (only C gets the halo).",
+                "severity": "high",
+                "issue": f"Halo or outline detected on letters other than C: {other}.",
+                "fix_suggestion": "Remove halos or outlines from all letters except C.",
+                "evidence": f"Brand detection found halos/outlines on: {other}.",
+                "bbox": None,
+            })
+
+    if not reg.get("nicotine_warning_present", True):
+        if "REG-01" not in violation_ids:
+            logger.warning("CROSS-VALIDATION: No nicotine warning detected but LLM passed REG-01 — forcing violation")
+            forced_violations.append({
+                "rule_id": "REG-01",
+                "rule_text": "Every marketing asset MUST include a bilingual nicotine warning statement banner at the TOP of the creative.",
+                "severity": "critical",
+                "issue": "No nicotine warning statement is present at the top of the image.",
+                "fix_suggestion": "Add a bilingual nicotine warning banner (English + French) at the top of the image.",
+                "evidence": "No nicotine warning text was found anywhere in the image.",
+                "bbox": None,
+            })
+
+    if not reg.get("age_icon_present", True):
+        if "REG-02" not in violation_ids:
+            logger.warning("CROSS-VALIDATION: No 18+ icon detected but LLM passed REG-02 — forcing violation")
+            forced_violations.append({
+                "rule_id": "REG-02",
+                "rule_text": "The 18+ icon must be present on marketing materials to indicate age restriction.",
+                "severity": "critical",
+                "issue": "The 18+ age restriction icon is missing.",
+                "fix_suggestion": "Add the 18+ age restriction icon to the image.",
+                "evidence": "No 18+ icon was detected in the image.",
+                "bbox": None,
+            })
+
+    if not reg.get("risk_communication_present", True):
+        if "REG-03" not in violation_ids:
+            logger.warning("CROSS-VALIDATION: No risk communication detected but LLM passed REG-03 — forcing violation")
+            forced_violations.append({
+                "rule_id": "REG-03",
+                "rule_text": "Every marketing asset MUST include risk communication text at the BOTTOM of the creative.",
+                "severity": "critical",
+                "issue": "Risk communication text is missing from the bottom of the image.",
+                "fix_suggestion": "Add risk communication text at the bottom of the image.",
+                "evidence": "No risk communication text was found in the image.",
+                "bbox": None,
+            })
+
+    if not logo.get("present", True):
+        if "LOGO-DONT-01" not in violation_ids and "LOGO-01" not in violation_ids:
+            logger.warning("CROSS-VALIDATION: No logo detected — this may not be a ZONNIC marketing asset")
+
+    if forced_violations:
+        forced_ids = {v["rule_id"] for v in forced_violations}
+        result["passed_details"] = [p for p in result.get("passed_details", []) if p.get("rule_id") not in forced_ids]
+        result["violations"].extend(forced_violations)
+        logger.info("CROSS-VALIDATION: Forced %d violations from detection facts: %s",
+                     len(forced_violations), [v["rule_id"] for v in forced_violations])
+        if result.get("verdict") == "PASS":
+            result["verdict"] = "FAIL"
+
+
 def _validate_rule_coverage(result: dict, rules: dict):
     all_rule_ids = set()
-    for section_key in ["regulatory_rules", "logo_rules", "gradient_rules", "colour_rules", "content_rules", "typography_rules"]:
+    for section_key in ["regulatory_rules", "logo_rules", "logo_donts", "logo_donts_gradients_backgrounds",
+                         "gradient_rules", "color_application_rules", "content_type_rules", "content_donts", "typography_rules"]:
         section = rules.get(section_key, [])
         if isinstance(section, list):
             for rule in section:
-                rid = rule.get("rule_id")
+                rid = rule.get("id") or rule.get("rule_id")
                 if rid:
                     all_rule_ids.add(rid)
 
