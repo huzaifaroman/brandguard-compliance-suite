@@ -1277,7 +1277,10 @@ export default function AnalyzePage() {
                                 </div>
                               )}
                               <AnimatePresence initial={false}>
-                                {chatMessages.map((msg, i) => (
+                                {chatMessages.map((msg, i) => {
+                                  const isEmptyStreaming = chatStreaming && msg.role === "assistant" && msg.content === "" && i === chatMessages.length - 1;
+                                  if (isEmptyStreaming) return null;
+                                  return (
                                   <motion.div
                                     key={i}
                                     initial={{ opacity: 0, y: 10, scale: 0.97 }}
@@ -1311,7 +1314,8 @@ export default function AnalyzePage() {
                                       </>
                                     )}
                                   </motion.div>
-                                ))}
+                                );
+                                })}
                               </AnimatePresence>
                               {chatStreaming && chatMessages.length > 0 && chatMessages[chatMessages.length - 1].content === "" && (
                                 <div className="flex items-start gap-2.5 mb-4">
