@@ -26,6 +26,8 @@ import {
   Lightbulb,
   Scan,
   BookOpen,
+  Sparkles,
+  HelpCircle,
 } from "lucide-react";
 import { getAnalysis, getChatMessages, streamChatMessage } from "@/lib/api";
 import type { ComplianceResult, Violation, PassedDetail, ChatMessage, CheckPerformed } from "@/lib/types";
@@ -107,9 +109,10 @@ export default function ReportPage() {
     setExpandedViolations(new Set());
   }, []);
 
-  const handleSendChat = () => {
-    if (!chatInput.trim() || !result?.session_id || chatStreaming) return;
-    const userMsg = chatInput.trim();
+  const handleSendChat = (directMessage?: string) => {
+    const msg = directMessage || chatInput.trim();
+    if (!msg || !result?.session_id || chatStreaming) return;
+    const userMsg = msg;
     setChatInput("");
     setChatMessages((prev) => [...prev, { role: "user", content: userMsg }]);
     setChatStreaming(true);
@@ -638,24 +641,36 @@ export default function ReportPage() {
 
         {result.session_id && (
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="print:hidden">
-            <Card>
-              <CardHeader className="pb-2">
+            <Card className="overflow-hidden border-primary/10">
+              <CardHeader className="pb-2 bg-gradient-to-r from-primary/5 via-transparent to-primary/5">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4 text-muted-foreground" />
-                    AI Assistant — Ask About This Report
+                  <CardTitle className="text-sm flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <span className="block text-sm font-semibold">BrandGuard AI</span>
+                      <span className="block text-[10px] text-muted-foreground font-normal -mt-0.5">Your compliance co-pilot</span>
+                    </div>
                   </CardTitle>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowChat(!showChat)}
-                    className="text-xs h-7 gap-1"
-                  >
-                    {showChat ? "Hide" : "Open Chat"}
-                    <motion.div animate={{ rotate: showChat ? 90 : 0 }} transition={{ duration: 0.2 }}>
-                      <ChevronRight className="w-3 h-3" />
-                    </motion.div>
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    {chatMessages.length > 0 && (
+                      <span className="text-[10px] text-muted-foreground bg-muted/40 px-2 py-0.5 rounded-full">
+                        {chatMessages.length} message{chatMessages.length !== 1 ? "s" : ""}
+                      </span>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowChat(!showChat)}
+                      className="text-xs h-7 gap-1 hover:bg-primary/10"
+                    >
+                      {showChat ? "Hide" : "Open Chat"}
+                      <motion.div animate={{ rotate: showChat ? 90 : 0 }} transition={{ duration: 0.2 }}>
+                        <ChevronRight className="w-3 h-3" />
+                      </motion.div>
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <AnimatePresence>
@@ -667,15 +682,32 @@ export default function ReportPage() {
                     transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                   >
                     <CardContent className="pt-0 pb-4 px-4">
-                      <ScrollArea className="h-[300px] mb-3 rounded-lg bg-muted/20 p-3">
+                      <ScrollArea className="h-[320px] mb-3 rounded-xl bg-muted/15 p-3">
                         {chatMessages.length === 0 && !chatStreaming && (
                           <div className="flex items-center justify-center h-full">
-                            <div className="text-center">
-                              <MessageSquare className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
-                              <p className="text-xs text-muted-foreground">
-                                Ask why something was flagged, how to fix a specific violation,
-                                <br />or what the brand guidelines require.
+                            <div className="text-center max-w-[300px]">
+                              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center mx-auto mb-4 border border-primary/10">
+                                <HelpCircle className="w-6 h-6 text-primary/50" />
+                              </div>
+                              <p className="text-sm font-semibold text-foreground/70 mb-1.5">Ask me anything about this report</p>
+                              <p className="text-xs text-muted-foreground leading-relaxed mb-4">
+                                I can explain violations, suggest fixes, clarify brand rules, or help you understand the results.
                               </p>
+                              <div className="flex flex-wrap gap-1.5 justify-center">
+                                {[
+                                  "Summarize the results",
+                                  "How do I fix this?",
+                                  "Why did it fail?",
+                                ].map((suggestion) => (
+                                  <button
+                                    key={suggestion}
+                                    onClick={() => handleSendChat(suggestion)}
+                                    className="text-[11px] px-2.5 py-1 rounded-full border border-primary/20 bg-primary/5 text-primary/70 hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-all duration-200 cursor-pointer"
+                                  >
+                                    {suggestion}
+                                  </button>
+                                ))}
+                              </div>
                             </div>
                           </div>
                         )}
@@ -686,43 +718,72 @@ export default function ReportPage() {
                               initial={{ opacity: 0, y: 10, scale: 0.97 }}
                               animate={{ opacity: 1, y: 0, scale: 1 }}
                               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                              className={`mb-3 ${msg.role === "user" ? "text-right" : ""}`}
+                              className={`mb-4 ${msg.role === "user" ? "text-right" : "flex items-start gap-2.5"}`}
                             >
-                              <div
-                                className={`inline-block max-w-[85%] px-3.5 py-2.5 rounded-2xl text-sm ${
-                                  msg.role === "user"
-                                    ? "bg-primary text-primary-foreground rounded-br-md"
-                                    : "bg-muted/60 text-foreground rounded-bl-md"
-                                }`}
-                              >
-                                <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
-                              </div>
+                              {msg.role === "user" ? (
+                                <div className="inline-block max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-br-md text-sm bg-primary text-primary-foreground shadow-md">
+                                  <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                                </div>
+                              ) : (
+                                <>
+                                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center shrink-0 mt-0.5 border border-primary/10">
+                                  <Sparkles className="w-3.5 h-3.5 text-primary" />
+                                </div>
+                                <div className="max-w-[88%] px-4 py-3 rounded-2xl rounded-tl-md text-sm bg-muted/40 border border-border/20 text-foreground shadow-sm">
+                                  <div className="space-y-2 leading-relaxed chat-response" dangerouslySetInnerHTML={{
+                                    __html: msg.content
+                                      .replace(/&/g, "&amp;")
+                                      .replace(/</g, "&lt;")
+                                      .replace(/>/g, "&gt;")
+                                      .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-foreground">$1</strong>')
+                                      .replace(/\*(.+?)\*/g, '<em class="text-primary/80">$1</em>')
+                                      .replace(/^[-•] (.+)$/gm, '<li class="ml-3 list-disc list-inside text-[13px] py-0.5">$1</li>')
+                                      .replace(/^(\d+)\. (.+)$/gm, '<li class="ml-3 list-decimal list-inside text-[13px] py-0.5">$1. $2</li>')
+                                      .replace(/\n{2,}/g, '</p><p class="mt-2.5">')
+                                      .replace(/\n/g, "<br />")
+                                  }} />
+                                </div>
+                                </>
+                              )}
                             </motion.div>
                           ))}
                         </AnimatePresence>
                         {chatStreaming && chatMessages.length > 0 && chatMessages[chatMessages.length - 1].content === "" && (
-                          <div className="flex items-center gap-1.5 px-3.5 py-2.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground typing-dot" />
-                            <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground typing-dot" />
-                            <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground typing-dot" />
+                          <div className="flex items-start gap-2.5 mb-4">
+                            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center shrink-0 mt-0.5 border border-primary/10">
+                              <Sparkles className="w-3.5 h-3.5 text-primary animate-pulse" />
+                            </div>
+                            <div className="px-4 py-3 rounded-2xl rounded-tl-md bg-muted/40 border border-border/20">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground">Thinking</span>
+                                <span className="flex items-center gap-1">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-primary/60 typing-dot" />
+                                  <span className="w-1.5 h-1.5 rounded-full bg-primary/60 typing-dot" />
+                                  <span className="w-1.5 h-1.5 rounded-full bg-primary/60 typing-dot" />
+                                </span>
+                              </div>
+                            </div>
                           </div>
                         )}
                         <div ref={chatEndRef} />
                       </ScrollArea>
                       <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={chatInput}
-                          onChange={(e) => setChatInput(e.target.value)}
-                          onKeyDown={(e) => e.key === "Enter" && handleSendChat()}
-                          placeholder="Why was rule R-XX flagged? How do I fix the logo placement?"
-                          className="flex-1 h-9 px-3.5 text-sm rounded-xl bg-muted/30 border border-border/50 text-foreground placeholder:text-muted-foreground input-premium focus:outline-none"
-                        />
+                        <div className="flex-1 relative">
+                          <input
+                            type="text"
+                            value={chatInput}
+                            onChange={(e) => setChatInput(e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handleSendChat()}
+                            placeholder="Ask anything about this report..."
+                            className="w-full h-10 px-4 pr-10 text-sm rounded-xl bg-muted/20 border border-border/40 text-foreground placeholder:text-muted-foreground/60 input-premium focus:outline-none focus:border-primary/40 focus:bg-muted/30 transition-all duration-200"
+                          />
+                          <HelpCircle className="w-3.5 h-3.5 text-muted-foreground/30 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                        </div>
                         <Button
                           size="sm"
-                          onClick={handleSendChat}
+                          onClick={() => handleSendChat()}
                           disabled={!chatInput.trim() || chatStreaming}
-                          className="h-9 w-9 p-0 rounded-xl"
+                          className="h-10 w-10 p-0 rounded-xl shadow-sm"
                         >
                           <Send className="w-3.5 h-3.5" />
                         </Button>
