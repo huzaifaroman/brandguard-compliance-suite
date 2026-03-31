@@ -40,6 +40,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } 
 import { batchAnalyze } from "@/lib/api";
 import type { BatchResult, BatchImageResult, Violation, PassedDetail } from "@/lib/types";
 import { getFriendlyName } from "@/lib/rule-names";
+import BoundingBoxOverlay from "@/components/BoundingBoxOverlay";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -739,6 +740,21 @@ function BatchImageReport({
                     </div>
                   </CardContent>
                 </Card>
+
+                {r.image_url && r.image_width && r.image_height && r.violations.length > 0 && r.violations.some((v) => v.bbox) && (
+                  <Card className="overflow-hidden">
+                    <CardContent className="p-3">
+                      <BoundingBoxOverlay
+                        imageUrl={r.image_url}
+                        imageWidth={r.image_width}
+                        imageHeight={r.image_height}
+                        violations={r.violations}
+                        maxHeight="350px"
+                        imageName={r.image_name}
+                      />
+                    </CardContent>
+                  </Card>
+                )}
 
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
                   <StatCard label="Passed" value={passedCount} color="text-green-600 dark:text-green-400" />

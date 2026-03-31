@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import BoundingBoxOverlay from "@/components/BoundingBoxOverlay";
 import {
   ShieldCheck,
   ShieldAlert,
@@ -256,7 +257,19 @@ export default function ReportPage() {
             <CardContent className="p-0">
               <div className={`${vc.bg} p-6`}>
                 <div className="flex flex-col md:flex-row gap-6">
-                  <ReportImage url={result.image_url} />
+                  {result.image_url && result.image_width && result.image_height && result.violations.some((v) => v.bbox) ? (
+                    <div className="w-full md:w-64 flex-shrink-0">
+                      <BoundingBoxOverlay
+                        imageUrl={result.image_url}
+                        imageWidth={result.image_width}
+                        imageHeight={result.image_height}
+                        violations={result.violations}
+                        maxHeight="250px"
+                      />
+                    </div>
+                  ) : (
+                    <ReportImage url={result.image_url} />
+                  )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-3">
                       <motion.div

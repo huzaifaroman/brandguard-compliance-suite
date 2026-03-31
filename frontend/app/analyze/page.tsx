@@ -481,8 +481,37 @@ export default function AnalyzePage() {
                           viewBox={`0 0 ${result.image_width || 1000} ${result.image_height || 1000}`}
                           preserveAspectRatio="xMidYMid meet"
                         >
-                          {result.violations.map((v, i) =>
-                            v.bbox ? (
+                          <defs>
+                            <filter id="neon-red" x="-50%" y="-50%" width="200%" height="200%">
+                              <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+                              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                            </filter>
+                            <filter id="neon-yellow" x="-50%" y="-50%" width="200%" height="200%">
+                              <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
+                              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                            </filter>
+                            <filter id="neon-green" x="-50%" y="-50%" width="200%" height="200%">
+                              <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
+                              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                            </filter>
+                          </defs>
+                          {result.violations.map((v, i) => {
+                            if (!v.bbox) return null;
+                            const neonColor =
+                              v.severity === "critical"
+                                ? "#ff1744"
+                                : v.severity === "high"
+                                ? "#ffea00"
+                                : "#76ff03";
+                            const filterId =
+                              v.severity === "critical"
+                                ? "neon-red"
+                                : v.severity === "high"
+                                ? "neon-yellow"
+                                : "neon-green";
+                            const label = getFriendlyName(v.rule_id);
+                            const labelW = Math.min(label.length * 8 + 16, v.bbox.w);
+                            return (
                               <g key={i}>
                                 <motion.rect
                                   x={v.bbox.x}
@@ -490,32 +519,49 @@ export default function AnalyzePage() {
                                   width={v.bbox.w}
                                   height={v.bbox.h}
                                   fill="none"
-                                  stroke={
-                                    v.severity === "critical"
-                                      ? "#ef4444"
-                                      : v.severity === "high"
-                                      ? "#f97316"
-                                      : "#eab308"
-                                  }
-                                  strokeWidth={2}
-                                  strokeDasharray="6 3"
+                                  stroke={neonColor}
+                                  strokeWidth={3}
+                                  filter={`url(#${filterId})`}
+                                  rx={3}
                                   initial={{ opacity: 0, pathLength: 0 }}
                                   animate={{ opacity: 1, pathLength: 1 }}
-                                  transition={{ delay: i * 0.15, duration: 0.5 }}
+                                  transition={{ delay: i * 0.12, duration: 0.5 }}
+                                />
+                                <motion.rect
+                                  x={v.bbox.x}
+                                  y={v.bbox.y}
+                                  width={v.bbox.w}
+                                  height={v.bbox.h}
+                                  fill={neonColor}
+                                  fillOpacity={0.08}
+                                  stroke="none"
+                                  rx={3}
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  transition={{ delay: i * 0.12 + 0.3, duration: 0.3 }}
+                                />
+                                <rect
+                                  x={v.bbox.x}
+                                  y={v.bbox.y - 20}
+                                  width={labelW}
+                                  height={20}
+                                  rx={3}
+                                  fill={neonColor}
+                                  fillOpacity={0.9}
                                 />
                                 <text
-                                  x={v.bbox.x + 4}
-                                  y={v.bbox.y - 6}
-                                  fill="#fff"
-                                  fontSize="12"
-                                  fontWeight="bold"
-                                  className="drop-shadow-lg"
+                                  x={v.bbox.x + 6}
+                                  y={v.bbox.y - 5}
+                                  fill="#000"
+                                  fontSize="11"
+                                  fontWeight="700"
+                                  fontFamily="system-ui, sans-serif"
                                 >
-                                  {getFriendlyName(v.rule_id)}
+                                  {label}
                                 </text>
                               </g>
-                            ) : null
-                          )}
+                            );
+                          })}
                         </svg>
                       )}
                     </div>
