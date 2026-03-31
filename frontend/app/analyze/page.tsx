@@ -1357,7 +1357,7 @@ export default function AnalyzePage() {
                               </div>
                               <Button
                                 size="sm"
-                                onClick={handleSendChat}
+                                onClick={() => handleSendChat()}
                                 disabled={!chatInput.trim() || chatStreaming}
                                 className="h-10 w-10 p-0 rounded-xl shadow-sm"
                               >

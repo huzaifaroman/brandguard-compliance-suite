@@ -180,7 +180,7 @@ export default function HistoryPage() {
               <Card className="border-red-500/30 bg-red-500/5">
                 <CardContent className="p-4 flex items-center justify-between">
                   <p className="text-sm text-red-400">{error}</p>
-                  <Button variant="ghost" size="sm" onClick={loadHistory} className="text-red-400 h-7 text-xs gap-1.5">
+                  <Button variant="ghost" size="sm" onClick={() => loadHistory()} className="text-red-400 h-7 text-xs gap-1.5">
                     <RefreshCw className="w-3 h-3" /> Retry
                   </Button>
                 </CardContent>
