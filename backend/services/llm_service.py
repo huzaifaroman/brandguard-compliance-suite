@@ -259,15 +259,18 @@ SUMMARY REQUIREMENTS (the "summary" field):
 Write a detailed visual assessment (4-6 sentences) for a marketing team. NO rule IDs in the summary — use plain language only:
 - FIRST: Describe exactly what you see — logo text colour, position, any shapes/circles around or behind letters, the C halo (colour, gradient vs solid, shape), background colour/type, any regulatory text visible, any other design elements.
 - THEN: State what follows brand guidelines correctly, in plain language.
-- THEN: State what is wrong, in plain language (e.g. "the halo around the C is a solid colour but should be a gradient on white backgrounds" NOT "LOGO-05 violation").
+- THEN: If there are violations, state what is wrong in plain language (e.g. "the halo around the C is a solid colour but should be a gradient on white backgrounds" NOT "LOGO-05 violation").
 - Be PRECISE about colours (navy blue, teal, white), shapes (circle, gradient ring), and positions (top, bottom, around which letter).
 - If there's anything unusual around the brand name or logo (wrong colours, extra elements, missing elements, wrong shapes), call it out explicitly.
 - NEVER include rule IDs like LOGO-05, REG-01 etc. in the summary. The summary is for non-technical marketing teams.
+- TONE MATTERS: If the image passes most rules (90%+), lead with what's correct and frame issues as minor improvements. Say things like "This image is largely compliant with brand guidelines" or "The image follows most brand standards correctly." Do NOT use alarmist language for minor issues. If all rules pass, celebrate: "This image fully complies with all brand guidelines."
 
-OVERALL VERDICT:
-- PASS: No violations found
-- FAIL: One or more violations found
-- WARNING: Only medium severity issues or borderline cases
+OVERALL VERDICT (choose carefully — marketing teams see this):
+- PASS: No violations, OR only 1-2 minor/medium issues that do not affect brand safety or regulatory compliance
+- WARNING: A few violations found but none are critical regulatory failures. The image is mostly compliant with some corrections needed.
+- FAIL: Multiple violations, OR any critical regulatory violation (missing warning, missing 18+ icon, missing risk text), OR serious brand misuse (wrong logo, completely wrong colours)
+
+IMPORTANT: An original ZONNIC product image that passes 90%+ of rules should generally get PASS or WARNING, NOT FAIL. Reserve FAIL for images with serious brand or regulatory issues. A single minor visual issue (e.g. gradient vs solid halo) on an otherwise perfect image should be WARNING at most.
 
 VIOLATION REQUIREMENTS:
 - Cite the exact rule ID and include the rule text
@@ -958,7 +961,12 @@ def _enforce_detection_violations(result: dict, detection: dict):
 
     colours = detection.get("colours", {})
     sec_usage = colours.get("secondary_colour_usage", "").lower()
-    if "dominant" in sec_usage or "background" in sec_usage:
+    bg_colour = detection.get("background", {}).get("type", "").lower() if isinstance(detection.get("background"), dict) else str(detection.get("background", "")).lower()
+    primary_bg = any(w in bg_colour for w in ["white", "navy", "dark", "gradient"])
+    sec_colour_name = colours.get("secondary_colour", "").lower()
+    sec_is_actually_primary = any(w in sec_colour_name for w in ["white", "navy", "navy blue"])
+
+    if ("dominant" in sec_usage or "background" in sec_usage) and not primary_bg and not sec_is_actually_primary:
         if "COLOR-04" not in violation_ids:
             logger.warning("CROSS-VALIDATION: Secondary colour used as dominant — forcing COLOR-04 violation")
             forced_violations.append({
@@ -970,6 +978,8 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "evidence": f"Brand detection found secondary colour usage: '{sec_usage}'.",
                 "bbox": None,
             })
+    elif ("dominant" in sec_usage or "background" in sec_usage) and (primary_bg or sec_is_actually_primary):
+        logger.info("CROSS-VALIDATION: Skipping COLOR-04 — background is '%s' (a primary brand colour), secondary is '%s'", bg_colour, sec_colour_name)
 
     if not logo.get("present", True):
         if "LOGO-DONT-01" not in violation_ids and "LOGO-01" not in violation_ids:
@@ -982,7 +992,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
         logger.info("CROSS-VALIDATION: Forced %d violations from detection facts: %s",
                      len(forced_violations), [v["rule_id"] for v in forced_violations])
         if result.get("verdict") == "PASS":
-            result["verdict"] = "FAIL"
+            result["verdict"] = "WARNING"
 
 
 def _validate_rule_coverage(result: dict, rules: dict):

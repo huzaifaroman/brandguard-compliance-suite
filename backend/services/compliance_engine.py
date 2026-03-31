@@ -16,6 +16,46 @@ logger = logging.getLogger("backend.services.engine")
 
 DEBUG_FILE = Path(__file__).parent.parent / "debug_raw_responses.json"
 
+CRITICAL_REG_IDS = {"REG-01", "REG-02", "REG-03", "REG-05", "REG-06"}
+
+
+def _recalculate_verdict(llm_result: dict, short_hash: str = ""):
+    violations = llm_result.get("violations", [])
+    passed_details = llm_result.get("passed_details", [])
+    passed_count = len([p for p in passed_details if p.get("status") != "not_applicable"]) if isinstance(passed_details, list) else 0
+    violation_count = len(violations)
+    applicable_total = passed_count + violation_count
+
+    has_critical_regulatory = any(
+        v.get("rule_id") in CRITICAL_REG_IDS or
+        (v.get("severity") == "critical" and v.get("rule_id", "").startswith("REG-"))
+        for v in violations
+    )
+
+    pass_rate = (passed_count / applicable_total * 100) if applicable_total > 0 else 0
+
+    old_verdict = llm_result.get("verdict", "WARNING")
+    if has_critical_regulatory:
+        new_verdict = "FAIL"
+    elif violation_count == 0:
+        new_verdict = "PASS"
+    elif pass_rate >= 95 and violation_count <= 2 and not has_critical_regulatory:
+        new_verdict = "PASS"
+    elif pass_rate >= 85 and not has_critical_regulatory:
+        new_verdict = "WARNING"
+    else:
+        new_verdict = "FAIL"
+
+    if new_verdict != old_verdict:
+        logger.info("[%s] Verdict recalculated: %s → %s (pass_rate=%.1f%%, violations=%d, critical_reg=%s)",
+                     short_hash, old_verdict, new_verdict, pass_rate, violation_count, has_critical_regulatory)
+        llm_result["verdict"] = new_verdict
+
+    if new_verdict == "PASS" and violation_count > 0:
+        llm_result["confidence"] = max(llm_result.get("confidence", 0), int(pass_rate))
+    elif new_verdict == "PASS" and violation_count == 0:
+        llm_result["confidence"] = max(llm_result.get("confidence", 0), 99)
+
 
 def _save_debug(filename: str, image_hash: str, vision_signals: dict, brand_detection: dict, llm_result: dict):
     try:
@@ -61,10 +101,12 @@ async def analyze_single_image(
 
     _save_debug(filename, image_hash, vision_signals, brand_detection, llm_result)
 
+    _recalculate_verdict(llm_result, short_hash)
+
     session_id = str(uuid.uuid4())
 
     passed_details = llm_result.get("passed_details", [])
-    passed_count = len(passed_details) if isinstance(passed_details, list) else 0
+    full_passed_count = len(passed_details) if isinstance(passed_details, list) else 0
 
     checks_performed = llm_result.get("checks_performed", [])
 
@@ -101,7 +143,7 @@ async def analyze_single_image(
                     image_hash, blob_url, width, height,
                     result["verdict"], result["confidence"],
                     json.dumps(result["violations"]),
-                    passed_count, json.dumps(passed_details),
+                    full_passed_count, json.dumps(passed_details),
                     prompt, session_id,
                     result.get("summary", ""),
                     result.get("content_type_detected", "unknown"),
@@ -168,12 +210,16 @@ async def analyze_single_image_streaming(
 
     yield {"event": "step", "step": "detecting", "progress": 60, "message": f"Brand detection: {detection_msg}"}
 
+    logger.info("[%s] └─ LLM done → %s %s%%", short_hash,
+                llm_result.get("verdict"), llm_result.get("confidence"))
+
+    _save_debug(filename, image_hash, vision_signals, brand_detection, llm_result)
+
+    _recalculate_verdict(llm_result, short_hash)
+
     verdict = llm_result.get("verdict", "WARNING")
     confidence = llm_result.get("confidence", 0)
     violations = llm_result.get("violations", [])
-    logger.info("[%s] └─ LLM done → %s %s%%", short_hash, verdict, confidence)
-
-    _save_debug(filename, image_hash, vision_signals, brand_detection, llm_result)
 
     yield {"event": "step", "step": "evaluating", "progress": 85, "message": f"Rule evaluation complete — {verdict} ({confidence}%) with {len(violations)} violation(s)"}
 
@@ -181,7 +227,7 @@ async def analyze_single_image_streaming(
 
     session_id = str(uuid.uuid4())
     passed_details = llm_result.get("passed_details", [])
-    passed_count = len(passed_details) if isinstance(passed_details, list) else 0
+    full_passed_count = len(passed_details) if isinstance(passed_details, list) else 0
     checks_performed = llm_result.get("checks_performed", [])
 
     result = {
@@ -217,7 +263,7 @@ async def analyze_single_image_streaming(
                     image_hash, blob_url, width, height,
                     result["verdict"], result["confidence"],
                     json.dumps(result["violations"]),
-                    passed_count, json.dumps(passed_details),
+                    full_passed_count, json.dumps(passed_details),
                     prompt, session_id,
                     result.get("summary", ""),
                     result.get("content_type_detected", "unknown"),
