@@ -119,7 +119,7 @@ async def analyze_single_image(
     signal_count = len(vision_signals) if isinstance(vision_signals, dict) else 0
     logger.info("[%s] ├─ Vision done (%d signals)", short_hash, signal_count)
 
-    llm_result = await analyze_compliance(vision_signals, rules, prompt, image_bytes=file_bytes)
+    llm_result = await analyze_compliance(vision_signals, rules, prompt, image_bytes=file_bytes, image_width=width, image_height=height)
     brand_detection = llm_result.pop("_brand_detection", {})
     logger.info("[%s] └─ LLM done → %s %s%%", short_hash,
                 llm_result.get("verdict"), llm_result.get("confidence"))
@@ -220,7 +220,7 @@ async def analyze_single_image_streaming(
     async def progress_callback(phase, progress, message):
         pass
 
-    llm_result = await analyze_compliance(vision_signals, rules, prompt, image_bytes=file_bytes, progress_callback=progress_callback)
+    llm_result = await analyze_compliance(vision_signals, rules, prompt, image_bytes=file_bytes, progress_callback=progress_callback, image_width=width, image_height=height)
 
     brand_detection = llm_result.pop("_brand_detection", {})
 

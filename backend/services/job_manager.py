@@ -136,6 +136,8 @@ async def run_job(job_id: str):
             vision_signals, rules, prompt,
             image_bytes=image_bytes_for_llm,
             progress_callback=progress_callback,
+            image_width=width,
+            image_height=height,
         )
 
         brand_detection = llm_result.pop("_brand_detection", {})

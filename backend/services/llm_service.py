@@ -354,7 +354,12 @@ VIOLATION REQUIREMENTS:
 - Cite the exact rule ID and include the rule text
 - Explain what's wrong in plain language a marketing team can understand
 - Provide an actionable fix suggestion
-- Include bounding box (x, y, w, h) when relevant, null for missing elements
+- BOUNDING BOX (bbox) — MANDATORY for every violation:
+  - The bbox must be in PIXEL coordinates relative to the image dimensions provided below.
+  - For PRESENT elements that violate a rule (wrong colour, wrong position, distorted logo, etc.): provide the bbox of the offending element as you see it in the image.
+  - For MISSING elements (no warning banner, no 18+ icon, no risk text, etc.): provide the bbox of WHERE the element SHOULD be placed according to brand guidelines. For example, a missing warning banner at the top → bbox covering the full-width top strip; missing 18+ icon → bbox in the bottom-right area; missing risk text → bbox at the bottom strip.
+  - NEVER return null for bbox. Always estimate a region even if approximate. Use the image dimensions provided to give pixel-accurate coordinates.
+  - The bbox {x, y} is the top-left corner, w is width, h is height, all in pixels.
 
 PASSED_DETAILS REQUIREMENTS:
 - For rules that PASS: describe what was confirmed using POSITIVE language only.
@@ -627,6 +632,8 @@ async def evaluate_compliance(
     rules: dict,
     prompt: Optional[str] = None,
     image_bytes: Optional[bytes] = None,
+    image_width: Optional[int] = None,
+    image_height: Optional[int] = None,
 ) -> dict:
     if not settings.azure_openai_endpoint or not settings.azure_openai_key:
         logger.warning("Azure OpenAI not configured — returning placeholder")
@@ -638,10 +645,14 @@ async def evaluate_compliance(
 
         detection_summary = _format_detection_summary(brand_detection)
 
+        dim_line = ""
+        if image_width and image_height:
+            dim_line = f"\n\nIMAGE DIMENSIONS: {image_width}px wide × {image_height}px tall. Use these pixel dimensions for all bounding box coordinates."
+
         text_message = f"""════════════════════════════════════════════════════
 VERIFIED BRAND ELEMENT DETECTION (from separate image inspection — TRUST THESE FACTS)
 ════════════════════════════════════════════════════
-{detection_summary}
+{detection_summary}{dim_line}
 
 ════════════════════════════════════════════════════
 BRAND RULES TO EVALUATE (check every rule against the detection facts above)
@@ -798,6 +809,8 @@ async def analyze_compliance(
     prompt: Optional[str] = None,
     image_bytes: Optional[bytes] = None,
     progress_callback=None,
+    image_width: Optional[int] = None,
+    image_height: Optional[int] = None,
 ) -> dict:
     brand_colors = rules.get("brand_colors", {})
 
@@ -824,9 +837,9 @@ async def analyze_compliance(
     if progress_callback:
         await progress_callback("evaluating", 70, "Evaluating against all brand rules...")
 
-    result = await evaluate_compliance(brand_detection, vision_signals, rules, prompt, image_bytes)
+    result = await evaluate_compliance(brand_detection, vision_signals, rules, prompt, image_bytes, image_width, image_height)
 
-    _enforce_detection_violations(result, brand_detection)
+    _enforce_detection_violations(result, brand_detection, image_width, image_height)
     _validate_rule_coverage(result, rules)
 
     result["_brand_detection"] = brand_detection
@@ -834,7 +847,22 @@ async def analyze_compliance(
     return result
 
 
-def _enforce_detection_violations(result: dict, detection: dict):
+def _estimate_bbox(region: str, img_w: Optional[int], img_h: Optional[int]) -> Optional[dict]:
+    if not img_w or not img_h:
+        return None
+    regions = {
+        "top_banner": {"x": 0, "y": 0, "w": img_w, "h": max(40, int(img_h * 0.12))},
+        "bottom_banner": {"x": 0, "y": img_h - max(40, int(img_h * 0.12)), "w": img_w, "h": max(40, int(img_h * 0.12))},
+        "bottom_right": {"x": img_w - int(img_w * 0.15), "y": img_h - int(img_h * 0.15), "w": int(img_w * 0.15), "h": int(img_h * 0.15)},
+        "logo_center": {"x": int(img_w * 0.15), "y": int(img_h * 0.2), "w": int(img_w * 0.7), "h": int(img_h * 0.5)},
+        "c_halo": {"x": int(img_w * 0.7), "y": int(img_h * 0.25), "w": int(img_w * 0.15), "h": int(img_h * 0.4)},
+        "z_area": {"x": int(img_w * 0.15), "y": int(img_h * 0.25), "w": int(img_w * 0.15), "h": int(img_h * 0.4)},
+        "full_image": {"x": 0, "y": 0, "w": img_w, "h": img_h},
+    }
+    return regions.get(region, regions["full_image"])
+
+
+def _enforce_detection_violations(result: dict, detection: dict, image_width: Optional[int] = None, image_height: Optional[int] = None):
     if not detection:
         return
 
@@ -863,7 +891,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "issue": "There is a circle/shape behind the Z letter. Only the C should have a halo — no other letter should have any shape behind it.",
                 "fix_suggestion": "Remove the circle from behind the Z. The halo belongs only on the C (the last letter in ZONNIC).",
                 "evidence": "Brand detection confirmed a circle/shape is present behind the Z letter.",
-                "bbox": None,
+                "bbox": _estimate_bbox("z_area", image_width, image_height),
             })
         if "LOGO-13" not in violation_ids:
             logger.warning("CROSS-VALIDATION: Halo on Z means logo is modified — forcing LOGO-13 violation")
@@ -874,7 +902,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "issue": "The logo has been modified — a circle/shape has been added behind the Z letter. In the correct ZONNIC logo, only the C has a halo behind it. No other letter should have any shape.",
                 "fix_suggestion": "Remove the circle/shape from behind the Z and use the official unmodified ZONNIC logo.",
                 "evidence": "Brand detection confirmed a circle/shape behind the Z letter, which is not part of the official logo design.",
-                "bbox": None,
+                "bbox": _estimate_bbox("z_area", image_width, image_height),
             })
 
     other_letters_raw = halo.get("halo_on_other_letters", "none")
@@ -889,7 +917,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "issue": f"A circle/shape was detected behind the letter(s): {other_letters_raw}. Only the C should have a halo.",
                 "fix_suggestion": "Remove any circles or shapes from behind letters other than C. Only the C gets a halo.",
                 "evidence": f"Brand detection confirmed shapes behind: {other_letters_raw}.",
-                "bbox": None,
+                "bbox": _estimate_bbox("logo_center", image_width, image_height),
             })
         if "LOGO-13" not in violation_ids and "LOGO-13" not in {v["rule_id"] for v in forced_violations}:
             forced_violations.append({
@@ -899,7 +927,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "issue": f"The logo has been modified — shapes have been added behind letter(s) {other_letters_raw} that should not have them.",
                 "fix_suggestion": "Use the official unmodified ZONNIC logo where only the C has a halo.",
                 "evidence": f"Brand detection confirmed unauthorized shapes behind: {other_letters_raw}.",
-                "bbox": None,
+                "bbox": _estimate_bbox("logo_center", image_width, image_height),
             })
 
     if logo.get("distorted_or_modified") is True and not is_product_photo:
@@ -912,7 +940,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "issue": "The logo appears to have been altered or modified from its official design.",
                 "fix_suggestion": "Use the official unmodified ZONNIC logo.",
                 "evidence": "Brand detection flagged the logo as distorted or modified.",
-                "bbox": None,
+                "bbox": _estimate_bbox("logo_center", image_width, image_height),
             })
 
     logo_not_present = logo.get("present") is False
@@ -929,7 +957,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "issue": "The C halo is missing from the ZONNIC logo.",
                 "fix_suggestion": "Add a circular halo around the letter C using the correct flavour gradient colours.",
                 "evidence": "No halo was detected on any letter in the logo.",
-                "bbox": None,
+                "bbox": _estimate_bbox("c_halo", image_width, image_height),
             })
 
     bg_type = bg.get("type", "")
@@ -944,7 +972,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "issue": f"The C halo is a solid {halo_col}, not a gradient. On white or grey backgrounds, the halo must use both the primary and secondary flavour colours as a visible gradient.",
                 "fix_suggestion": "Replace the solid halo with a gradient using both the primary (dark) and secondary (light) flavour colours.",
                 "evidence": f"Brand detection confirmed the halo is a single solid colour ({halo_col}) on a {bg_type} background.",
-                "bbox": None,
+                "bbox": _estimate_bbox("c_halo", image_width, image_height),
             })
 
     if halo.get("halo_on_other_letters", "none").lower() not in ("none", "not present", "") and not is_product_photo:
@@ -958,7 +986,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "issue": f"Halo or outline detected on letters other than C: {other}.",
                 "fix_suggestion": "Remove halos or outlines from all letters except C.",
                 "evidence": f"Brand detection found halos/outlines on: {other}.",
-                "bbox": None,
+                "bbox": _estimate_bbox("logo_center", image_width, image_height),
             })
         if "LOGO-13" not in violation_ids:
             logger.warning("CROSS-VALIDATION: Halo on other letters '%s' means logo is modified — forcing LOGO-13", other)
@@ -969,7 +997,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "issue": f"The logo has been modified — there are circles/shapes behind letter(s) other than C ({other}). The official ZONNIC logo only has a halo on the C.",
                 "fix_suggestion": f"Remove the circle/shape from behind the letter(s) {other}. Only the C should have a halo ring.",
                 "evidence": f"Brand detection confirmed halos/shapes on: {other}, which means the logo has been modified from its original design.",
-                "bbox": None,
+                "bbox": _estimate_bbox("logo_center", image_width, image_height),
             })
 
     if not reg.get("nicotine_warning_present", True):
@@ -982,7 +1010,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "issue": "No nicotine warning statement is present at the top of the image.",
                 "fix_suggestion": "Add a bilingual nicotine warning banner (English + French) at the top of the image.",
                 "evidence": "No nicotine warning text was found anywhere in the image.",
-                "bbox": None,
+                "bbox": _estimate_bbox("top_banner", image_width, image_height),
             })
 
     if not reg.get("age_icon_present", True):
@@ -995,7 +1023,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "issue": "The 18+ age restriction icon is missing.",
                 "fix_suggestion": "Add the 18+ age restriction icon to the image.",
                 "evidence": "No 18+ icon was detected in the image.",
-                "bbox": None,
+                "bbox": _estimate_bbox("bottom_right", image_width, image_height),
             })
 
     if not reg.get("risk_communication_present", True):
@@ -1008,7 +1036,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "issue": "Risk communication text is missing from the bottom of the image.",
                 "fix_suggestion": "Add risk communication text at the bottom of the image.",
                 "evidence": "No risk communication text was found in the image.",
-                "bbox": None,
+                "bbox": _estimate_bbox("bottom_banner", image_width, image_height),
             })
 
     if logo.get("distorted_or_modified") is True:
@@ -1021,7 +1049,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "issue": "The ZONNIC logo appears distorted, stretched, or otherwise modified from its original design.",
                 "fix_suggestion": "Use the original, unmodified ZONNIC logo file. Do not stretch, skew, or alter the logo.",
                 "evidence": "Brand detection confirmed the logo is distorted or modified.",
-                "bbox": None,
+                "bbox": _estimate_bbox("logo_center", image_width, image_height),
             })
 
     if logo.get("present") and logo.get("clear_space_sufficient") is False:
@@ -1034,7 +1062,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "issue": "Other elements are too close to the ZONNIC logo — there is not enough clear space around it.",
                 "fix_suggestion": "Increase the spacing around the logo so no other elements intrude into the clear space zone.",
                 "evidence": "Brand detection confirmed insufficient clear space around the logo.",
-                "bbox": None,
+                "bbox": _estimate_bbox("logo_center", image_width, image_height),
             })
 
     if halo.get("any_halo_present") and halo.get("halo_shape", "circle").lower() in ("oval", "distorted", "irregular"):
@@ -1048,7 +1076,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "issue": f"The halo around the C is {shape} instead of a perfect circle.",
                 "fix_suggestion": "Redraw the halo as a perfect circle around the letter C.",
                 "evidence": f"Brand detection confirmed the halo shape is '{shape}'.",
-                "bbox": None,
+                "bbox": _estimate_bbox("c_halo", image_width, image_height),
             })
 
     if halo.get("any_halo_present") and halo.get("halo_proportional") is False:
@@ -1061,7 +1089,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "issue": "The halo around the C is disproportionately sized — either too large or too small relative to the letter.",
                 "fix_suggestion": "Resize the halo so it is proportional to the letter C.",
                 "evidence": "Brand detection confirmed the halo is not proportional to the C letter.",
-                "bbox": None,
+                "bbox": _estimate_bbox("c_halo", image_width, image_height),
             })
 
     if halo.get("any_halo_present") and halo.get("halo_has_outline") is True:
@@ -1075,7 +1103,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "issue": f"The halo around the C has an outline/stroke ({outline_col}) which should not be present.",
                 "fix_suggestion": "Remove the outline/stroke from the C halo. The halo should be a clean ring without any border.",
                 "evidence": f"Brand detection confirmed the halo has an outline in {outline_col}.",
-                "bbox": None,
+                "bbox": _estimate_bbox("c_halo", image_width, image_height),
             })
 
     if reg.get("nicotine_warning_present") and not reg.get("nicotine_warning_bilingual", True):
@@ -1089,7 +1117,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "issue": "The nicotine warning is present but not bilingual — it is missing either the English or French version.",
                 "fix_suggestion": "Add both English and French versions of the nicotine warning statement.",
                 "evidence": f"Brand detection confirmed the warning is not bilingual. Warning text found: '{warning_text[:100]}'.",
-                "bbox": None,
+                "bbox": _estimate_bbox("top_banner", image_width, image_height),
             })
 
     if reg.get("nicotine_warning_present"):
@@ -1104,7 +1132,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                     "issue": f"The nicotine warning is present but positioned at the {pos} instead of the top of the image.",
                     "fix_suggestion": "Move the nicotine warning banner to the top of the image.",
                     "evidence": f"Brand detection found the warning at position: {pos}.",
-                    "bbox": None,
+                    "bbox": _estimate_bbox("top_banner", image_width, image_height),
                 })
 
     if reg.get("risk_communication_present"):
@@ -1119,7 +1147,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                     "issue": f"The risk communication text is present but positioned at the {pos} instead of the bottom of the image.",
                     "fix_suggestion": "Move the risk communication text to the bottom of the image.",
                     "evidence": f"Brand detection found risk text at position: {pos}.",
-                    "bbox": None,
+                    "bbox": _estimate_bbox("bottom_banner", image_width, image_height),
                 })
 
     bg_type_str = bg.get("type", "")
@@ -1136,7 +1164,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                         "issue": f"The logo text is {logo_colour} on a {bg_type_str} background — it should be navy blue.",
                         "fix_suggestion": "Change the logo text colour to navy blue (#242c65) for light backgrounds.",
                         "evidence": f"Brand detection found logo text colour is '{logo_colour}' on a '{bg_type_str}' background.",
-                        "bbox": None,
+                        "bbox": _estimate_bbox("logo_center", image_width, image_height),
                     })
         elif bg_type_str in ("dark_image",):
             if logo_colour and "white" not in logo_colour and logo_colour not in ("not present", "unknown", ""):
@@ -1149,7 +1177,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                         "issue": f"The logo text is {logo_colour} on a dark background — it should be white.",
                         "fix_suggestion": "Change the logo text colour to white (#FFFFFF) for dark backgrounds.",
                         "evidence": f"Brand detection found logo text colour is '{logo_colour}' on a dark background.",
-                        "bbox": None,
+                        "bbox": _estimate_bbox("logo_center", image_width, image_height),
                     })
 
     colours = detection.get("colours", {})
@@ -1169,7 +1197,7 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "issue": "A secondary/accent colour is being used as the main background colour instead of as a small accent.",
                 "fix_suggestion": "Use the secondary colour only for small accents (halo, icons). Use white, navy, or a brand gradient as the background.",
                 "evidence": f"Brand detection found secondary colour usage: '{sec_usage}'.",
-                "bbox": None,
+                "bbox": _estimate_bbox("full_image", image_width, image_height),
             })
     elif ("dominant" in sec_usage or "background" in sec_usage) and (primary_bg or sec_is_actually_primary):
         logger.info("CROSS-VALIDATION: Skipping COLOR-04 — background is '%s' (a primary brand colour), secondary is '%s'", bg_colour, sec_colour_name)
