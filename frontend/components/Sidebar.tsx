@@ -12,7 +12,7 @@ import {
   BookOpen,
   Clock,
   ShieldCheck,
-  Activity,
+  Zap,
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 
@@ -21,6 +21,16 @@ const navItems = [
   { href: "/batch", label: "Batch", icon: Layers, description: "Up to 10 images" },
   { href: "/rules", label: "Rules", icon: BookOpen, description: "Brand guidelines" },
   { href: "/history", label: "History", icon: Clock, description: "Past analyses" },
+];
+
+const poweredByIcons = [
+  { src: "/icons/azure-color.png", alt: "Microsoft Azure", tooltip: "Microsoft Azure" },
+  { src: "/icons/azure-openai.png", alt: "Azure OpenAI", tooltip: "GPT-4.1" },
+  { src: "/icons/computer-vision.png", alt: "Computer Vision", tooltip: "Computer Vision" },
+  { src: "/icons/ai-studio.png", alt: "AI Studio", tooltip: "AI Studio" },
+  { src: "/icons/azure-blob.png", alt: "Blob Storage", tooltip: "Blob Storage" },
+  { src: "/icons/container-apps.png", alt: "Container Apps", tooltip: "Container Apps" },
+  { src: "/icons/upstash-icon-white-bg.png", alt: "Upstash", tooltip: "Upstash Redis" },
 ];
 
 export default function Sidebar() {
@@ -139,18 +149,50 @@ export default function Sidebar() {
       </div>
 
       <div className="p-4 border-t border-border">
-        <div className="flex items-center gap-2 mb-2.5">
-          <Activity className="w-3.5 h-3.5 text-muted-foreground" />
-          <span className="text-[11px] text-muted-foreground uppercase tracking-wider">System</span>
+        <div className="flex items-center gap-2 mb-3">
+          <Zap className="w-3.5 h-3.5 text-primary/70" />
+          <span className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">
+            Powered By
+          </span>
         </div>
-        <div className="space-y-2">
+
+        <div className="flex flex-wrap gap-2 mb-3">
+          {poweredByIcons.map((icon, i) => (
+            <motion.div
+              key={icon.alt}
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1 + i * 0.06, type: "spring", stiffness: 400, damping: 20 }}
+              className="group/icon relative"
+            >
+              <motion.div
+                className="w-8 h-8 rounded-lg bg-background/80 border border-border/50 flex items-center justify-center cursor-default hover:border-primary/30 hover:bg-primary/5 transition-all duration-200"
+                whileHover={{ scale: 1.15, y: -2 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              >
+
+                <img
+                  src={icon.src}
+                  alt={icon.alt}
+                  className="w-[18px] h-[18px] object-contain"
+                />
+              </motion.div>
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 rounded-md bg-popover border border-border text-[9px] text-foreground whitespace-nowrap opacity-0 group-hover/icon:opacity-100 transition-opacity duration-200 pointer-events-none shadow-lg z-50">
+                {icon.tooltip}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="pt-2.5 border-t border-border/50">
           <AnimatePresence mode="wait">
             {health ? (
               <motion.div
                 key="health"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="space-y-2"
+                className="space-y-1.5"
               >
                 <StatusDot label="Vision API" active={health.azure_vision_configured} delay={0} />
                 <StatusDot label="GPT-4.1" active={health.azure_openai_configured} delay={0.05} />
@@ -158,29 +200,29 @@ export default function Sidebar() {
                 <StatusDot label="Cache" active={health.redis_configured} delay={0.15} />
               </motion.div>
             ) : (
-              <motion.div key="loading" className="space-y-2">
+              <motion.div key="loading" className="space-y-1.5">
                 {[1, 2, 3, 4].map((i) => (
                   <div key={i} className="flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full bg-muted animate-pulse" />
-                    <div className="h-2.5 w-16 rounded bg-muted animate-pulse" />
+                    <div className="w-2 h-2 rounded-full bg-muted animate-pulse" />
+                    <div className="h-2 w-14 rounded bg-muted animate-pulse" />
                   </div>
                 ))}
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
-        <div className="mt-3 pt-3 border-t border-border">
-          <div className="flex items-center justify-between">
-            <p className="text-[10px] text-muted-foreground">{servicesUp}/4 services active</p>
-            <div className="flex gap-0.5">
-              {[0, 1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className={`w-1.5 h-1.5 rounded-full transition-colors duration-500 ${
-                    i < servicesUp ? "bg-green-500" : "bg-muted-foreground/30"
-                  }`}
-                />
-              ))}
+          <div className="mt-2 pt-2 border-t border-border/30">
+            <div className="flex items-center justify-between">
+              <p className="text-[9px] text-muted-foreground">{servicesUp}/4 services active</p>
+              <div className="flex gap-0.5">
+                {[0, 1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className={`w-1.5 h-1.5 rounded-full transition-colors duration-500 ${
+                      i < servicesUp ? "bg-green-500" : "bg-muted-foreground/30"
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -198,12 +240,12 @@ function StatusDot({ label, active, delay }: { label: string; active: boolean; d
       transition={{ delay, duration: 0.3 }}
     >
       <div className="relative">
-        <div className={`w-2.5 h-2.5 rounded-full transition-colors duration-500 ${active ? "bg-green-500" : "bg-red-500/70"}`} />
+        <div className={`w-2 h-2 rounded-full transition-colors duration-500 ${active ? "bg-green-500" : "bg-red-500/70"}`} />
         {active && (
-          <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-green-500/40 animate-ping" style={{ animationDuration: '3s' }} />
+          <div className="absolute inset-0 w-2 h-2 rounded-full bg-green-500/40 animate-ping" style={{ animationDuration: '3s' }} />
         )}
       </div>
-      <span className="text-[11px] text-muted-foreground">{label}</span>
+      <span className="text-[10px] text-muted-foreground">{label}</span>
       <span className={`text-[9px] ml-auto ${active ? "text-green-500/70" : "text-red-500/50"}`}>
         {active ? "online" : "offline"}
       </span>
