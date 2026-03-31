@@ -81,7 +81,7 @@ const SESSION_KEY = "compliance_analyze_session";
 
 function saveSession(result: ComplianceResult, previewUrl: string | null) {
   try {
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+    localStorage.setItem(SESSION_KEY, JSON.stringify({
       result,
       previewUrl: result.image_url || previewUrl,
       savedAt: Date.now(),
@@ -91,11 +91,11 @@ function saveSession(result: ComplianceResult, previewUrl: string | null) {
 
 function loadSession(): { result: ComplianceResult; previewUrl: string | null } | null {
   try {
-    const raw = sessionStorage.getItem(SESSION_KEY);
+    const raw = localStorage.getItem(SESSION_KEY);
     if (!raw) return null;
     const data = JSON.parse(raw);
-    if (Date.now() - data.savedAt > 30 * 60 * 1000) {
-      sessionStorage.removeItem(SESSION_KEY);
+    if (Date.now() - data.savedAt > 24 * 60 * 60 * 1000) {
+      localStorage.removeItem(SESSION_KEY);
       return null;
     }
     return data;
@@ -105,7 +105,7 @@ function loadSession(): { result: ComplianceResult; previewUrl: string | null } 
 }
 
 function clearSession() {
-  try { sessionStorage.removeItem(SESSION_KEY); } catch {}
+  try { localStorage.removeItem(SESSION_KEY); } catch {}
 }
 
 export default function AnalyzePage() {
@@ -136,6 +136,11 @@ export default function AnalyzePage() {
       setResult(saved.result);
       if (saved.previewUrl) setPreview(saved.previewUrl);
       setRestoredFromSession(true);
+      if (saved.result.session_id) {
+        getChatMessages(saved.result.session_id).then((msgs) => {
+          if (msgs.length > 0) setChatMessages(msgs);
+        }).catch(() => {});
+      }
     }
   }, []);
 
