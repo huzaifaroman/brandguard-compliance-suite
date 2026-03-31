@@ -1148,11 +1148,13 @@ export default function AnalyzePage() {
                             <ScrollArea className="h-[300px] mb-3 rounded-lg bg-muted/20 p-3">
                               {chatMessages.length === 0 && !chatStreaming && (
                                 <div className="flex items-center justify-center h-full">
-                                  <div className="text-center">
-                                    <MessageSquare className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
-                                    <p className="text-xs text-muted-foreground">
-                                      Ask why something was flagged, how to fix a specific violation,
-                                      <br />or what the brand guidelines require.
+                                  <div className="text-center max-w-[260px]">
+                                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                                      <MessageSquare className="w-5 h-5 text-primary/40" />
+                                    </div>
+                                    <p className="text-sm font-medium text-foreground/60 mb-1">How can I help?</p>
+                                    <p className="text-xs text-muted-foreground leading-relaxed">
+                                      Ask about any violation, how to fix it, or what the brand guidelines say.
                                     </p>
                                   </div>
                                 </div>
@@ -1164,25 +1166,48 @@ export default function AnalyzePage() {
                                     initial={{ opacity: 0, y: 10, scale: 0.97 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                                    className={`mb-3 ${msg.role === "user" ? "text-right" : ""}`}
+                                    className={`mb-4 ${msg.role === "user" ? "text-right" : "flex items-start gap-2"}`}
                                   >
-                                    <div
-                                      className={`inline-block max-w-[85%] px-3.5 py-2.5 rounded-2xl text-sm ${
-                                        msg.role === "user"
-                                          ? "bg-primary text-primary-foreground rounded-br-md"
-                                          : "bg-muted/60 text-foreground rounded-bl-md"
-                                      }`}
-                                    >
-                                      <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
-                                    </div>
+                                    {msg.role === "user" ? (
+                                      <div className="inline-block max-w-[85%] px-3.5 py-2.5 rounded-2xl rounded-br-md text-sm bg-primary text-primary-foreground shadow-sm">
+                                        <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                                      </div>
+                                    ) : (
+                                      <>
+                                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                                        <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+                                      </div>
+                                      <div className="max-w-[88%] px-4 py-3 rounded-2xl rounded-tl-md text-sm bg-muted/50 border border-border/30 text-foreground shadow-sm">
+                                        <div className="space-y-2 leading-relaxed chat-response" dangerouslySetInnerHTML={{
+                                          __html: msg.content
+                                            .replace(/&/g, "&amp;")
+                                            .replace(/</g, "&lt;")
+                                            .replace(/>/g, "&gt;")
+                                            .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-foreground">$1</strong>')
+                                            .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                                            .replace(/^[-•] (.+)$/gm, '<li class="ml-3 list-disc list-inside text-[13px]">$1</li>')
+                                            .replace(/^(\d+)\. (.+)$/gm, '<li class="ml-3 list-decimal list-inside text-[13px]">$1. $2</li>')
+                                            .replace(/\n{2,}/g, '</p><p class="mt-2">')
+                                            .replace(/\n/g, "<br />")
+                                        }} />
+                                      </div>
+                                      </>
+                                    )}
                                   </motion.div>
                                 ))}
                               </AnimatePresence>
                               {chatStreaming && chatMessages.length > 0 && chatMessages[chatMessages.length - 1].content === "" && (
-                                <div className="flex items-center gap-1.5 px-3.5 py-2.5">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground typing-dot" />
-                                  <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground typing-dot" />
-                                  <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground typing-dot" />
+                                <div className="flex items-start gap-2 mb-4">
+                                  <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                                    <ShieldCheck className="w-3.5 h-3.5 text-primary animate-pulse" />
+                                  </div>
+                                  <div className="px-4 py-3 rounded-2xl rounded-tl-md bg-muted/50 border border-border/30">
+                                    <div className="flex items-center gap-1.5">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-primary/60 typing-dot" />
+                                      <span className="w-1.5 h-1.5 rounded-full bg-primary/60 typing-dot" />
+                                      <span className="w-1.5 h-1.5 rounded-full bg-primary/60 typing-dot" />
+                                    </div>
+                                  </div>
                                 </div>
                               )}
                               <div ref={chatEndRef} />
@@ -1193,7 +1218,7 @@ export default function AnalyzePage() {
                                 value={chatInput}
                                 onChange={(e) => setChatInput(e.target.value)}
                                 onKeyDown={(e) => e.key === "Enter" && handleSendChat()}
-                                placeholder="Why was rule R-XX flagged? How do I fix the logo placement?"
+                                placeholder="Ask about a violation or how to fix it..."
                                 className="flex-1 h-9 px-3.5 text-sm rounded-xl bg-muted/30 border border-border/50 text-foreground placeholder:text-muted-foreground input-premium focus:outline-none"
                               />
                               <Button
