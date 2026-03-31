@@ -69,6 +69,29 @@ export default function BatchPage() {
   }, []);
 
   useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      const imageFiles: File[] = [];
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith("image/")) {
+          const blob = items[i].getAsFile();
+          if (blob) {
+            const ext = blob.type.split("/")[1] || "png";
+            imageFiles.push(new File([blob], `pasted-image-${Date.now()}-${i}.${ext}`, { type: blob.type }));
+          }
+        }
+      }
+      if (imageFiles.length > 0) {
+        e.preventDefault();
+        onDrop(imageFiles);
+      }
+    };
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, [onDrop]);
+
+  useEffect(() => {
     if (!loading) { setBatchProgress(0); return; }
     setBatchProgress(5);
     const interval = setInterval(() => {
@@ -223,7 +246,7 @@ export default function BatchPage() {
                       <Layers className="w-8 h-8 text-primary/50" />
                     </motion.div>
                     <p className="text-sm font-medium mb-1">
-                      {isDragActive ? "Release to add images" : "Drop images or click to browse"}
+                      {isDragActive ? "Release to add images" : "Drop images, click to browse, or paste"}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {files.length}/{MAX_FILES} selected
