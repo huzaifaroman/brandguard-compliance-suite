@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ComplianceAI | Marketing Engine",
+  title: "BrandGuard | Compliance Suite",
   description: "AI-powered marketing compliance analysis for ZONNIC brand guidelines",
 };
 

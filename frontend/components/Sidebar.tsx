@@ -11,7 +11,7 @@ import {
   Layers,
   BookOpen,
   Clock,
-  Shield,
+  ShieldCheck,
   Activity,
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -51,11 +51,11 @@ export default function Sidebar() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <Shield className="w-5 h-5 text-primary" />
+            <ShieldCheck className="w-5 h-5 text-primary" />
           </motion.div>
           <div>
-            <h1 className="text-sm font-semibold tracking-tight gradient-text">ComplianceAI</h1>
-            <p className="text-[10px] text-muted-foreground tracking-wider uppercase">Marketing Engine</p>
+            <h1 className="text-sm font-semibold tracking-tight gradient-text">BrandGuard</h1>
+            <p className="text-[10px] text-muted-foreground tracking-wider uppercase">Compliance Suite</p>
           </div>
         </div>
       </div>

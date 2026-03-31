@@ -11,8 +11,8 @@ import {
   ShieldQuestion,
   Send,
   ChevronRight,
-  Sparkles,
-  Zap,
+  SearchCheck,
+  ScanLine,
   Eye,
   MessageSquare,
   RotateCcw,
@@ -66,7 +66,7 @@ const pipelineSteps = [
   { icon: Cloud, label: "Uploading", sublabel: "Cloud storage" },
   { icon: ScanEye, label: "Vision Analysis", sublabel: "Reading elements" },
   { icon: Brain, label: "Brand Detection", sublabel: "Identifying elements" },
-  { icon: Scan, label: "Rule Evaluation", sublabel: "62 brand rules" },
+  { icon: Scan, label: "Rule Evaluation", sublabel: "Full guideline check" },
   { icon: FileCheck, label: "Building Report", sublabel: "Final results" },
 ];
 
@@ -379,12 +379,12 @@ export default function AnalyzePage() {
         >
           <div className="flex items-center gap-3 mb-1">
             <div className="p-2 rounded-xl bg-primary/10 animate-glow-pulse">
-              <Sparkles className="w-5 h-5 text-primary" />
+              <SearchCheck className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight gradient-text">Analyze Image</h1>
+              <h1 className="text-2xl font-bold tracking-tight gradient-text">Brand Review</h1>
               <p className="text-sm text-muted-foreground">
-                Upload a marketing asset for AI-powered compliance review
+                Upload a marketing asset for intelligent compliance review
               </p>
             </div>
           </div>
@@ -516,9 +516,9 @@ export default function AnalyzePage() {
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                <Zap className="w-4 h-4" />
+                <ScanLine className="w-4 h-4" />
               )}
-              {loading ? "Analyzing" : "Analyze"}
+              {loading ? "Reviewing" : "Review"}
             </Button>
           </div>
         </motion.div>
@@ -673,7 +673,7 @@ export default function AnalyzePage() {
                       <p className="text-xs text-muted-foreground font-mono">{reportId}</p>
                       {result.cached && (
                         <Badge variant="outline" className="text-blue-400 border-blue-500/30 text-[10px] gap-1">
-                          <Zap className="w-2.5 h-2.5" /> Cached
+                          <CheckCircle2 className="w-2.5 h-2.5" /> Cached
                         </Badge>
                       )}
                     </div>
