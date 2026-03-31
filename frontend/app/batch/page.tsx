@@ -17,6 +17,13 @@ import {
   Download,
   FileText,
   CheckCircle2,
+  Cloud,
+  ScanEye,
+  Brain,
+  Scan,
+  FileCheck,
+  ScanLine,
+  ImagePlus,
 } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
 import { batchAnalyze } from "@/lib/api";
@@ -31,6 +38,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 const MAX_FILES = 10;
 const DONUT_COLORS = { passed: "#22c55e", failed: "#ef4444", warnings: "#f59e0b" };
 
+const batchPipelineSteps = [
+  { icon: Cloud, label: "Uploading", sublabel: "Cloud storage" },
+  { icon: ScanEye, label: "Vision Analysis", sublabel: "Reading elements" },
+  { icon: Brain, label: "Rule Evaluation", sublabel: "Checking compliance" },
+  { icon: Scan, label: "Cross-Validation", sublabel: "Verifying results" },
+  { icon: FileCheck, label: "Building Report", sublabel: "Final results" },
+];
+
 export default function BatchPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
@@ -39,6 +54,7 @@ export default function BatchPage() {
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [batchProgress, setBatchProgress] = useState(0);
+  const [activeStep, setActiveStep] = useState(0);
 
   const onDrop = useCallback(
     (accepted: File[]) => {
@@ -92,13 +108,17 @@ export default function BatchPage() {
   }, [onDrop]);
 
   useEffect(() => {
-    if (!loading) { setBatchProgress(0); return; }
+    if (!loading) { setBatchProgress(0); setActiveStep(0); return; }
     setBatchProgress(5);
-    const interval = setInterval(() => {
-      setBatchProgress((prev) => Math.min(prev + Math.random() * 8, 92));
+    setActiveStep(0);
+    const progressInterval = setInterval(() => {
+      setBatchProgress((prev) => Math.min(prev + Math.random() * 6, 92));
     }, 800);
-    return () => clearInterval(interval);
-  }, [loading]);
+    const stepInterval = setInterval(() => {
+      setActiveStep((prev) => Math.min(prev + 1, batchPipelineSteps.length - 1));
+    }, Math.max(2000, (files.length * 8000) / batchPipelineSteps.length));
+    return () => { clearInterval(progressInterval); clearInterval(stepInterval); };
+  }, [loading, files.length]);
 
   const handleSubmit = async () => {
     if (!files.length) return;
@@ -229,28 +249,32 @@ export default function BatchPage() {
               exit={{ opacity: 0, y: -20 }}
               className="space-y-5"
             >
-              <Card className="overflow-hidden card-hover">
+              <Card className="overflow-hidden card-hover border-dashed border-2 border-border/50 hover:border-primary/30 transition-colors duration-300">
                 <CardContent className="p-0">
                   <div
                     {...getRootProps()}
-                    className={`p-10 text-center cursor-pointer transition-all duration-300 ${
-                      isDragActive ? "bg-primary/5 ring-2 ring-primary/30" : ""
+                    className={`p-12 text-center cursor-pointer transition-all duration-300 ${
+                      isDragActive ? "bg-primary/5 ring-2 ring-primary/30 border-primary/50" : ""
                     }`}
                   >
                     <input {...getInputProps()} />
                     <motion.div
-                      animate={isDragActive ? { scale: 1.1, y: -5 } : { scale: 1, y: 0 }}
+                      animate={isDragActive ? { scale: 1.15, y: -8 } : { scale: 1, y: 0 }}
                       transition={{ type: "spring", stiffness: 400, damping: 20 }}
-                      className="inline-flex p-4 rounded-2xl bg-primary/5 mb-4"
+                      className="inline-flex p-5 rounded-2xl bg-primary/5 mb-5"
                     >
-                      <Layers className="w-8 h-8 text-primary/50" />
+                      <ImagePlus className="w-9 h-9 text-primary/50" />
                     </motion.div>
-                    <p className="text-sm font-medium mb-1">
+                    <p className="text-sm font-medium mb-1.5">
                       {isDragActive ? "Release to add images" : "Drop images, click to browse, or paste"}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {files.length}/{MAX_FILES} selected
+                      PNG, JPG, WEBP up to 20MB — Ctrl+V / ⌘V to paste from clipboard
                     </p>
+                    <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted/30 border border-border/30">
+                      <span className="text-[11px] font-medium text-muted-foreground tabular-nums">{files.length}/{MAX_FILES}</span>
+                      <span className="text-[11px] text-muted-foreground/60">selected</span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -272,24 +296,34 @@ export default function BatchPage() {
                         transition={{ delay: i * 0.05 }}
                         className="relative group"
                       >
-                        <Card className="overflow-hidden aspect-square card-hover">
+                        <Card className="overflow-hidden aspect-square card-hover border-border/50">
                           <img
                             src={src}
                             alt={files[i]?.name}
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                           />
-                          <button
-                            onClick={(e) => { e.stopPropagation(); removeFile(i); }}
-                            className="absolute top-1.5 right-1.5 rounded-full w-5 h-5 flex items-center justify-center bg-black/70 text-white opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-red-500/80"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-2 py-1">
-                            <p className="text-[10px] text-white truncate">{files[i]?.name}</p>
+                          {!loading && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); removeFile(i); }}
+                              className="absolute top-1.5 right-1.5 rounded-full w-6 h-6 flex items-center justify-center bg-black/70 backdrop-blur-sm text-white opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-red-500/90 hover:scale-110"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent px-2.5 py-2">
+                            <p className="text-[10px] text-white/90 truncate font-medium">{files[i]?.name}</p>
                           </div>
                           {loading && (
-                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                              <Loader2 className="w-5 h-5 text-white animate-spin" />
+                            <div className="absolute inset-0 bg-black/50 backdrop-blur-[1px] flex flex-col items-center justify-center gap-2">
+                              <div className="relative w-8 h-8">
+                                <motion.div
+                                  className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary"
+                                  animate={{ rotate: 360 }}
+                                  transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                                />
+                                <ScanLine className="w-4 h-4 text-primary absolute inset-0 m-auto" />
+                              </div>
+                              <span className="text-[10px] text-white/70 font-medium tracking-wider uppercase">Scanning</span>
                             </div>
                           )}
                         </Card>
@@ -306,16 +340,95 @@ export default function BatchPage() {
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
                   >
-                    <Card className="border-primary/20">
-                      <CardContent className="p-4 space-y-3">
+                    <Card className="border-primary/20 overflow-hidden">
+                      <CardContent className="p-5 space-y-4">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Loader2 className="w-4 h-4 text-primary animate-spin" />
-                            <p className="text-sm font-medium">Analyzing {files.length} images...</p>
+                          <div className="flex items-center gap-2.5">
+                            <div className="relative w-5 h-5">
+                              <motion.div
+                                className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary"
+                                animate={{ rotate: 360 }}
+                                transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                              />
+                              <ScanLine className="w-3.5 h-3.5 text-primary absolute inset-0 m-auto" />
+                            </div>
+                            <p className="text-sm font-medium">
+                              Analyzing {files.length} image{files.length !== 1 ? "s" : ""}
+                            </p>
                           </div>
-                          <span className="text-xs font-mono text-primary">{Math.round(batchProgress)}%</span>
+                          <span className="text-xs font-mono text-primary tabular-nums">{Math.round(batchProgress)}%</span>
                         </div>
-                        <Progress value={batchProgress} className="h-1.5" />
+                        <div className="h-1.5 rounded-full bg-muted/50 overflow-hidden">
+                          <motion.div
+                            className="h-full bg-primary rounded-full"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${batchProgress}%` }}
+                            transition={{ duration: 0.5, ease: "easeOut" }}
+                          />
+                        </div>
+                        <div className="grid grid-cols-5 gap-1.5">
+                          {batchPipelineSteps.map((step, i) => {
+                            const Icon = step.icon;
+                            const isActive = i === activeStep;
+                            const isDone = i < activeStep || batchProgress === 100;
+                            return (
+                              <motion.div
+                                key={i}
+                                initial={{ opacity: 0, y: 8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.08, duration: 0.3 }}
+                                className={`flex flex-col items-center gap-1.5 rounded-xl p-2.5 transition-all duration-500 ${
+                                  isActive
+                                    ? "bg-primary/10 ring-1 ring-primary/30 shadow-lg shadow-primary/10"
+                                    : isDone
+                                    ? "bg-green-500/5 ring-1 ring-green-500/20"
+                                    : "bg-muted/30 opacity-40"
+                                }`}
+                              >
+                                <div className="relative flex items-center justify-center w-8 h-8">
+                                  {isActive && (
+                                    <motion.div
+                                      className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary"
+                                      animate={{ rotate: 360 }}
+                                      transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                                    />
+                                  )}
+                                  {isDone && (
+                                    <motion.div
+                                      className="absolute inset-0 rounded-full bg-green-500/10"
+                                      initial={{ scale: 0 }}
+                                      animate={{ scale: 1 }}
+                                      transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                                    />
+                                  )}
+                                  <motion.div
+                                    animate={isActive ? { scale: [1, 1.1, 1] } : { scale: 1 }}
+                                    transition={isActive ? { repeat: Infinity, duration: 2, ease: "easeInOut" } : {}}
+                                  >
+                                    <Icon className={`w-4 h-4 relative z-10 ${
+                                      isActive ? "text-primary" : isDone ? "text-green-500" : "text-muted-foreground"
+                                    }`} />
+                                  </motion.div>
+                                  {isDone && (
+                                    <motion.div
+                                      initial={{ scale: 0 }}
+                                      animate={{ scale: 1 }}
+                                      className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-green-500 flex items-center justify-center z-20"
+                                    >
+                                      <CheckCircle2 className="w-2.5 h-2.5 text-white" />
+                                    </motion.div>
+                                  )}
+                                </div>
+                                <div className="text-center">
+                                  <p className={`text-[11px] font-medium leading-tight ${
+                                    isActive ? "text-primary" : isDone ? "text-green-500" : "text-muted-foreground"
+                                  }`}>{step.label}</p>
+                                  <p className="text-[9px] text-muted-foreground mt-0.5">{step.sublabel}</p>
+                                </div>
+                              </motion.div>
+                            );
+                          })}
+                        </div>
                       </CardContent>
                     </Card>
                   </motion.div>
@@ -337,18 +450,21 @@ export default function BatchPage() {
                 )}
               </AnimatePresence>
 
-              <Button
-                onClick={handleSubmit}
-                disabled={!files.length || loading}
-                className="gap-2 btn-glow"
-              >
-                {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Upload className="w-4 h-4" />
-                )}
-                {loading ? `Analyzing ${files.length} images...` : `Analyze ${files.length} Image${files.length !== 1 ? "s" : ""}`}
-              </Button>
+              <div className="flex justify-end">
+                <Button
+                  onClick={handleSubmit}
+                  disabled={!files.length || loading}
+                  size="lg"
+                  className="gap-2.5 btn-glow px-6 h-11 text-sm font-semibold"
+                >
+                  {loading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <ScanLine className="w-4 h-4" />
+                  )}
+                  {loading ? `Analyzing ${files.length} image${files.length !== 1 ? "s" : ""}...` : `Review ${files.length} Image${files.length !== 1 ? "s" : ""}`}
+                </Button>
+              </div>
             </motion.div>
           ) : (
             <motion.div
