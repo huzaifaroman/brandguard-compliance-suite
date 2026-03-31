@@ -202,10 +202,13 @@ async def analyze_single_image_streaming(
     detection_parts = []
     if logo_info.get("present"):
         detection_parts.append("Logo found")
+    if halo_info.get("halo_on_z"):
+        detection_parts.append("circle on Z (violation)")
+    other_letters = halo_info.get("halo_on_other_letters", "none")
+    if other_letters and other_letters.lower() not in ("none", "n/a", "no", ""):
+        detection_parts.append(f"shape on {other_letters} (violation)")
     if halo_info.get("halo_on_c"):
         detection_parts.append("halo on C (correct)")
-    elif halo_info.get("halo_on_z"):
-        detection_parts.append("halo on Z (wrong letter)")
     detection_msg = ", ".join(detection_parts) if detection_parts else "Detection complete"
 
     yield {"event": "step", "step": "detecting", "progress": 60, "message": f"Brand detection: {detection_msg}"}

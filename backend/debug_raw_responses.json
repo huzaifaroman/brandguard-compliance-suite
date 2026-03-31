@@ -1,6 +1,6 @@
 {
   "_info": "Raw API responses \u2014 overwritten on each new analysis",
-  "_timestamp": "2026-03-31T11:50:38.487631+00:00",
+  "_timestamp": "2026-03-31T12:05:42.598924+00:00",
   "_filename": "Screenshot 2026-03-30 at 15.07.56.png",
   "_image_hash": "ad30e645fc7259f92ca5ce8a40870b555692ca705711251e046de36bbda47901",
   "step_1_vision_api": {
@@ -61,15 +61,15 @@
     "tags": [
       {
         "name": "font",
-        "confidence": 0.9556118845939636
+        "confidence": 0.9556117653846741
       },
       {
         "name": "logo",
-        "confidence": 0.9371317028999329
+        "confidence": 0.9371316432952881
       },
       {
         "name": "graphics",
-        "confidence": 0.9289462566375732
+        "confidence": 0.9289461374282837
       },
       {
         "name": "text",
@@ -77,23 +77,23 @@
       },
       {
         "name": "graphic design",
-        "confidence": 0.862612247467041
+        "confidence": 0.8626120090484619
       },
       {
         "name": "brand",
-        "confidence": 0.8456437587738037
+        "confidence": 0.8456436395645142
       },
       {
         "name": "symbol",
-        "confidence": 0.8422145843505859
+        "confidence": 0.8422143459320068
       },
       {
         "name": "design",
-        "confidence": 0.7848436236381531
+        "confidence": 0.7848429679870605
       },
       {
         "name": "typography",
-        "confidence": 0.6555079221725464
+        "confidence": 0.6555070281028748
       }
     ],
     "objects": [],
@@ -152,14 +152,14 @@
       "text_colour": "navy blue",
       "distorted_or_modified": false,
       "clear_space_sufficient": true,
-      "relative_size": "medium (occupies about 30% of image width)"
+      "relative_size": "medium (about 25% of image width)"
     },
     "halo": {
       "any_halo_present": true,
       "halo_on_z": false,
       "halo_on_c": true,
       "halo_on_other_letters": "none",
-      "halo_colour": "solid light teal (matches Grey/Neutral secondary_light #89d0c8)",
+      "halo_colour": "#89d0c8 (mint/teal, matches Grey/Neutral secondary light palette)",
       "halo_is_gradient": false,
       "halo_gradient_colours": "#89d0c8",
       "halo_shape": "circle",
@@ -189,18 +189,18 @@
       "additional_text": "NOT PRESENT"
     },
     "colours": {
-      "dominant_colours": "navy blue, light teal, white",
+      "dominant_colours": "navy blue, mint/teal, white",
       "matches_flavour_palette": "Grey/Neutral",
-      "secondary_colour_usage": "used as accent (halo around C)"
+      "secondary_colour_usage": "used sparingly as accent (halo around C)"
     },
     "content_type": "logo_only",
-    "overall_description": "The image shows the ZONNIC logo in navy blue, centered left on a solid white background. The C has a light teal circular halo around it, matching the Grey/Neutral flavour palette. No regulatory or additional text is present."
+    "overall_description": "The image shows the ZONNIC logo centered left on a solid white background. The logo text is navy blue, and only the C has a mint/teal halo ring matching the Grey/Neutral flavour palette. No regulatory or additional text is present."
   },
-  "step_2b_formatted_detection_sent_to_pass2": "OVERVIEW: The image shows the ZONNIC logo in navy blue, centered left on a solid white background. The C has a light teal circular halo around it, matching the Grey/Neutral flavour palette. No regulatory or additional text is present.\nCONTENT TYPE: logo_only\n\n\u2500\u2500 LOGO \u2500\u2500\n  Present: YES\n  Position: center left\n  Text colour: navy blue\n  Distorted or modified: NO\n  Clear space sufficient: YES\n  Relative size: medium (occupies about 30% of image width)\n\n\u2500\u2500 C HALO (CRITICAL) \u2500\u2500\n  Any halo present: YES\n  Halo on Z (leftmost letter): NO (correct)\n  Halo on C (rightmost letter): YES (correct)\n  Halo on other letters: none\n  Halo colour: solid light teal (matches Grey/Neutral secondary_light #89d0c8)\n  Halo is gradient (two colours): NO \u2014 solid single colour (on white/grey background the halo MUST be a gradient per LOGO-05)\n  Gradient colours: #89d0c8\n  Shape: circle\n  Proportional: YES\n  Has outline: NO\n\n\u2500\u2500 BACKGROUND \u2500\u2500\n  Type: white\n  Colours: white\n  Gradient direction: not present\n  Description: solid white background\n\n\u2500\u2500 REGULATORY ELEMENTS \u2500\u2500\n  Nicotine warning: NOT PRESENT \u26a0\n  18+ age icon: NOT PRESENT \u26a0\n  Risk communication: NOT PRESENT \u26a0\n\n\u2500\u2500 TYPOGRAPHY \u2500\u2500\n  Fonts: bold geometric sans-serif (logo only)\n  Sans-serif: YES\n  Additional text: NOT PRESENT\n\n\u2500\u2500 COLOURS \u2500\u2500\n  Dominant: navy blue, light teal, white\n  Flavour palette match: Grey/Neutral\n  Secondary colour usage: used as accent (halo around C)",
+  "step_2b_formatted_detection_sent_to_pass2": "OVERVIEW: The image shows the ZONNIC logo centered left on a solid white background. The logo text is navy blue, and only the C has a mint/teal halo ring matching the Grey/Neutral flavour palette. No regulatory or additional text is present.\nCONTENT TYPE: logo_only\n\n\u2500\u2500 LOGO \u2500\u2500\n  Present: YES\n  Position: center left\n  Text colour: navy blue\n  Distorted or modified: NO\n  Clear space sufficient: YES\n  Relative size: medium (about 25% of image width)\n\n\u2500\u2500 C HALO (CRITICAL) \u2500\u2500\n  Any halo present: YES\n  Halo on Z (leftmost letter): NO (correct)\n  Halo on C (rightmost letter): YES (correct)\n  Halo on other letters: none\n  Halo colour: #89d0c8 (mint/teal, matches Grey/Neutral secondary light palette)\n  Halo is gradient (two colours): NO \u2014 solid single colour (on white/grey background the halo MUST be a gradient per LOGO-05)\n  Gradient colours: #89d0c8\n  Shape: circle\n  Proportional: YES\n  Has outline: NO\n\n\u2500\u2500 BACKGROUND \u2500\u2500\n  Type: white\n  Colours: white\n  Gradient direction: not present\n  Description: solid white background\n\n\u2500\u2500 REGULATORY ELEMENTS \u2500\u2500\n  Nicotine warning: NOT PRESENT \u26a0\n  18+ age icon: NOT PRESENT \u26a0\n  Risk communication: NOT PRESENT \u26a0\n\n\u2500\u2500 TYPOGRAPHY \u2500\u2500\n  Fonts: bold geometric sans-serif (logo only)\n  Sans-serif: YES\n  Additional text: NOT PRESENT\n\n\u2500\u2500 COLOURS \u2500\u2500\n  Dominant: navy blue, mint/teal, white\n  Flavour palette match: Grey/Neutral\n  Secondary colour usage: used sparingly as accent (halo around C)",
   "step_3_rule_evaluation_pass2": {
     "verdict": "WARNING",
     "confidence": 98,
-    "summary": "The image displays the ZONNIC logo in navy blue, positioned center-left on a solid white background. The logo text is clear and uses the correct colour for a light background. The C at the end of the logo has a circular halo in light teal, matching the Grey/Neutral flavour palette, and the halo is proportionally sized and correctly placed. There are no extra shapes or outlines around the logo or halo, and the logo is not distorted or modified. However, the halo around the C is a solid colour rather than a gradient, which is required for white backgrounds. Additionally, the image is missing all regulatory elements: there is no bilingual nicotine warning at the top, no 18+ icon, and no risk communication text at the bottom. The logo\u2019s clear space is respected, and only approved brand colours are used. Overall, the image follows most brand standards but needs to address the missing regulatory elements and update the C halo to a gradient for full compliance.",
+    "summary": "The image displays the ZONNIC logo in navy blue text, positioned center left on a solid white background. The logo is clean and undistorted, with the C featuring a mint/teal circular halo that matches the Grey/Neutral flavour palette. The halo is properly sized and placed only around the C, with no outline or distortion. The logo has sufficient clear space and uses the correct font style. However, the halo around the C is a solid colour rather than a gradient, which is required for white backgrounds. Additionally, there are no regulatory elements present, such as the bilingual nicotine warning, 18+ icon, or risk communication text. The image follows most brand standards for logo appearance, colour, and layout, but needs minor improvements for the halo and must include mandatory regulatory text and icons for full compliance.",
     "checks_performed": [
       {
         "check_id": "CHECK-01",
@@ -212,7 +212,7 @@
         "check_id": "CHECK-02",
         "check_name": "Regulatory: 18+ Icon Present",
         "status": "fail",
-        "detail": "No 18+ age restriction icon is present in the image."
+        "detail": "No 18+ age restriction icon is visible in the image."
       },
       {
         "check_id": "CHECK-03",
@@ -224,7 +224,7 @@
         "check_id": "CHECK-04",
         "check_name": "Logo Presence",
         "status": "pass",
-        "detail": "ZONNIC logo is present and correctly rendered in navy blue with a halo around the C."
+        "detail": "ZONNIC logo is clearly visible and correctly positioned."
       },
       {
         "check_id": "CHECK-05",
@@ -235,62 +235,62 @@
       {
         "check_id": "CHECK-06",
         "check_name": "C Halo Presence and Correctness",
-        "status": "fail",
-        "detail": "Halo around the C is a solid colour; on white backgrounds, it must be a gradient."
+        "status": "pass",
+        "detail": "C halo is present, circular, properly sized, and matches the flavour palette."
       },
       {
         "check_id": "CHECK-07",
         "check_name": "Logo Integrity",
         "status": "pass",
-        "detail": "Logo is not distorted, modified, or rearranged. No gradients in text, no outlines, no stacking."
+        "detail": "Logo is undistorted, not modified, and uses correct arrangement."
       },
       {
         "check_id": "CHECK-08",
         "check_name": "Background Type Detection",
         "status": "pass",
-        "detail": "Background is solid white, not a gradient or image."
+        "detail": "Background is solid white, not gradient or image."
       },
       {
         "check_id": "CHECK-09",
         "check_name": "Gradient Compliance",
         "status": "not_applicable",
-        "detail": "No gradient background is present, so gradient direction and split do not apply."
+        "detail": "No gradient background is present, so gradient rules do not apply."
       },
       {
         "check_id": "CHECK-10",
         "check_name": "Content Type vs Background Match",
         "status": "pass",
-        "detail": "Logo-only content on a white background is acceptable for brand visuals."
+        "detail": "Logo-only content on white background is acceptable for brand visuals."
       },
       {
         "check_id": "CHECK-11",
         "check_name": "Colour Palette Compliance",
         "status": "pass",
-        "detail": "Only approved brand colours are used; halo matches Grey/Neutral palette."
+        "detail": "All colours used are approved brand colours and match the Grey/Neutral palette."
       },
       {
         "check_id": "CHECK-12",
         "check_name": "Typography Check",
         "status": "pass",
-        "detail": "Logo uses bold geometric sans-serif font, consistent with Santral. No additional text or NRT lockup present."
+        "detail": "Logo uses bold geometric sans-serif font, consistent with Santral."
       },
       {
         "check_id": "CHECK-13",
         "check_name": "Grey Gradient Background",
         "status": "not_applicable",
-        "detail": "No grey gradient background is used."
+        "detail": "No grey gradient background is used, so these rules do not apply."
       },
       {
         "check_id": "CHECK-14",
         "check_name": "Logo Safety Zone",
         "status": "pass",
-        "detail": "Logo has sufficient clear space around it; no elements intrude."
+        "detail": "Logo has sufficient clear space around it."
       },
       {
         "check_id": "CHECK-15",
         "check_name": "Logo on Background Dont's",
         "status": "pass",
-        "detail": "Halo does not blend into background, flavour matches, logo is not placed in any shape, and no other background-specific violations."
+        "detail": "Halo does not blend into background, flavour matches, and logo is not placed in any shape."
       }
     ],
     "violations": [
@@ -300,16 +300,16 @@
         "severity": "critical",
         "issue": "No nicotine warning statement is present at the top of the image.",
         "fix_suggestion": "Add a bilingual nicotine warning banner at the top of the image.",
-        "evidence": "No warning text detected at the top.",
+        "evidence": "No warning text detected anywhere in the image.",
         "bbox": null
       },
       {
         "rule_id": "REG-02",
         "rule_text": "The 18+ icon must be present on marketing materials to indicate age restriction.",
         "severity": "critical",
-        "issue": "No 18+ age restriction icon is present in the image.",
+        "issue": "No 18+ age restriction icon is visible in the image.",
         "fix_suggestion": "Add the 18+ icon at the bottom of the image.",
-        "evidence": "No age icon detected.",
+        "evidence": "No age icon detected in the image.",
         "bbox": null
       },
       {
@@ -318,16 +318,16 @@
         "severity": "critical",
         "issue": "No risk communication text is present at the bottom of the image.",
         "fix_suggestion": "Add the required risk communication text at the bottom of the image.",
-        "evidence": "No risk text detected.",
+        "evidence": "No risk text detected anywhere in the image.",
         "bbox": null
       },
       {
         "rule_id": "REG-04",
-        "rule_text": "The nicotine warning banner must be positioned at the TOP of the asset. The risk communication and 18+ icon must be at the BOTTOM.",
+        "rule_text": "The nicotine warning banner must be positioned at the TOP of the asset. The risk communication and 18+ icon must be at the BOTTOM. This placement is consistent across all compliant examples in the guidelines.",
         "severity": "critical",
-        "issue": "Required regulatory elements are missing from their designated positions.",
-        "fix_suggestion": "Add the nicotine warning at the top and risk communication plus 18+ icon at the bottom.",
-        "evidence": "No regulatory elements detected.",
+        "issue": "Required regulatory elements (nicotine warning, 18+ icon, risk text) are missing from their designated positions.",
+        "fix_suggestion": "Add the nicotine warning at the top and the 18+ icon and risk text at the bottom.",
+        "evidence": "No regulatory elements detected in the image.",
         "bbox": null
       },
       {
@@ -335,17 +335,17 @@
         "rule_text": "The nicotine warning must appear in BOTH English and French on every asset. English uses 'WARNING:', French uses 'AVERTISSEMENT :'.",
         "severity": "critical",
         "issue": "No bilingual nicotine warning is present.",
-        "fix_suggestion": "Add both English and French nicotine warnings at the top.",
-        "evidence": "No warning text detected.",
+        "fix_suggestion": "Add both English and French nicotine warning statements at the top.",
+        "evidence": "No warning text detected in any language.",
         "bbox": null
       },
       {
         "rule_id": "LOGO-05",
         "rule_text": "On a white or grey gradient background, the C halo must always use the full gradient, consisting of both the primary and secondary colours.",
         "severity": "critical",
-        "issue": "The halo around the C is a solid colour; on white backgrounds, it must be a gradient.",
-        "fix_suggestion": "Update the C halo to use a gradient with both primary and secondary colours.",
-        "evidence": "Halo is solid light teal (#89d0c8) on white background.",
+        "issue": "The C halo is a solid colour instead of a gradient, which is required on white backgrounds.",
+        "fix_suggestion": "Change the C halo to a gradient using both the primary and secondary colours from the Grey/Neutral palette.",
+        "evidence": "Halo around C is mint/teal (#89d0c8) but not a gradient.",
         "bbox": {
           "x": 261,
           "y": 24,
@@ -358,13 +358,13 @@
       {
         "rule_id": "LOGO-01",
         "category": "Logo",
-        "detail": "ZONNIC logo is present with navy blue text and a circular halo around the C.",
+        "detail": "Logo text is navy blue and the C halo is present, matching the flavour palette.",
         "status": "pass"
       },
       {
         "rule_id": "LOGO-04",
         "category": "Logo",
-        "detail": "Colour logo is used, not monochrome.",
+        "detail": "Colour ZONNIC logo is used, not monochrome.",
         "status": "pass"
       },
       {
@@ -374,21 +374,99 @@
         "status": "pass"
       },
       {
+        "rule_id": "LOGO-11",
+        "category": "Logo",
+        "detail": "Logo has sufficient clear space around it.",
+        "status": "pass"
+      },
+      {
+        "rule_id": "LOGO-12",
+        "category": "Logo",
+        "detail": "Logo size is appropriate for screen display.",
+        "status": "pass"
+      },
+      {
+        "rule_id": "LOGO-13",
+        "category": "Logo",
+        "detail": "Logo is not altered, distorted, or rearranged.",
+        "status": "pass"
+      },
+      {
         "rule_id": "LOGO-DONT-01",
         "category": "Logo",
-        "detail": "C halo is present and correctly placed.",
+        "detail": "C halo is present and properly positioned.",
         "status": "pass"
       },
       {
         "rule_id": "LOGO-DONT-02",
         "category": "Logo",
-        "detail": "Halo is not on the Z; only on the C.",
+        "detail": "Halo is correctly placed on the C.",
+        "status": "pass"
+      },
+      {
+        "rule_id": "LOGO-DONT-03",
+        "category": "Logo",
+        "detail": "Halo does not have an outline.",
         "status": "pass"
       },
       {
         "rule_id": "LOGO-DONT-04",
         "category": "Logo",
-        "detail": "Halo is proportionally sized and not enlarged.",
+        "detail": "Halo is proportionally sized to the logo.",
+        "status": "pass"
+      },
+      {
+        "rule_id": "LOGO-DONT-05",
+        "category": "Logo",
+        "detail": "Logo text does not use gradients.",
+        "status": "pass"
+      },
+      {
+        "rule_id": "LOGO-DONT-06",
+        "category": "Logo",
+        "detail": "Halo colour is distinct from the background and does not blend in.",
+        "status": "pass"
+      },
+      {
+        "rule_id": "LOGO-DONT-07",
+        "category": "Logo",
+        "detail": "Logo text does not have an outline.",
+        "status": "pass"
+      },
+      {
+        "rule_id": "LOGO-DONT-08",
+        "category": "Logo",
+        "detail": "Halo does not have a reversed outline.",
+        "status": "pass"
+      },
+      {
+        "rule_id": "LOGO-DONT-09",
+        "category": "Logo",
+        "detail": "Halo, outline, and background are not the same colour.",
+        "status": "pass"
+      },
+      {
+        "rule_id": "LOGO-DONT-10",
+        "category": "Logo",
+        "detail": "Logo is not used on a dark background.",
+        "status": "pass"
+      },
+      {
+        "rule_id": "LOGO-DONT-11",
+        "category": "Logo",
+        "detail": "No other letters have circular outlines or halos.",
+        "status": "pass"
+      },
+      {
+        "rule_id": "LOGO-DONT-12",
+        "category": "Logo",
+        "detail": "Logo colour is not reversed; navy blue is used on white.",
+        "status": "pass"
+      },
+      {
+        "rule_id": "LOGO-DONT-13",
+        "category": "Logo",
+        "detail": "Logo layout is not modified or stacked.",
         "status": "pass"
       },
       {
@@ -404,201 +482,171 @@
         "status": "pass"
       },
       {
-        "rule_id": "LOGO-DONT-03",
+        "rule_id": "LOGOBG-DONT-01",
         "category": "Logo",
-        "detail": "Halo does not have an outline.",
+        "detail": "Halo and background are not the same colour; halo is visible.",
         "status": "pass"
       },
       {
-        "rule_id": "LOGO-DONT-06",
+        "rule_id": "LOGOBG-DONT-02",
         "category": "Logo",
-        "detail": "Halo does not blend into the background; it is visible.",
+        "detail": "Halo does not disappear into the background.",
         "status": "pass"
       },
       {
-        "rule_id": "LOGO-DONT-08",
+        "rule_id": "LOGOBG-DONT-03",
         "category": "Logo",
-        "detail": "Halo does not have a reversed outline.",
+        "detail": "Halo colour matches the flavour palette and is not mismatched.",
         "status": "pass"
       },
       {
-        "rule_id": "LOGO-DONT-09",
+        "rule_id": "LOGOBG-DONT-04",
         "category": "Logo",
-        "detail": "Halo, outline, and background are not all the same colour.",
+        "detail": "No part of the halo is white.",
         "status": "pass"
       },
       {
-        "rule_id": "LOGO-DONT-11",
+        "rule_id": "LOGOBG-DONT-05",
         "category": "Logo",
-        "detail": "No outlines or halos on other letters besides C.",
+        "detail": "Logo text does not use gradients on a gradient background.",
         "status": "pass"
       },
       {
-        "rule_id": "LOGO-13",
+        "rule_id": "LOGOBG-DONT-06",
         "category": "Logo",
-        "detail": "Logo is not altered, recreated, or structurally modified.",
+        "detail": "Logo is not used on a dark image background.",
         "status": "pass"
       },
       {
-        "rule_id": "LOGO-DONT-05",
+        "rule_id": "LOGOBG-DONT-07",
         "category": "Logo",
-        "detail": "Logo text does not use gradients.",
+        "detail": "Logo is not used in white on a light image background.",
         "status": "pass"
       },
       {
-        "rule_id": "LOGO-DONT-07",
+        "rule_id": "LOGOBG-DONT-08",
         "category": "Logo",
-        "detail": "Logo text does not have an outline.",
+        "detail": "Logo is not placed in any shape or container.",
         "status": "pass"
-      },
-      {
-        "rule_id": "LOGO-DONT-13",
-        "category": "Logo",
-        "detail": "Logo layout is not modified or rearranged.",
-        "status": "pass"
-      },
-      {
-        "rule_id": "LOGO-DONT-10",
-        "category": "Logo",
-        "detail": "Logo colour is not reversed; navy blue is used on white.",
-        "status": "pass"
-      },
-      {
-        "rule_id": "LOGO-DONT-12",
-        "category": "Logo",
-        "detail": "Logo colour is not reversed; navy blue is used on white.",
-        "status": "pass"
-      },
-      {
-        "rule_id": "LOGO-11",
-        "category": "Logo",
-        "detail": "Logo has sufficient clear space around it.",
-        "status": "pass"
-      },
-      {
-        "rule_id": "LOGO-12",
-        "category": "Logo",
-        "detail": "Logo size is above minimum required for screen.",
-        "status": "pass"
-      },
-      {
-        "rule_id": "LOGO-14",
-        "category": "Logo",
-        "detail": "No NRT lockup text present; rule not applicable.",
-        "status": "not_applicable"
-      },
-      {
-        "rule_id": "LOGO-15",
-        "category": "Logo",
-        "detail": "No NRT lockup text present; rule not applicable.",
-        "status": "not_applicable"
       },
       {
         "rule_id": "LOGO-02",
         "category": "Logo",
-        "detail": "No gradient background present; rule not applicable.",
+        "detail": "No gradient background is present, so this rule does not apply.",
         "status": "not_applicable"
       },
       {
         "rule_id": "LOGO-03",
         "category": "Logo",
-        "detail": "No gradient background present; rule not applicable.",
+        "detail": "No gradient background is present, so this rule does not apply.",
         "status": "not_applicable"
       },
       {
         "rule_id": "LOGO-07",
         "category": "Logo",
-        "detail": "No light image background present; rule not applicable.",
+        "detail": "No light image background is present, so this rule does not apply.",
         "status": "not_applicable"
       },
       {
         "rule_id": "LOGO-08",
         "category": "Logo",
-        "detail": "No light image background present; rule not applicable.",
+        "detail": "No light image background is present, so this rule does not apply.",
         "status": "not_applicable"
       },
       {
         "rule_id": "LOGO-09",
         "category": "Logo",
-        "detail": "No dark image background present; rule not applicable.",
+        "detail": "No dark image background is present, so this rule does not apply.",
         "status": "not_applicable"
       },
       {
         "rule_id": "LOGO-10",
         "category": "Logo",
-        "detail": "No dark image background present; rule not applicable.",
+        "detail": "No dark image background is present, so this rule does not apply.",
+        "status": "not_applicable"
+      },
+      {
+        "rule_id": "LOGO-14",
+        "category": "Logo",
+        "detail": "No NRT lockup text is present, so this rule does not apply.",
+        "status": "not_applicable"
+      },
+      {
+        "rule_id": "LOGO-15",
+        "category": "Logo",
+        "detail": "No NRT lockup text is present, so this rule does not apply.",
         "status": "not_applicable"
       },
       {
         "rule_id": "GRAD-01",
         "category": "Gradient",
-        "detail": "No gradient background present; rule not applicable.",
+        "detail": "No gradient background is present, so this rule does not apply.",
         "status": "not_applicable"
       },
       {
         "rule_id": "GRAD-02",
         "category": "Gradient",
-        "detail": "No gradient background present; rule not applicable.",
+        "detail": "No gradient background is present, so this rule does not apply.",
         "status": "not_applicable"
       },
       {
         "rule_id": "GRAD-03",
         "category": "Gradient",
-        "detail": "No gradient background present; rule not applicable.",
+        "detail": "No gradient background is present, so this rule does not apply.",
         "status": "not_applicable"
       },
       {
         "rule_id": "GRAD-04",
         "category": "Gradient",
-        "detail": "No grey gradient background present; rule not applicable.",
+        "detail": "No grey gradient background is present, so this rule does not apply.",
         "status": "not_applicable"
       },
       {
         "rule_id": "GRAD-05",
         "category": "Gradient",
-        "detail": "No gradient background present; rule not applicable.",
+        "detail": "No gradient background is present, so this rule does not apply.",
         "status": "not_applicable"
       },
       {
         "rule_id": "COLOR-01",
         "category": "Colors",
-        "detail": "Primary brand colour (navy blue) is used for logo text.",
+        "detail": "Primary brand colour is used for logo text.",
         "status": "pass"
       },
       {
         "rule_id": "COLOR-02",
         "category": "Colors",
-        "detail": "Secondary colour (light teal) is used as an accent for the C halo.",
+        "detail": "Secondary colour is used only as an accent (halo around C).",
         "status": "pass"
       },
       {
         "rule_id": "COLOR-03",
         "category": "Colors",
-        "detail": "No flavour-led content; rule not applicable.",
+        "detail": "No flavour-led content is present, so this rule does not apply.",
         "status": "not_applicable"
       },
       {
         "rule_id": "COLOR-04",
         "category": "Colors",
-        "detail": "Secondary colour is used as an accent, not as a full background.",
+        "detail": "Secondary colour is not used as a dominant background.",
         "status": "pass"
       },
       {
         "rule_id": "CONTENT-01",
         "category": "Content",
-        "detail": "No flavour-led content; rule not applicable.",
+        "detail": "No flavour-led content is present, so this rule does not apply.",
         "status": "not_applicable"
       },
       {
         "rule_id": "CONTENT-02",
         "category": "Content",
-        "detail": "No educational content; rule not applicable.",
+        "detail": "No educational content is present, so this rule does not apply.",
         "status": "not_applicable"
       },
       {
         "rule_id": "CONTENT-03",
         "category": "Content",
-        "detail": "No brand purpose content; rule not applicable.",
+        "detail": "No brand purpose content is present, so this rule does not apply.",
         "status": "not_applicable"
       },
       {
@@ -610,86 +658,38 @@
       {
         "rule_id": "CONTENT-DONT-02",
         "category": "Content",
-        "detail": "No gradient background used for non-flavour content.",
+        "detail": "No gradient background is used for non-flavour content.",
         "status": "pass"
       },
       {
         "rule_id": "CONTENT-DONT-03",
         "category": "Content",
-        "detail": "No grey gradient background used.",
+        "detail": "No grey gradient background is used.",
         "status": "not_applicable"
       },
       {
         "rule_id": "CONTENT-DONT-04",
         "category": "Content",
-        "detail": "No flavour product shown on plain white background; logo-only content is allowed.",
+        "detail": "No flavour product is shown on a plain white background.",
         "status": "pass"
       },
       {
         "rule_id": "TYPO-01",
         "category": "Typography",
-        "detail": "Logo uses bold geometric sans-serif font, consistent with Santral.",
+        "detail": "Logo uses bold geometric sans-serif font consistent with Santral.",
         "status": "pass"
       },
       {
         "rule_id": "TYPO-02",
         "category": "Typography",
-        "detail": "Santral font is used for logo; no other typefaces present.",
+        "detail": "Santral font is used for logo text.",
         "status": "pass"
       },
       {
         "rule_id": "TYPO-03",
         "category": "Typography",
-        "detail": "No NRT lockup text present; rule not applicable.",
+        "detail": "No NRT lockup text is present, so this rule does not apply.",
         "status": "not_applicable"
-      },
-      {
-        "rule_id": "LOGOBG-DONT-01",
-        "category": "Logo",
-        "detail": "Halo does not disappear into gradient; no gradient background present.",
-        "status": "pass"
-      },
-      {
-        "rule_id": "LOGOBG-DONT-02",
-        "category": "Logo",
-        "detail": "Halo does not disappear into solid background; it is visible.",
-        "status": "pass"
-      },
-      {
-        "rule_id": "LOGOBG-DONT-03",
-        "category": "Logo",
-        "detail": "Halo colour matches flavour palette; no mismatch.",
-        "status": "pass"
-      },
-      {
-        "rule_id": "LOGOBG-DONT-04",
-        "category": "Logo",
-        "detail": "Halo does not use white as secondary part; only light teal is used.",
-        "status": "pass"
-      },
-      {
-        "rule_id": "LOGOBG-DONT-05",
-        "category": "Logo",
-        "detail": "Logo text does not use gradients on gradient backgrounds.",
-        "status": "pass"
-      },
-      {
-        "rule_id": "LOGOBG-DONT-06",
-        "category": "Logo",
-        "detail": "Navy logo is not used over dark images.",
-        "status": "pass"
-      },
-      {
-        "rule_id": "LOGOBG-DONT-07",
-        "category": "Logo",
-        "detail": "White logo is not used over light images.",
-        "status": "pass"
-      },
-      {
-        "rule_id": "LOGOBG-DONT-08",
-        "category": "Logo",
-        "detail": "Logo is not placed in any shape (box, circle, badge) over images.",
-        "status": "pass"
       }
     ],
     "content_type_detected": "unknown",

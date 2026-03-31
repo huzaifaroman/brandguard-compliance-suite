@@ -47,20 +47,33 @@ Examine the image and report on ALL of the following. If something is not presen
 LOGO ANALYSIS:
 - Is the ZONNIC logo visible? Describe its position (top/center/bottom, left/center/right)
 - What colour is the logo text? (navy blue, white, other — describe exact colour)
-- Is the logo distorted, stretched, or modified? "Distorted" means the logo has been STRETCHED, SQUASHED, SKEWED, ROTATED, or structurally REARRANGED (e.g. stacking ZON/NIC), OR has circles/shapes added behind letters that shouldn't have them. The Z's angular LETTER SHAPE with sharp geometric edges is the correct original design, NOT a distortion. However, if there is any CIRCLE, RING, or FILLED SHAPE behind or around ANY letter other than C, that IS a modification — flag it.
+- Is the logo distorted, stretched, or modified? Check for: STRETCHED, SQUASHED, SKEWED, ROTATED, structurally REARRANGED (e.g. stacking ZON/NIC). Also check: is there any filled circle or shape BEHIND any letter other than C? If yes, report distorted_or_modified=true.
 - Is there sufficient clear space around the logo?
 - Estimate the logo size relative to the full image
 
-C HALO ANALYSIS (MOST IMPORTANT — BE EXTREMELY DETAILED):
-- The correct ZONNIC logo has "ZONNIC" spelled out. The letters from left to right are: Z-O-N-N-I-C
-- IMPORTANT: The Z's angular/geometric LETTER SHAPE with sharp edges and extended strokes is the OFFICIAL design — do not confuse the letter's shape with a halo or distortion. However, if you see any CIRCLE, RING, or FILLED SHAPE behind or around ANY letter other than C (including Z, O, N, N, I), that IS wrong — only the C should have a halo. No other letter should have any shape behind it.
-- The HALO is a coloured ring/circle that goes AROUND a letter. The halo should ONLY appear around the C (last/rightmost letter). No other letter should have any ring, circle, or shape around or behind it.
-- Look at EACH letter carefully. Which letter(s) have a coloured ring/halo AROUND them?
-- Specifically: Does the C (last letter, rightmost) have a halo ring around it? Does any other letter have a halo? (No letter other than C should have one.)
-- If a halo exists: What colour is it? Is it a single solid colour or a gradient (two colours blending)?
-- If a halo exists: Is it a perfect circle or distorted/oval?
-- If a halo exists: Is it proportional to the letter or oversized/undersized?
-- If a halo exists: Does it have an outline/stroke? What colour is the outline?
+HALO / CIRCLE ANALYSIS (MOST IMPORTANT — BE EXTREMELY DETAILED):
+
+THE CORRECT ZONNIC LOGO looks like this:
+- Six letters: Z-O-N-N-I-C (left to right)
+- All letters are bold sans-serif navy blue
+- ONLY the C (last letter, rightmost) has a circular shape sitting PARTIALLY BEHIND it — this is called the "halo"
+- The Z, O, N, N, and I should have NO circle, ring, or shape behind them whatsoever — they are plain letters on the background with nothing behind them
+
+YOUR TASK — examine EACH letter one by one from left to right:
+1. Z (leftmost): Is there ANY circle, ring, or filled shape sitting BEHIND this letter? Look carefully at the area behind and around the Z. If there is a dark circle, navy circle, or any round shape behind it → report halo_on_z=true. The Z letter itself has sharp angular edges — that is the normal letter shape. But if there is a SEPARATE circular shape BEHIND the Z letter, that is wrong.
+2. O: Any circle or shape behind it?
+3. First N: Any circle or shape behind it?
+4. Second N: Any circle or shape behind it?
+5. I: Any circle or shape behind it?
+6. C (rightmost): Does it have a circular halo partially behind it? This is the ONLY letter that should have one.
+
+Report halo_on_other_letters with the name of ANY letter (other than C) that has a circle/shape behind it.
+
+If a halo exists on the C:
+- What colour is it? Is it a single solid colour or a gradient (two colours blending)?
+- Is it a perfect circle or distorted/oval?
+- Is it proportional to the letter or oversized/undersized?
+- Does it have an outline/stroke? What colour is the outline?
 
 BACKGROUND ANALYSIS:
 - What is the background type? (solid white, solid colour, gradient, image/photo, dark, light)
@@ -206,9 +219,11 @@ YOUR TASK:
 - Double-check: violations + passed_details must total 62
 
 IMPORTANT BRAND DESIGN CONTEXT:
-- The ZONNIC logo is the text "ZONNIC" in navy blue. The Z has an intentionally stylized angular LETTER SHAPE with sharp geometric edges — this letter shape is the OFFICIAL design and is NOT a distortion.
-- If there is any CIRCLE, RING, or FILLED SHAPE behind or around ANY letter other than C (Z, O, N, N, I), that IS a violation — only the C gets a halo. A circle/shape behind any other letter means the logo has been modified (LOGO-13 violation) and has a halo on the wrong letter (LOGO-DONT-02 for Z, LOGO-DONT-11 for any other letter).
-- "Distorted or modified" means: STRETCHED, SQUASHED, SKEWED, ROTATED, structurally REARRANGED (e.g. stacking ZON/NIC), OR any added shapes/circles/rings around letters that shouldn't have them. The Z's angular letter shape itself is NOT distortion, but a circle/shape behind any letter other than C IS.
+- The correct ZONNIC logo: six bold navy blue letters Z-O-N-N-I-C with a circular halo sitting PARTIALLY BEHIND the C (last letter) only.
+- NO other letter should have any circle, ring, or shape behind it. The Z, O, N, N, I are plain letters with nothing behind them.
+- If brand detection reports a circle/shape behind the Z → flag LOGO-DONT-02 ("Don't add the halo on the Z instead of the C") AND LOGO-13 ("The logo should never be altered or recreated"). Trust brand detection — if halo_on_z=true, these are violations.
+- If brand detection reports a circle/shape behind any other letter (O, N, I) → flag LOGO-DONT-11 AND LOGO-13.
+- The halo behind the C should be a gradient (two colours) on white/grey backgrounds, or a solid colour matching the flavour on gradient/coloured backgrounds.
 - The HALO is a coloured ring that goes AROUND the C letter (rightmost). The halo should ONLY be on the C. No other letter has any circle or shape around it.
 - On white or grey backgrounds, the C halo MUST be a gradient (two colours), NOT a solid single colour.
 
@@ -264,6 +279,7 @@ Write a detailed visual assessment (4-6 sentences) for a marketing team. NO rule
 - THEN: If there are violations, state what is wrong in plain language (e.g. "the halo around the C is a solid colour but should be a gradient on white backgrounds" NOT "LOGO-05 violation").
 - Be PRECISE about colours (navy blue, teal, white), shapes (circle, gradient ring), and positions (top, bottom, around which letter).
 - If there's anything unusual around the brand name or logo (wrong colours, extra elements, missing elements, wrong shapes), call it out explicitly.
+- If brand detection reports a circle/shape behind the Z letter, explicitly state this in the summary: "There is a circle behind the Z letter that should not be there — only the C should have a halo."
 - NEVER include rule IDs like LOGO-05, REG-01 etc. in the summary. The summary is for non-technical marketing teams.
 - TONE MATTERS: If the image passes most rules (90%+), lead with what's correct and frame issues as minor improvements. Say things like "This image is largely compliant with brand guidelines" or "The image follows most brand standards correctly." Do NOT use alarmist language for minor issues. If all rules pass, celebrate: "This image fully complies with all brand guidelines."
 
@@ -450,6 +466,21 @@ async def detect_brand_elements(
 
     try:
         client = _get_client()
+
+        z_circle_warning = ""
+        dense_captions = vision_signals.get("dense_captions", [])
+        for dc in dense_captions:
+            text_lower = dc.get("text", "").lower() if isinstance(dc, dict) else ""
+            bbox = dc.get("bbox", {}) if isinstance(dc, dict) else {}
+            if ("circle" in text_lower or "round" in text_lower) and ("letter" in text_lower or "white" in text_lower):
+                all_bboxes = [c.get("bbox", {}) for c in dense_captions if isinstance(c, dict)]
+                rightmost_x = max((b.get("x", 0) + b.get("w", 0) for b in all_bboxes), default=0)
+                dc_center_x = bbox.get("x", 0) + bbox.get("w", 0) / 2
+                if rightmost_x > 0 and dc_center_x < rightmost_x * 0.5:
+                    z_circle_warning = f"\n\n⚠️ AUTOMATED SIGNAL: The vision API detected '{dc.get('text', '')}' at bbox {bbox} which is on the LEFT half of the logo (near the Z). This strongly suggests a filled circle/shape behind the Z letter. You MUST report halo_on_z=true unless you can clearly see there is NO circle behind the Z."
+                    logger.warning("Pre-LLM signal: Dense caption '%s' at left-side bbox %s — likely circle on Z", dc.get("text"), bbox)
+                    break
+
         text_message = f"""════════════════════════════════════════════════════
 OFFICIAL ZONNIC BRAND COLOURS (use these as reference when identifying colours)
 ════════════════════════════════════════════════════
@@ -464,6 +495,8 @@ SUPPLEMENTARY VISION DATA (OCR text positions, object labels from Azure Vision)
 TASK: Examine the image carefully and report exactly what brand elements you see.
 Focus on: logo presence/position, C halo (colour, gradient vs solid, shape),
 background type/colours, regulatory text, typography, and overall colour palette.
+
+IMPORTANT: Check vision data above for any dense caption describing "letter in a circle" or similar — if the bounding box is on the LEFT side of the logo (the Z position), this strongly suggests there is a filled circle behind the Z letter. Report halo_on_z=true in that case.{z_circle_warning}
 ════════════════════════════════════════════════════"""
 
         user_content = _build_user_content(text_message, image_bytes)
@@ -743,9 +776,9 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "rule_id": "LOGO-DONT-02",
                 "rule_text": "Don't add the halo on the Z instead of the C.",
                 "severity": "critical",
-                "issue": "The halo/circle is on the Z (first letter) instead of the C (last letter). Only the C should have a halo.",
-                "fix_suggestion": "Move the halo from the Z to the C (the last letter in ZONNIC).",
-                "evidence": "Brand detection confirmed halo is present on the Z letter.",
+                "issue": "There is a circle/shape behind the Z letter. Only the C should have a halo — no other letter should have any shape behind it.",
+                "fix_suggestion": "Remove the circle from behind the Z. The halo belongs only on the C (the last letter in ZONNIC).",
+                "evidence": "Brand detection confirmed a circle/shape is present behind the Z letter.",
                 "bbox": None,
             })
         if "LOGO-13" not in violation_ids:
@@ -754,9 +787,47 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "rule_id": "LOGO-13",
                 "rule_text": "The logo should never be altered or recreated in any way.",
                 "severity": "critical",
-                "issue": "The logo has been modified — there is a circle/shape behind the Z letter that should not be there. The official ZONNIC logo has no shape behind the Z.",
-                "fix_suggestion": "Remove the circle/shape from behind the Z. Only the C should have a halo ring.",
-                "evidence": "Brand detection confirmed a halo/circle is present on the Z letter, which means the logo has been modified from its original design.",
+                "issue": "The logo has been modified — a circle/shape has been added behind the Z letter. In the correct ZONNIC logo, only the C has a halo behind it. No other letter should have any shape.",
+                "fix_suggestion": "Remove the circle/shape from behind the Z and use the official unmodified ZONNIC logo.",
+                "evidence": "Brand detection confirmed a circle/shape behind the Z letter, which is not part of the official logo design.",
+                "bbox": None,
+            })
+
+    other_letters_raw = halo.get("halo_on_other_letters", "none")
+    has_other = other_letters_raw and str(other_letters_raw).lower() not in ("none", "n/a", "no", "")
+    if has_other:
+        if "LOGO-DONT-11" not in violation_ids:
+            logger.warning("CROSS-VALIDATION: Detection says halo on other letters (%s) — forcing LOGO-DONT-11", other_letters_raw)
+            forced_violations.append({
+                "rule_id": "LOGO-DONT-11",
+                "rule_text": "Don't put the halo on any letter other than the C.",
+                "severity": "critical",
+                "issue": f"A circle/shape was detected behind the letter(s): {other_letters_raw}. Only the C should have a halo.",
+                "fix_suggestion": "Remove any circles or shapes from behind letters other than C. Only the C gets a halo.",
+                "evidence": f"Brand detection confirmed shapes behind: {other_letters_raw}.",
+                "bbox": None,
+            })
+        if "LOGO-13" not in violation_ids and "LOGO-13" not in {v["rule_id"] for v in forced_violations}:
+            forced_violations.append({
+                "rule_id": "LOGO-13",
+                "rule_text": "The logo should never be altered or recreated in any way.",
+                "severity": "critical",
+                "issue": f"The logo has been modified — shapes have been added behind letter(s) {other_letters_raw} that should not have them.",
+                "fix_suggestion": "Use the official unmodified ZONNIC logo where only the C has a halo.",
+                "evidence": f"Brand detection confirmed unauthorized shapes behind: {other_letters_raw}.",
+                "bbox": None,
+            })
+
+    if logo.get("distorted_or_modified") is True:
+        if "LOGO-13" not in violation_ids and "LOGO-13" not in {v["rule_id"] for v in forced_violations}:
+            logger.warning("CROSS-VALIDATION: Logo detected as distorted/modified — forcing LOGO-13")
+            forced_violations.append({
+                "rule_id": "LOGO-13",
+                "rule_text": "The logo should never be altered or recreated in any way.",
+                "severity": "critical",
+                "issue": "The logo appears to have been altered or modified from its official design.",
+                "fix_suggestion": "Use the official unmodified ZONNIC logo.",
+                "evidence": "Brand detection flagged the logo as distorted or modified.",
                 "bbox": None,
             })
 
