@@ -47,6 +47,9 @@ async def batch_start(
         "total": len(file_data),
         "completed": 0,
         "step": "uploading",
+        "current_image": "",
+        "image_step": "uploading",
+        "sub_progress": 0,
         "result": None,
     }
 
@@ -76,6 +79,9 @@ async def batch_status(batch_id: str):
         "total": job["total"],
         "completed": job["completed"],
         "step": job["step"],
+        "current_image": job.get("current_image", ""),
+        "image_step": job.get("image_step", ""),
+        "sub_progress": job.get("sub_progress", 0),
         "result": job["result"],
     }
 
@@ -166,7 +172,15 @@ async def _run_batch(batch_id: str, file_data: list, rules: dict):
 async def _process_files(file_data: list, rules: dict, batch_id: str | None) -> list:
     async def process_one(fd: dict, index: int) -> BatchImageResult:
         try:
+            if batch_id and batch_id in _batch_jobs:
+                job = _batch_jobs[batch_id]
+                job["current_image"] = fd["filename"]
+                job["image_step"] = "uploading"
+                job["sub_progress"] = (index / len(file_data)) * 100
+
             if fd["content_type"] and fd["content_type"] not in ALLOWED_TYPES:
+                if batch_id and batch_id in _batch_jobs:
+                    _batch_jobs[batch_id]["completed"] = _batch_jobs[batch_id].get("completed", 0) + 1
                 return BatchImageResult(
                     image_name=fd["filename"],
                     verdict="WARNING",
@@ -175,6 +189,8 @@ async def _process_files(file_data: list, rules: dict, batch_id: str | None) -> 
                 )
 
             if len(fd["bytes"]) == 0:
+                if batch_id and batch_id in _batch_jobs:
+                    _batch_jobs[batch_id]["completed"] = _batch_jobs[batch_id].get("completed", 0) + 1
                 return BatchImageResult(
                     image_name=fd["filename"],
                     verdict="WARNING",
@@ -183,6 +199,8 @@ async def _process_files(file_data: list, rules: dict, batch_id: str | None) -> 
                 )
 
             if len(fd["bytes"]) > MAX_FILE_SIZE:
+                if batch_id and batch_id in _batch_jobs:
+                    _batch_jobs[batch_id]["completed"] = _batch_jobs[batch_id].get("completed", 0) + 1
                 return BatchImageResult(
                     image_name=fd["filename"],
                     verdict="WARNING",
@@ -190,11 +208,17 @@ async def _process_files(file_data: list, rules: dict, batch_id: str | None) -> 
                     error="File too large (max 20MB)",
                 )
 
+            if batch_id and batch_id in _batch_jobs:
+                job = _batch_jobs[batch_id]
+                job["image_step"] = "vision"
+                job["step"] = "vision"
+
             result = await analyze_single_image(fd["bytes"], fd["filename"], rules)
 
             if batch_id and batch_id in _batch_jobs:
                 job = _batch_jobs[batch_id]
                 job["completed"] = job.get("completed", 0) + 1
+                job["sub_progress"] = (job["completed"] / job["total"]) * 100
                 progress = job["completed"] / job["total"]
                 if progress < 0.3:
                     job["step"] = "vision"

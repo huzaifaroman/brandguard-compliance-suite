@@ -117,9 +117,18 @@ export function pollAnalysis(
 }
 
 
+export interface BatchStatusUpdate {
+  completed: number;
+  total: number;
+  step: string;
+  currentImage: string;
+  imageStep: string;
+  subProgress: number;
+}
+
 export async function batchAnalyze(
   files: File[],
-  onProgress?: (completed: number, total: number, step: string) => void,
+  onProgress?: (update: BatchStatusUpdate) => void,
 ): Promise<BatchResult> {
   const formData = new FormData();
   files.forEach((f) => formData.append("files", f));
@@ -132,13 +141,20 @@ export async function batchAnalyze(
   const { batch_id, total } = await startRes.json();
 
   while (true) {
-    await new Promise((r) => setTimeout(r, 2000));
+    await new Promise((r) => setTimeout(r, 800));
     const statusRes = await fetch(`${API_BASE}/api/batch/status/${batch_id}`);
     if (!statusRes.ok) throw new Error(`Batch status check failed`);
     const status = await statusRes.json();
 
     if (onProgress) {
-      onProgress(status.completed || 0, status.total || total, status.step || "processing");
+      onProgress({
+        completed: status.completed || 0,
+        total: status.total || total,
+        step: status.step || "processing",
+        currentImage: status.current_image || "",
+        imageStep: status.image_step || "",
+        subProgress: status.sub_progress || 0,
+      });
     }
 
     if (status.status === "done" && status.result) {

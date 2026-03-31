@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useDropzone } from "react-dropzone";
 import { motion, AnimatePresence } from "framer-motion";
@@ -105,7 +105,13 @@ export default function BatchPage() {
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const [batchProgress, setBatchProgress] = useState(0);
+  const [displayProgress, setDisplayProgress] = useState(0);
   const [activeStep, setActiveStep] = useState(0);
+  const [currentImageName, setCurrentImageName] = useState("");
+  const [completedCount, setCompletedCount] = useState(0);
+  const targetProgressRef = useRef(0);
+  const animFrameRef = useRef<number>(0);
+  const tickIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const onDrop = useCallback(
     (accepted: File[]) => {
@@ -164,19 +170,47 @@ export default function BatchPage() {
     uploading: 0, vision: 1, evaluating: 2, cross_validation: 3, building_report: 4, done: 4,
   };
 
+  useEffect(() => {
+    if (!loading) return;
+    const tick = () => {
+      setDisplayProgress((prev) => {
+        const target = targetProgressRef.current;
+        if (prev >= target) {
+          const drift = Math.min(0.15, (target < 90 ? 0.15 : 0.03));
+          return Math.min(prev + drift, 99);
+        }
+        const diff = target - prev;
+        return prev + diff * 0.18;
+      });
+    };
+    tickIntervalRef.current = setInterval(tick, 50);
+    return () => {
+      if (tickIntervalRef.current) clearInterval(tickIntervalRef.current);
+    };
+  }, [loading]);
+
   const handleSubmit = async () => {
     if (!files.length) return;
     setLoading(true);
     setError(null);
-    setBatchProgress(5);
+    setBatchProgress(3);
+    setDisplayProgress(3);
+    targetProgressRef.current = 3;
     setActiveStep(0);
+    setCompletedCount(0);
+    setCurrentImageName(files[0]?.name || "");
     try {
-      const res = await batchAnalyze(files, (completed, total, step) => {
-        const pct = Math.max(5, Math.min(95, (completed / total) * 90 + 5));
+      const res = await batchAnalyze(files, (update) => {
+        const pct = Math.max(5, Math.min(95, (update.completed / update.total) * 90 + 5));
         setBatchProgress(pct);
-        setActiveStep(stepMap[step] ?? 1);
+        targetProgressRef.current = pct;
+        setActiveStep(stepMap[update.step] ?? 1);
+        setCompletedCount(update.completed);
+        if (update.currentImage) setCurrentImageName(update.currentImage);
       });
+      targetProgressRef.current = 100;
       setBatchProgress(100);
+      setDisplayProgress(100);
       setActiveStep(batchPipelineSteps.length - 1);
       await new Promise((r) => setTimeout(r, 400));
       setResult(res);
@@ -186,7 +220,12 @@ export default function BatchPage() {
     } finally {
       setLoading(false);
       setBatchProgress(0);
+      setDisplayProgress(0);
+      targetProgressRef.current = 0;
       setActiveStep(0);
+      setCompletedCount(0);
+      setCurrentImageName("");
+      if (tickIntervalRef.current) clearInterval(tickIntervalRef.current);
     }
   };
 
@@ -382,12 +421,40 @@ export default function BatchPage() {
                     <Card className="border-primary/20 bg-primary/5">
                       <CardContent className="p-5 space-y-4">
                         <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium text-foreground/80">
-                            Analyzing {files.length} image{files.length !== 1 ? "s" : ""}...
-                          </p>
-                          <span className="text-sm font-bold text-primary tabular-nums">{Math.round(batchProgress)}%</span>
+                          <div className="flex flex-col gap-0.5">
+                            <p className="text-sm font-medium text-foreground/80">
+                              Analyzing {files.length} image{files.length !== 1 ? "s" : ""}...
+                              <span className="text-xs text-muted-foreground ml-2">
+                                ({completedCount}/{files.length} done)
+                              </span>
+                            </p>
+                            {currentImageName && (
+                              <motion.p
+                                key={currentImageName}
+                                initial={{ opacity: 0, x: -5 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="text-[11px] text-muted-foreground truncate max-w-[300px]"
+                              >
+                                Processing: {currentImageName}
+                              </motion.p>
+                            )}
+                          </div>
+                          <motion.span
+                            key={Math.round(displayProgress)}
+                            className="text-sm font-bold text-primary tabular-nums"
+                          >{Math.round(displayProgress)}%</motion.span>
                         </div>
-                        <Progress value={batchProgress} className="h-2" />
+                        <div className="relative">
+                          <Progress value={displayProgress} className="h-2" />
+                          {displayProgress > 0 && displayProgress < 100 && (
+                            <motion.div
+                              className="absolute top-0 h-2 w-8 rounded-full bg-white/30"
+                              animate={{ left: [`${Math.max(0, displayProgress - 8)}%`, `${Math.min(100, displayProgress)}%`] }}
+                              transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+                              style={{ filter: "blur(3px)" }}
+                            />
+                          )}
+                        </div>
                         <div className="flex items-center justify-between pt-1">
                           {batchPipelineSteps.map((step, idx) => {
                             const isActive = idx === activeStep;
