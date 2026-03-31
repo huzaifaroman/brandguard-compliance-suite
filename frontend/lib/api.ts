@@ -58,8 +58,9 @@ export async function startAnalysis(
   return data.job_id;
 }
 
-export async function pollAnalysisStatus(jobId: string): Promise<JobStatus> {
+export async function pollAnalysisStatus(jobId: string): Promise<JobStatus | null> {
   const res = await fetch(`${API_BASE}/api/analyze/status/${jobId}`);
+  if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Failed to check status: ${res.statusText}`);
   return res.json();
 }
@@ -73,6 +74,8 @@ export function pollAnalysis(
 ): { cancel: () => void } {
   let cancelled = false;
   let timerId: ReturnType<typeof setTimeout> | null = null;
+  let notFoundStreak = 0;
+  const MAX_NOT_FOUND = 20;
 
   (async () => {
     try {
@@ -84,6 +87,17 @@ export function pollAnalysis(
           const status = await pollAnalysisStatus(jobId);
           if (cancelled) return;
 
+          if (status === null) {
+            notFoundStreak++;
+            if (notFoundStreak >= MAX_NOT_FOUND) {
+              onError(new Error("Analysis timed out — please try again"));
+              return;
+            }
+            timerId = setTimeout(poll, 1500);
+            return;
+          }
+
+          notFoundStreak = 0;
           onProgress(status);
 
           if (status.status === "done" && status.result) {
