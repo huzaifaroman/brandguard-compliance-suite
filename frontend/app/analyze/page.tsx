@@ -33,6 +33,7 @@ import {
   Lightbulb,
   Printer,
   ChevronDown,
+  CircleSlash,
 } from "lucide-react";
 import Link from "next/link";
 import { pollAnalysis, getChatMessages, streamChatMessage } from "@/lib/api";
@@ -987,8 +988,8 @@ export default function AnalyzePage() {
                                           onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setExpandedNA(prev => { const n = new Set(prev); n.has(key) ? n.delete(key) : n.add(key); return n; }); }}}
                                           className="flex items-center gap-3 px-3 py-2.5 cursor-pointer hover:bg-violet-500/[0.05] transition-colors"
                                         >
-                                          <div className="w-5 h-5 rounded-full bg-violet-500/10 flex items-center justify-center shrink-0">
-                                            <span className="text-[10px] text-violet-400 font-medium">N/A</span>
+                                          <div className="w-5 h-5 flex items-center justify-center shrink-0">
+                                            <CircleSlash className="w-4 h-4 text-violet-400/60" />
                                           </div>
                                           <span className="text-sm font-medium text-foreground/70 flex-1">{getFriendlyName(pd.rule_id)}</span>
                                           <motion.div animate={{ rotate: isOpen ? 90 : 0 }} transition={{ duration: 0.2 }}>
