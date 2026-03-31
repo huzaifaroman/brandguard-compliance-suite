@@ -143,8 +143,10 @@ async def run_job(job_id: str):
         logger.info("[%s] └─ LLM done → %s %s%%", short_hash,
                     llm_result.get("verdict"), llm_result.get("confidence"))
 
-        from backend.services.compliance_engine import _save_debug
+        from backend.services.compliance_engine import _save_debug, _recalculate_verdict
         _save_debug(filename, image_hash, vision_signals, brand_detection, llm_result)
+
+        _recalculate_verdict(llm_result, short_hash)
 
         job["step"] = "persisting"
         job["progress"] = 90

@@ -388,7 +388,7 @@ PASS2_SCHEMA = {
                 },
                 "background_type_detected": {
                     "type": "string",
-                    "enum": ["gradient", "grey_gradient", "white", "light_image", "dark_image", "solid_color", "unknown"]
+                    "enum": ["gradient", "grey_gradient", "white", "light_image", "dark_image", "solid_colour", "unknown"]
                 }
             },
             "required": ["verdict", "confidence", "summary", "checks_performed", "violations", "passed_details", "content_type_detected", "background_type_detected"],
@@ -620,7 +620,16 @@ def _format_detection_summary(detection: dict) -> str:
         lines.append(f"  Halo on other letters: {halo.get('halo_on_other_letters', 'none')}")
         lines.append(f"  Halo colour: {halo.get('halo_colour', 'unknown')}")
         is_grad = halo.get("halo_is_gradient", False)
-        lines.append(f"  Halo is gradient (two colours): {'YES' if is_grad else 'NO — solid single colour ⚠'}")
+        if is_grad:
+            lines.append("  Halo is gradient (two colours): YES")
+        else:
+            bg_type_val = bg.get("type", "unknown")
+            if bg_type_val in ("white", "grey_gradient"):
+                lines.append("  Halo is gradient (two colours): NO — solid single colour (on white/grey background the halo MUST be a gradient per LOGO-05)")
+            elif bg_type_val == "gradient":
+                lines.append("  Halo is gradient (two colours): NO — solid single colour (correct on gradient backgrounds — halo uses secondary colour per LOGO-02)")
+            else:
+                lines.append("  Halo is gradient (two colours): NO — solid single colour")
         lines.append(f"  Gradient colours: {halo.get('halo_gradient_colours', 'N/A')}")
         lines.append(f"  Shape: {halo.get('halo_shape', 'unknown')}")
         lines.append(f"  Proportional: {'YES' if halo.get('halo_proportional') else 'NO'}")

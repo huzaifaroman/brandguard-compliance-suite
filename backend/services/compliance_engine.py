@@ -16,7 +16,7 @@ logger = logging.getLogger("backend.services.engine")
 
 DEBUG_FILE = Path(__file__).parent.parent / "debug_raw_responses.json"
 
-CRITICAL_REG_IDS = {"REG-01", "REG-02", "REG-03", "REG-05", "REG-06"}
+CRITICAL_REG_IDS = {"REG-01", "REG-02", "REG-03", "REG-04", "REG-05"}
 
 
 def _recalculate_verdict(llm_result: dict, short_hash: str = ""):
