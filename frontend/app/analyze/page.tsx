@@ -417,15 +417,46 @@ export default function AnalyzePage() {
                       />
                       {loading && (
                         <motion.div
-                          className="absolute inset-0 bg-black/40 flex items-center justify-center"
+                          className="absolute inset-0 overflow-hidden"
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                         >
-                          <div className="relative w-16 h-16">
-                            <div className="absolute inset-0 rounded-full border-2 border-primary/20" />
-                            <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary animate-spin" style={{ animationDuration: '1s' }} />
-                            <div className="absolute inset-2 rounded-full border-2 border-transparent border-t-primary/50 animate-spin" style={{ animationDuration: '1.5s', animationDirection: 'reverse' }} />
-                          </div>
+                          <div className="absolute inset-0 bg-black/30" />
+
+                          <div className="absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 border-primary rounded-tl-sm" />
+                          <div className="absolute top-3 right-3 w-6 h-6 border-t-2 border-r-2 border-primary rounded-tr-sm" />
+                          <div className="absolute bottom-3 left-3 w-6 h-6 border-b-2 border-l-2 border-primary rounded-bl-sm" />
+                          <div className="absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 border-primary rounded-br-sm" />
+
+                          <motion.div
+                            className="absolute left-0 right-0 h-[2px]"
+                            style={{
+                              background: "linear-gradient(90deg, transparent 0%, hsl(var(--primary)) 20%, hsl(var(--primary)) 80%, transparent 100%)",
+                              boxShadow: "0 0 15px 3px hsl(var(--primary) / 0.5), 0 0 40px 8px hsl(var(--primary) / 0.2)",
+                            }}
+                            initial={{ top: "8%" }}
+                            animate={{ top: ["8%", "92%", "8%"] }}
+                            transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+                          />
+
+                          <motion.div
+                            className="absolute left-0 right-0 h-24 pointer-events-none"
+                            style={{
+                              background: "linear-gradient(180deg, hsl(var(--primary) / 0.08) 0%, transparent 100%)",
+                            }}
+                            initial={{ top: "8%" }}
+                            animate={{ top: ["8%", "92%", "8%"] }}
+                            transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+                          />
+
+                          <motion.div
+                            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-sm border border-primary/30"
+                            animate={{ opacity: [0.7, 1, 0.7] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                          >
+                            <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                            <span className="text-[11px] font-medium text-primary tracking-wider uppercase">Scanning</span>
+                          </motion.div>
                         </motion.div>
                       )}
                       {result && result.violations.length > 0 && (
