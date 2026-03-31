@@ -33,54 +33,191 @@ def _get_client() -> AzureOpenAI:
     return _client
 
 
-SYSTEM_PROMPT = """You are a ZONNIC brand compliance analyst. You evaluate marketing images against the ZONNIC Design Guidelines.
+PASS1_SYSTEM_PROMPT = """You are a ZONNIC brand visual inspector. Your ONLY job is to carefully examine a marketing image and describe EXACTLY what you see — focusing on ZONNIC brand elements. Do NOT evaluate rules or compliance yet. Just report the facts.
 
 You will receive:
-1. THE IMAGE: The actual marketing image to evaluate — use this to verify colors, shapes, gradients, fonts, layout, and all visual elements
-2. RULES: The complete brand guidelines as structured JSON
-3. VISION_SIGNALS: Supplementary data from Azure Vision API (OCR text positions, object detection, captions) — use as supporting evidence
-4. USER_PROMPT: Optional additional question from the user
+1. THE IMAGE: The actual marketing image — look at it carefully
+2. BRAND_REFERENCE: The official ZONNIC brand colours and flavour palettes for comparison
+3. VISION_SIGNALS: Supplementary OCR text and object data from computer vision
 
-IMPORTANT: You have BOTH the image and the vision signals. You can SEE the image — use it directly to check colors, gradients, shapes, logo styling, typography, layout, and everything visual. Use the vision signals for supplementary text positions and bounding boxes.
+IMPORTANT: You can SEE the image directly. Use it to describe every detail below. Be extremely precise about positions, colours, and elements.
+
+Examine the image and report on ALL of the following. If something is not present, say "NOT PRESENT":
+
+LOGO ANALYSIS:
+- Is the ZONNIC logo visible? Describe its position (top/center/bottom, left/center/right)
+- What colour is the logo text? (navy blue, white, other — describe exact colour)
+- Is the logo distorted, stretched, or modified in any way?
+- Is the logo placed inside any shape (circle, square, etc.)?
+- Is there sufficient clear space around the logo?
+- Estimate the logo size relative to the full image
+
+C HALO ANALYSIS (MOST IMPORTANT — BE EXTREMELY DETAILED):
+- The correct ZONNIC logo has "ZONNIC" spelled out. The letters from left to right are: Z-O-N-N-I-C
+- Look at EACH letter carefully. Which letter(s) have a circular ring/halo around them?
+- Specifically: Does the Z (first letter, leftmost) have a halo? Does the C (last letter, rightmost) have a halo? Does any other letter have a halo?
+- If a halo exists: What colour is it? Is it a single solid colour or a gradient (two colours blending)?
+- If a halo exists: Is it a perfect circle or distorted/oval?
+- If a halo exists: Is it proportional to the letter or oversized/undersized?
+- If a halo exists: Does it have an outline/stroke? What colour is the outline?
+
+BACKGROUND ANALYSIS:
+- What is the background type? (solid white, solid colour, gradient, image/photo, dark, light)
+- If gradient: what colours? What direction (left-to-right, top-to-bottom)?
+- If image/photo: describe what's shown (people, products, scenery)
+
+REGULATORY TEXT ANALYSIS:
+- Is there a nicotine warning statement? Where is it positioned? What does it say? Is it bilingual (English + French)?
+- Is there an 18+ age restriction icon? Where?
+- Is there risk communication text? Where (bottom of image)?
+
+TYPOGRAPHY:
+- What fonts are visible? Are they sans-serif?
+- Any text besides the logo and regulatory text? What does it say?
+
+COLOUR ANALYSIS:
+- What are the dominant colours in the image?
+- Do they match any ZONNIC flavour palette? (Grey/Neutral, Green/Mint, Blue)
+- Is the secondary/accent colour used sparingly or as a dominant element?
+
+CONTENT TYPE:
+- Is this a flavour-led asset (focused on product/flavour)?
+- Is this educational content (health/information focused)?
+- Is this brand purpose content (lifestyle/brand story)?
+- Or is it just the logo on a simple background?
+
+Return ONLY valid JSON matching the schema. No extra text."""
+
+PASS1_SCHEMA = {
+    "type": "json_schema",
+    "json_schema": {
+        "name": "brand_detection",
+        "strict": True,
+        "schema": {
+            "type": "object",
+            "properties": {
+                "logo": {
+                    "type": "object",
+                    "properties": {
+                        "present": {"type": "boolean"},
+                        "position": {"type": "string"},
+                        "text_colour": {"type": "string"},
+                        "distorted_or_modified": {"type": "boolean"},
+                        "inside_shape": {"type": "string"},
+                        "clear_space_sufficient": {"type": "boolean"},
+                        "relative_size": {"type": "string"}
+                    },
+                    "required": ["present", "position", "text_colour", "distorted_or_modified", "inside_shape", "clear_space_sufficient", "relative_size"],
+                    "additionalProperties": False
+                },
+                "halo": {
+                    "type": "object",
+                    "properties": {
+                        "any_halo_present": {"type": "boolean"},
+                        "halo_on_z": {"type": "boolean", "description": "Is there a halo on the Z (first/leftmost letter)?"},
+                        "halo_on_c": {"type": "boolean", "description": "Is there a halo on the C (last/rightmost letter)?"},
+                        "halo_on_other_letters": {"type": "string", "description": "List any other letters with halos, or 'none'"},
+                        "halo_colour": {"type": "string", "description": "Exact colour description of the halo"},
+                        "halo_is_gradient": {"type": "boolean", "description": "Is the halo a gradient (two colours) or a single solid colour?"},
+                        "halo_gradient_colours": {"type": "string", "description": "If gradient, describe the two colours. If solid, repeat the single colour."},
+                        "halo_shape": {"type": "string", "description": "circle, oval, distorted, or not present"},
+                        "halo_proportional": {"type": "boolean"},
+                        "halo_has_outline": {"type": "boolean"},
+                        "halo_outline_colour": {"type": "string"}
+                    },
+                    "required": ["any_halo_present", "halo_on_z", "halo_on_c", "halo_on_other_letters", "halo_colour", "halo_is_gradient", "halo_gradient_colours", "halo_shape", "halo_proportional", "halo_has_outline", "halo_outline_colour"],
+                    "additionalProperties": False
+                },
+                "background": {
+                    "type": "object",
+                    "properties": {
+                        "type": {"type": "string", "enum": ["white", "solid_colour", "gradient", "light_image", "dark_image", "grey_gradient", "unknown"]},
+                        "colours": {"type": "string"},
+                        "gradient_direction": {"type": "string"},
+                        "description": {"type": "string"}
+                    },
+                    "required": ["type", "colours", "gradient_direction", "description"],
+                    "additionalProperties": False
+                },
+                "regulatory": {
+                    "type": "object",
+                    "properties": {
+                        "nicotine_warning_present": {"type": "boolean"},
+                        "nicotine_warning_position": {"type": "string"},
+                        "nicotine_warning_text": {"type": "string"},
+                        "nicotine_warning_bilingual": {"type": "boolean"},
+                        "age_icon_present": {"type": "boolean"},
+                        "age_icon_position": {"type": "string"},
+                        "risk_communication_present": {"type": "boolean"},
+                        "risk_communication_position": {"type": "string"}
+                    },
+                    "required": ["nicotine_warning_present", "nicotine_warning_position", "nicotine_warning_text", "nicotine_warning_bilingual", "age_icon_present", "age_icon_position", "risk_communication_present", "risk_communication_position"],
+                    "additionalProperties": False
+                },
+                "typography": {
+                    "type": "object",
+                    "properties": {
+                        "fonts_visible": {"type": "string"},
+                        "is_sans_serif": {"type": "boolean"},
+                        "additional_text": {"type": "string"}
+                    },
+                    "required": ["fonts_visible", "is_sans_serif", "additional_text"],
+                    "additionalProperties": False
+                },
+                "colours": {
+                    "type": "object",
+                    "properties": {
+                        "dominant_colours": {"type": "string"},
+                        "matches_flavour_palette": {"type": "string", "description": "Which flavour palette it matches, or 'none/unclear'"},
+                        "secondary_colour_usage": {"type": "string", "description": "Is secondary colour used sparingly as accent, or as a dominant element?"}
+                    },
+                    "required": ["dominant_colours", "matches_flavour_palette", "secondary_colour_usage"],
+                    "additionalProperties": False
+                },
+                "content_type": {
+                    "type": "string",
+                    "enum": ["flavour_led", "educational", "brand_purpose", "logo_only", "unknown"]
+                },
+                "overall_description": {
+                    "type": "string",
+                    "description": "2-3 sentence plain English description of what the image shows"
+                }
+            },
+            "required": ["logo", "halo", "background", "regulatory", "typography", "colours", "content_type", "overall_description"],
+            "additionalProperties": False
+        }
+    }
+}
+
+
+PASS2_SYSTEM_PROMPT = """You are a ZONNIC brand compliance analyst. You evaluate marketing images against the ZONNIC Design Guidelines.
+
+You will receive:
+1. THE IMAGE: The actual marketing image (use it to verify anything)
+2. BRAND_DETECTION: A verified fact sheet of what ZONNIC brand elements are present in the image — this was produced by a separate careful inspection. TRUST these facts. Do NOT contradict them.
+3. RULES: The complete brand guidelines as structured JSON
+4. USER_PROMPT: Optional additional question
 
 YOUR TASK:
+- Evaluate every rule in the RULES against the BRAND_DETECTION facts and the image
 - Follow the ai_evaluation_checklist in EXACT ORDER (CHECK-01 through CHECK-15)
-- You MUST evaluate and report on ALL 15 checks — no skipping
-- For each check, evaluate every rule_id listed in rules_to_evaluate
+- You MUST evaluate ALL 15 checks, no skipping
 - There are 62 rules total. Every rule_id must appear in EITHER violations OR passed_details
 - Double-check: violations + passed_details must total 62
 
+USING THE BRAND_DETECTION FACTS:
+- The brand detection has already identified which letter the halo is on, what colour it is, whether it's a gradient, etc.
+- If brand detection says halo_on_z=true and halo_on_c=false → that means the halo is on the WRONG letter → VIOLATION of LOGO-DONT-02
+- If brand detection says halo_is_gradient=false on a white background → VIOLATION of LOGO-05
+- If brand detection says nicotine_warning_present=false → VIOLATION of REG-01
+- Always cross-reference the detection facts with each rule. Do NOT override the detection facts with your own assumptions.
+
 RULE STATUS — EVERY RULE MUST BE ONE OF THREE:
-1. VIOLATION (in violations array): The rule is clearly broken — you can see evidence in the image
-2. PASS (in passed_details with status "pass"): The rule is met — you verified it by looking at the image
-3. NOT APPLICABLE (in passed_details with status "not_applicable"): The rule does not apply to this type of image/content (e.g. "educational content rules" on a flavour-led image, or "dark background rules" on a light background image)
+1. VIOLATION (in violations array): The rule is clearly broken based on the detection facts and image
+2. PASS (in passed_details with status "pass"): The rule is met — confirmed by detection facts
+3. NOT APPLICABLE (in passed_details with status "not_applicable"): The rule does not apply to this image type (e.g. "dark background rules" on a white background image)
 
-CRITICAL: Do NOT mark a rule as "pass" if you cannot actually verify it. If a rule doesn't apply to this image, mark it "not_applicable" with a brief reason. Only mark "pass" when you genuinely see the image complies.
-
-C HALO EVALUATION — MOST CRITICAL CHECK, BE EXTREMELY STRICT:
-The correct ZONNIC logo has a circular halo around the letter C (the LAST letter). This is the single most important brand element. You MUST carefully examine in this EXACT order:
-
-STEP 1 — WHICH LETTER HAS THE HALO? (CHECK THIS FIRST!)
-Look at EVERY letter in "ZONNIC" and identify which letter(s) have a circular ring/halo around them.
-- The halo MUST be on the C (the last letter, rightmost). If the halo is on the Z (the first letter, leftmost) → VIOLATION of LOGO-DONT-02. This is a CRITICAL error.
-- If any other letter besides C has a halo → VIOLATION of LOGO-DONT-11.
-- If NO letter has a halo at all → VIOLATION of LOGO-DONT-01.
-- Do NOT confuse the Z and C. Z is on the LEFT side, C is on the RIGHT side of "ZONNIC".
-
-STEP 2 — HALO COLOR:
-- On white or light backgrounds: the halo MUST be a visible GRADIENT using BOTH the primary AND secondary flavour colours (two distinct colours blending). A solid single-colour halo on a white background is a VIOLATION of LOGO-05.
-- On gradient backgrounds: the halo must use the secondary colour (LOGO-04). If it blends into the background → LOGO-DONT-06.
-
-STEP 3 — HALO SHAPE AND SIZE:
-- Must be a perfect circle, not oval or distorted → LOGO-DONT-15
-- Must be proportional to the logo text → LOGO-DONT-04
-
-STEP 4 — HALO OUTLINE:
-- No outline over a coloured halo → LOGO-DONT-03
-- No reversed outline → LOGO-DONT-08
-- Outline, halo, and background must not all be the same colour → LOGO-DONT-09
-
-WHEN IN DOUBT: Flag it as a violation. The halo is the most critical brand element.
+CRITICAL: Do NOT mark a rule as "pass" if the detection facts show it fails. Trust the detection facts.
 
 OVERALL VERDICT:
 - PASS: No violations found
@@ -94,24 +231,18 @@ VIOLATION REQUIREMENTS:
 - Include bounding box (x, y, w, h) when relevant, null for missing elements
 
 PASSED_DETAILS REQUIREMENTS:
-- For rules that PASS: describe what you see in the image that confirms compliance
-- For rules that are NOT APPLICABLE: briefly explain why (e.g. "This rule applies to educational content only — this is a flavour-led image")
+- For rules that PASS: describe what was confirmed
+- For rules that are NOT APPLICABLE: briefly explain why
 - Group by category: Regulatory, Logo, Gradient, Colors, Typography, Content
 
-LANGUAGE RULES — VERY IMPORTANT:
+LANGUAGE RULES:
 - Write everything in plain, non-technical English for a marketing team
-- NEVER use: "OCR", "Vision API", "Azure", "GPT", "AI model", "dense captions", "tags", "bounding polygon", "confidence score", "signal", "verified from signals", "image signals", "manual review needed"
+- NEVER use: "OCR", "Vision API", "Azure", "GPT", "AI model", "dense captions", "tags", "bounding polygon", "confidence score", "signal", "verified from signals", "image signals", "manual review needed", "brand detection"
 - Instead use: "text found", "logo visible", "color matches", "element present", "the image shows", "not visible in the image"
 
-BACKGROUND AND CONTENT TYPE DETECTION:
-- Look at the image to determine background and content type
-- Person/model visible → likely brand_purpose or flavour_led
-- Products visible → likely flavour_led
-- If unclear → use "unknown" but do NOT flag violations for it
+Return ONLY valid JSON matching the schema. No extra text."""
 
-Return ONLY valid JSON matching the schema below. No extra text."""
-
-COMPLIANCE_SCHEMA = {
+PASS2_SCHEMA = {
     "type": "json_schema",
     "json_schema": {
         "name": "compliance_result",
@@ -129,7 +260,7 @@ COMPLIANCE_SCHEMA = {
                 },
                 "summary": {
                     "type": "string",
-                    "description": "2-3 sentence summary of findings including what was verified and what requires manual review"
+                    "description": "2-3 sentence summary of findings in plain language"
                 },
                 "checks_performed": {
                     "type": "array",
@@ -230,17 +361,6 @@ Answer follow-up questions about:
 Be concise, actionable, and always reference specific rule IDs (e.g. REG-01, LOGO-03, GRAD-02). If the user asks about something not covered in the analysis results, say so clearly and suggest running a new analysis if needed."""
 
 
-def _build_compliance_text(vision_signals: dict, rules: dict, prompt: Optional[str]) -> str:
-    user_prompt = prompt if prompt else "Check this image for brand compliance."
-    return f"""RULES:
-{json.dumps(rules, indent=2)}
-
-VISION_SIGNALS:
-{json.dumps(vision_signals, indent=2)}
-
-USER_PROMPT: {user_prompt}"""
-
-
 def _build_user_content(text_message: str, image_bytes: Optional[bytes] = None) -> list | str:
     if not image_bytes:
         return text_message
@@ -268,7 +388,71 @@ def _build_user_content(text_message: str, image_bytes: Optional[bytes] = None) 
     ]
 
 
-async def analyze_compliance(
+async def detect_brand_elements(
+    vision_signals: dict,
+    brand_colors: dict,
+    image_bytes: Optional[bytes] = None,
+) -> dict:
+    if not settings.azure_openai_endpoint or not settings.azure_openai_key:
+        logger.warning("Azure OpenAI not configured — skipping brand detection")
+        return {}
+
+    try:
+        client = _get_client()
+        text_message = f"""BRAND_REFERENCE (official ZONNIC colours for comparison):
+{json.dumps(brand_colors, indent=2)}
+
+VISION_SIGNALS (supplementary text and object data):
+{json.dumps(vision_signals, indent=2)}
+
+Now examine the image carefully and report what you see."""
+
+        user_content = _build_user_content(text_message, image_bytes)
+
+        messages: list = [
+            {"role": "system", "content": PASS1_SYSTEM_PROMPT},
+            {"role": "user", "content": user_content},
+        ]
+
+        if image_bytes:
+            logger.info("Pass 1 — Brand detection: sending image (%dKB)", len(image_bytes) // 1024)
+
+        response = await asyncio.wait_for(
+            asyncio.to_thread(
+                client.chat.completions.create,
+                model=settings.azure_openai_deployment,
+                temperature=0,
+                top_p=0.1,
+                seed=42,
+                response_format=PASS1_SCHEMA,
+                messages=messages,
+            ),
+            timeout=LLM_TIMEOUT_SECONDS,
+        )
+
+        content = response.choices[0].message.content
+        if content is None:
+            logger.error("Pass 1 — GPT returned empty content")
+            return {}
+
+        result = json.loads(content)
+        logger.info("Pass 1 — Brand detection complete: logo=%s, halo_on_c=%s, halo_on_z=%s, bg=%s",
+                     result.get("logo", {}).get("present"),
+                     result.get("halo", {}).get("halo_on_c"),
+                     result.get("halo", {}).get("halo_on_z"),
+                     result.get("background", {}).get("type"))
+        return result
+
+    except asyncio.TimeoutError:
+        logger.error("Pass 1 — Brand detection timed out")
+        return {}
+    except Exception as e:
+        logger.error("Pass 1 — Brand detection error: %s: %s", type(e).__name__, e)
+        return {}
+
+
+async def evaluate_compliance(
+    brand_detection: dict,
     vision_signals: dict,
     rules: dict,
     prompt: Optional[str] = None,
@@ -280,16 +464,28 @@ async def analyze_compliance(
 
     try:
         client = _get_client()
-        text_message = _build_compliance_text(vision_signals, rules, prompt)
+        user_prompt = prompt if prompt else "Check this image for brand compliance."
+
+        text_message = f"""BRAND_DETECTION (verified facts about what is in the image — trust these):
+{json.dumps(brand_detection, indent=2)}
+
+RULES:
+{json.dumps(rules, indent=2)}
+
+VISION_SIGNALS (supplementary):
+{json.dumps(vision_signals, indent=2)}
+
+USER_PROMPT: {user_prompt}"""
+
         user_content = _build_user_content(text_message, image_bytes)
 
         messages: list = [
-            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "system", "content": PASS2_SYSTEM_PROMPT},
             {"role": "user", "content": user_content},
         ]
 
         if image_bytes:
-            logger.info("Sending image (%dKB) + vision signals to LLM", len(image_bytes) // 1024)
+            logger.info("Pass 2 — Rule evaluation: sending image (%dKB) + detection facts + rules", len(image_bytes) // 1024)
 
         response = await asyncio.wait_for(
             asyncio.to_thread(
@@ -298,27 +494,106 @@ async def analyze_compliance(
                 temperature=0,
                 top_p=0.1,
                 seed=42,
-                response_format=COMPLIANCE_SCHEMA,  # type: ignore[arg-type]
+                response_format=PASS2_SCHEMA,
                 messages=messages,
             ),
             timeout=LLM_TIMEOUT_SECONDS,
         )
 
-        content = response.choices[0].message.content  # type: ignore[union-attr]
+        content = response.choices[0].message.content
         if content is None:
-            logger.error("GPT returned empty content")
+            logger.error("Pass 2 — GPT returned empty content")
             return _placeholder_result("AI returned empty response")
 
         result = json.loads(content)
-        logger.info("GPT verdict: %s (%s%%)", result.get("verdict"), result.get("confidence"))
+        logger.info("Pass 2 — Verdict: %s (%s%%), %d violations",
+                     result.get("verdict"), result.get("confidence"), len(result.get("violations", [])))
         return result
 
     except asyncio.TimeoutError:
-        logger.error("Azure OpenAI request timed out")
+        logger.error("Pass 2 — Rule evaluation timed out")
         return _placeholder_result("Request timed out. Please try again.")
     except Exception as e:
-        logger.error("Azure OpenAI error: %s: %s", type(e).__name__, e)
+        logger.error("Pass 2 — Rule evaluation error: %s: %s", type(e).__name__, e)
         return _placeholder_result(f"AI analysis failed: {type(e).__name__}")
+
+
+async def analyze_compliance(
+    vision_signals: dict,
+    rules: dict,
+    prompt: Optional[str] = None,
+    image_bytes: Optional[bytes] = None,
+    progress_callback=None,
+) -> dict:
+    brand_colors = rules.get("brand_colors", {})
+
+    if progress_callback:
+        await progress_callback("detecting", 50, "Identifying brand elements in the image...")
+
+    brand_detection = await detect_brand_elements(vision_signals, brand_colors, image_bytes)
+
+    if progress_callback:
+        halo_info = brand_detection.get("halo", {})
+        logo_info = brand_detection.get("logo", {})
+        msg_parts = []
+        if logo_info.get("present"):
+            msg_parts.append("Logo found")
+        if halo_info.get("halo_on_c"):
+            msg_parts.append("halo on C")
+        elif halo_info.get("halo_on_z"):
+            msg_parts.append("halo on Z (wrong letter!)")
+        elif not halo_info.get("any_halo_present"):
+            msg_parts.append("no halo found")
+        detection_summary = ", ".join(msg_parts) if msg_parts else "Detection complete"
+        await progress_callback("detecting", 65, f"Brand detection: {detection_summary}")
+
+    if progress_callback:
+        await progress_callback("evaluating", 70, "Evaluating against all brand rules...")
+
+    result = await evaluate_compliance(brand_detection, vision_signals, rules, prompt, image_bytes)
+
+    _validate_rule_coverage(result, rules)
+
+    result["_brand_detection"] = brand_detection
+
+    return result
+
+
+def _validate_rule_coverage(result: dict, rules: dict):
+    all_rule_ids = set()
+    for section_key in ["regulatory_rules", "logo_rules", "gradient_rules", "colour_rules", "content_rules", "typography_rules"]:
+        section = rules.get(section_key, [])
+        if isinstance(section, list):
+            for rule in section:
+                rid = rule.get("rule_id")
+                if rid:
+                    all_rule_ids.add(rid)
+
+    violation_ids = {v["rule_id"] for v in result.get("violations", []) if "rule_id" in v}
+    passed_ids = {p["rule_id"] for p in result.get("passed_details", []) if "rule_id" in p}
+
+    covered = violation_ids | passed_ids
+    missing = all_rule_ids - covered
+    duplicates = violation_ids & passed_ids
+
+    if duplicates:
+        logger.warning("Rule IDs in BOTH violations and passed_details (removing from passed): %s", duplicates)
+        result["passed_details"] = [p for p in result["passed_details"] if p.get("rule_id") not in duplicates]
+
+    if missing:
+        logger.warning("Missing rule IDs from LLM output (adding as not_applicable): %s", missing)
+        for rid in sorted(missing):
+            result["passed_details"].append({
+                "rule_id": rid,
+                "category": "Content",
+                "detail": "Rule was not evaluated by the model",
+                "status": "not_applicable",
+            })
+
+    total = len(result.get("violations", [])) + len(result.get("passed_details", []))
+    logger.info("Rule coverage: %d violations + %d passed/na = %d total (expected %d)",
+                len(result.get("violations", [])), len(result.get("passed_details", [])),
+                total, len(all_rule_ids))
 
 
 async def chat_followup(
@@ -340,7 +615,7 @@ async def chat_followup(
             {"role": "system", "content": context_msg},
         ]
         for msg in messages:
-            api_messages.append({"role": msg["role"], "content": msg["content"]})  # type: ignore[arg-type]
+            api_messages.append({"role": msg["role"], "content": msg["content"]})
 
         stream = await asyncio.to_thread(
             client.chat.completions.create,
@@ -350,9 +625,9 @@ async def chat_followup(
             messages=api_messages,
         )
 
-        for chunk in stream:  # type: ignore[union-attr]
-            if hasattr(chunk, "choices") and chunk.choices and chunk.choices[0].delta and chunk.choices[0].delta.content:  # type: ignore[union-attr]
-                yield chunk.choices[0].delta.content  # type: ignore[union-attr]
+        for chunk in stream:
+            if hasattr(chunk, "choices") and chunk.choices and chunk.choices[0].delta and chunk.choices[0].delta.content:
+                yield chunk.choices[0].delta.content
 
     except Exception as e:
         logger.error("Chat followup error: %s: %s", type(e).__name__, e)

@@ -71,10 +71,11 @@ async def analyze_single_image(
     logger.info("[%s] ├─ Vision done (%d signals)", short_hash, signal_count)
 
     llm_result = await analyze_compliance(vision_signals, rules, prompt, image_bytes=file_bytes)
+    brand_detection = llm_result.pop("_brand_detection", {})
     logger.info("[%s] └─ LLM done → %s %s%%", short_hash,
                 llm_result.get("verdict"), llm_result.get("confidence"))
 
-    _save_debug(filename, image_hash, vision_signals, llm_result)
+    _save_debug(filename, image_hash, {"vision_signals": vision_signals, "brand_detection": brand_detection}, llm_result)
 
     session_id = str(uuid.uuid4())
 
@@ -171,25 +172,44 @@ async def analyze_single_image_streaming(
 
     yield {"event": "step", "step": "uploading", "progress": 15, "message": f"Image uploaded ({width or 0}×{height or 0})"}
 
-    yield {"event": "step", "step": "vision", "progress": 20, "message": "Running Azure Vision 4.0 analysis..."}
+    yield {"event": "step", "step": "vision", "progress": 20, "message": "Running image analysis..."}
 
     vision_signals = await analyze_image(file_bytes)
     signal_count = len(vision_signals) if isinstance(vision_signals, dict) else 0
     logger.info("[%s] ├─ Vision done (%d signals)", short_hash, signal_count)
 
-    yield {"event": "step", "step": "vision", "progress": 45, "message": f"Vision analysis complete — {signal_count} signals extracted"}
+    yield {"event": "step", "step": "vision", "progress": 30, "message": f"Image analysis complete — {signal_count} signals extracted"}
 
-    yield {"event": "step", "step": "llm", "progress": 50, "message": "GPT-4.1 evaluating against 62 brand rules..."}
+    yield {"event": "step", "step": "detecting", "progress": 35, "message": "Identifying ZONNIC brand elements in the image..."}
 
-    llm_result = await analyze_compliance(vision_signals, rules, prompt, image_bytes=file_bytes)
+    async def progress_callback(phase, progress, message):
+        pass
+
+    llm_result = await analyze_compliance(vision_signals, rules, prompt, image_bytes=file_bytes, progress_callback=progress_callback)
+
+    brand_detection = llm_result.pop("_brand_detection", {})
+
+    halo_info = brand_detection.get("halo", {})
+    logo_info = brand_detection.get("logo", {})
+    detection_parts = []
+    if logo_info.get("present"):
+        detection_parts.append("Logo found")
+    if halo_info.get("halo_on_c"):
+        detection_parts.append("halo on C (correct)")
+    elif halo_info.get("halo_on_z"):
+        detection_parts.append("halo on Z (wrong letter)")
+    detection_msg = ", ".join(detection_parts) if detection_parts else "Detection complete"
+
+    yield {"event": "step", "step": "detecting", "progress": 60, "message": f"Brand detection: {detection_msg}"}
+
     verdict = llm_result.get("verdict", "WARNING")
     confidence = llm_result.get("confidence", 0)
     violations = llm_result.get("violations", [])
     logger.info("[%s] └─ LLM done → %s %s%%", short_hash, verdict, confidence)
 
-    _save_debug(filename, image_hash, vision_signals, llm_result)
+    _save_debug(filename, image_hash, {"vision_signals": vision_signals, "brand_detection": brand_detection}, llm_result)
 
-    yield {"event": "step", "step": "llm", "progress": 85, "message": f"AI evaluation complete — {verdict} ({confidence}%) with {len(violations)} violation(s)"}
+    yield {"event": "step", "step": "evaluating", "progress": 85, "message": f"Rule evaluation complete — {verdict} ({confidence}%) with {len(violations)} violation(s)"}
 
     yield {"event": "step", "step": "persisting", "progress": 90, "message": "Saving results to database..."}
 

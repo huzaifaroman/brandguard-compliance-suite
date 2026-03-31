@@ -27,9 +27,9 @@ backend/
     chat.py            # GET/POST /api/chat/{session_id} — streaming AI chat follow-up (error handling)
   services/
     vision_service.py  # Azure Vision 4.0 (captions, dense_captions, tags, objects, OCR) with retries
-    llm_service.py     # GPT-4.1 compliance reasoning (strict JSON schema with passed_details, temp=0, seed=42) + streaming chat
+    llm_service.py     # Two-pass GPT-4.1 analysis: Pass 1 = brand element detection (logo, halo, colours, regulatory), Pass 2 = rule evaluation against locked-in facts. Strict JSON schemas, temp=0, seed=42. Chat follow-up streaming.
     blob_service.py    # Azure Blob Storage upload with PIL dimensions
-    compliance_engine.py # Orchestrates: hash → cache check → blob upload → vision → LLM → DB persist → cache
+    compliance_engine.py # Orchestrates: hash → cache check → blob upload → vision → Pass 1 (detect) → Pass 2 (evaluate) → DB persist → cache
 frontend/
   app/
     page.tsx           # Redirects to /analyze

@@ -8,15 +8,19 @@ logger = logging.getLogger("backend.services.jobs")
 
 _jobs: dict[str, dict] = {}
 
-LLM_MESSAGES = [
-    "Deep thinking... analyzing brand elements",
-    "Evaluating logo placement and sizing rules",
-    "Checking typography and text compliance",
-    "Analyzing color palette against brand guidelines",
-    "Reviewing layout and composition rules",
-    "Cross-referencing 62 brand compliance rules",
-    "Verifying health warning requirements",
-    "Assessing background and imagery standards",
+DETECTION_MESSAGES = [
+    "Examining the image for ZONNIC brand elements...",
+    "Identifying logo placement and halo position...",
+    "Analyzing colours, background, and typography...",
+    "Checking for regulatory text and warnings...",
+]
+
+EVALUATION_MESSAGES = [
+    "Comparing brand elements against compliance rules...",
+    "Evaluating logo and halo rules...",
+    "Checking regulatory requirements...",
+    "Assessing colour and gradient compliance...",
+    "Reviewing typography and content rules...",
     "Finalizing compliance verdict...",
 ]
 
@@ -35,8 +39,8 @@ def create_job(file_bytes: bytes, filename: str, rules: dict, prompt: Optional[s
         "filename": filename,
         "rules": rules,
         "prompt": prompt,
-        "llm_msg_idx": 0,
-        "llm_start": None,
+        "llm_phase": None,
+        "llm_phase_start": None,
     }
     return job_id
 
@@ -57,19 +61,23 @@ def get_job(job_id: str) -> Optional[dict]:
         response["result"] = job["result"]
     elif job["status"] == "error":
         response["error"] = job["error"]
-    elif job["step"] == "llm" and job["llm_start"]:
-        elapsed = time.time() - job["llm_start"]
-        idx = min(int(elapsed / 6), len(LLM_MESSAGES) - 1)
-        job["llm_msg_idx"] = idx
-        response["message"] = LLM_MESSAGES[idx]
-        response["progress"] = min(50 + int(elapsed * 0.5), 88)
+    elif job["llm_phase"] and job["llm_phase_start"]:
+        last_cb = job.get("last_callback_time", 0)
+        if time.time() - last_cb > 2:
+            elapsed = time.time() - job["llm_phase_start"]
+            if job["llm_phase"] == "detecting":
+                idx = min(int(elapsed / 5), len(DETECTION_MESSAGES) - 1)
+                response["message"] = DETECTION_MESSAGES[idx]
+                response["progress"] = max(job["progress"], min(35 + int(elapsed * 0.8), 55))
+            elif job["llm_phase"] == "evaluating":
+                idx = min(int(elapsed / 6), len(EVALUATION_MESSAGES) - 1)
+                response["message"] = EVALUATION_MESSAGES[idx]
+                response["progress"] = max(job["progress"], min(60 + int(elapsed * 0.5), 88))
 
     return response
 
 
 async def run_job(job_id: str):
-    from backend.services.compliance_engine import analyze_single_image
-
     job = _jobs.get(job_id)
     if not job:
         return
@@ -116,27 +124,45 @@ async def run_job(job_id: str):
 
         job["step"] = "vision"
         job["progress"] = 20
-        job["message"] = f"Image uploaded ({width or 0}x{height or 0}). Running Vision API..."
+        job["message"] = f"Image uploaded ({width or 0}x{height or 0}). Running image analysis..."
 
         vision_signals = await analyze_image(file_bytes)
         signal_count = len(vision_signals) if isinstance(vision_signals, dict) else 0
         logger.info("[%s] ├─ Vision done (%d signals)", short_hash, signal_count)
 
         job["step"] = "llm"
-        job["progress"] = 50
-        job["message"] = "Deep thinking... analyzing brand elements"
-        job["llm_start"] = time.time()
+        job["progress"] = 35
+        job["message"] = "Examining image for ZONNIC brand elements..."
+        job["llm_phase"] = "detecting"
+        job["llm_phase_start"] = time.time()
 
-        llm_result = await analyze_compliance(vision_signals, rules, prompt, image_bytes=image_bytes_for_llm)
+        async def progress_callback(phase, progress, message):
+            job["llm_phase"] = phase
+            if phase != job.get("_last_phase"):
+                job["llm_phase_start"] = time.time()
+                job["_last_phase"] = phase
+            job["progress"] = progress
+            job["message"] = message
+            job["last_callback_time"] = time.time()
+
+        llm_result = await analyze_compliance(
+            vision_signals, rules, prompt,
+            image_bytes=image_bytes_for_llm,
+            progress_callback=progress_callback,
+        )
+
+        brand_detection = llm_result.pop("_brand_detection", {})
+
         logger.info("[%s] └─ LLM done → %s %s%%", short_hash,
                     llm_result.get("verdict"), llm_result.get("confidence"))
 
         from backend.services.compliance_engine import _save_debug
-        _save_debug(filename, image_hash, vision_signals, llm_result)
+        _save_debug(filename, image_hash, {"vision_signals": vision_signals, "brand_detection": brand_detection}, llm_result)
 
         job["step"] = "persisting"
         job["progress"] = 90
         job["message"] = "Saving results..."
+        job["llm_phase"] = None
 
         session_id = str(uuid.uuid4())
         passed_details = llm_result.get("passed_details", [])
