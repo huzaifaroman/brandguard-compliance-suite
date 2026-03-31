@@ -21,6 +21,7 @@ import {
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from "recharts";
 import { batchAnalyze } from "@/lib/api";
 import type { BatchResult } from "@/lib/types";
+import { getFriendlyName } from "@/lib/rule-names";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -110,13 +111,13 @@ export default function BatchPage() {
 
   const exportCSV = () => {
     if (!result) return;
-    const headers = ["Image", "Verdict", "Confidence", "Violations", "Rule IDs", "Issues"];
+    const headers = ["Image", "Verdict", "Confidence", "Violations", "Checks", "Issues"];
     const rows = result.results.map((r) => [
       r.image_name,
       r.verdict,
       String(r.confidence),
       String(r.violations.length),
-      r.violations.map((v) => v.rule_id).join("; "),
+      r.violations.map((v) => getFriendlyName(v.rule_id)).join("; "),
       r.violations.map((v) => v.issue).join("; "),
     ]);
     const csv = [headers, ...rows].map((row) => row.map((c) => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
@@ -149,7 +150,7 @@ export default function BatchPage() {
         doc.setFontSize(9);
         r.violations.forEach((v) => {
           if (y > 270) { doc.addPage(); y = 20; }
-          doc.text(`  [${v.rule_id}] ${v.severity}: ${v.issue}`, 18, y);
+          doc.text(`  ${getFriendlyName(v.rule_id)} (${v.severity}): ${v.issue}`, 18, y);
           y += 6;
           if (v.fix_suggestion) {
             doc.text(`    Fix: ${v.fix_suggestion}`, 22, y);
@@ -485,7 +486,7 @@ export default function BatchPage() {
                                           className="rounded-lg px-4 py-3 bg-card border border-border/50"
                                         >
                                           <div className="flex items-center gap-2 mb-1">
-                                            <code className="text-xs font-mono font-bold text-primary">{v.rule_id}</code>
+                                            <span className="text-sm font-semibold text-foreground">{getFriendlyName(v.rule_id)}</span>
                                             <Badge variant="outline" className={`text-[10px] px-1.5 ${
                                               v.severity === "critical" ? "text-red-400 border-red-500/30"
                                               : v.severity === "high" ? "text-orange-400 border-orange-500/30"

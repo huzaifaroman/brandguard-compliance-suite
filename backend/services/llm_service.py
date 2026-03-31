@@ -227,12 +227,13 @@ RULE STATUS — EVERY RULE MUST BE ONE OF THREE:
 CRITICAL: Do NOT mark a rule as "pass" if the detection facts show it fails. Trust the detection facts.
 
 SUMMARY REQUIREMENTS (the "summary" field):
-Write a detailed visual assessment (4-6 sentences) for a marketing team:
+Write a detailed visual assessment (4-6 sentences) for a marketing team. NO rule IDs in the summary — use plain language only:
 - FIRST: Describe exactly what you see — logo text colour, position, any shapes/circles around or behind letters, the C halo (colour, gradient vs solid, shape), background colour/type, any regulatory text visible, any other design elements.
-- THEN: State what follows brand guidelines correctly.
-- THEN: State what violates brand guidelines — be specific about which rule IDs fail and why.
+- THEN: State what follows brand guidelines correctly, in plain language.
+- THEN: State what is wrong, in plain language (e.g. "the halo around the C is a solid colour but should be a gradient on white backgrounds" NOT "LOGO-05 violation").
 - Be PRECISE about colours (navy blue, teal, white), shapes (circle, gradient ring), and positions (top, bottom, around which letter).
 - If there's anything unusual around the brand name or logo (wrong colours, extra elements, missing elements, wrong shapes), call it out explicitly.
+- NEVER include rule IDs like LOGO-05, REG-01 etc. in the summary. The summary is for non-technical marketing teams.
 
 OVERALL VERDICT:
 - PASS: No violations found
@@ -275,7 +276,7 @@ PASS2_SCHEMA = {
                 },
                 "summary": {
                     "type": "string",
-                    "description": "4-6 sentence visual assessment. Describe what you see (logo, colours, shapes around letters, halo details, background, regulatory text), then what is correct, then what violates guidelines with specific rule IDs. Be precise about colours, shapes, positions."
+                    "description": "4-6 sentence visual assessment in plain language. NO rule IDs. Describe what you see (logo, colours, shapes, halo, background), what is correct, and what is wrong. Write for non-technical marketing teams."
                 },
                 "checks_performed": {
                     "type": "array",
@@ -367,13 +368,13 @@ PASS2_SCHEMA = {
 CHAT_SYSTEM_PROMPT = """You are a ZONNIC brand compliance assistant. The user has already run a compliance check on a marketing image. You have access to the full analysis results including verdict, violations, checks passed, and detected content/background types.
 
 Answer follow-up questions about:
-- Why specific violations were flagged (reference the exact rule ID and rule text)
+- Why specific violations were flagged — use the friendly check name (e.g. "Logo Clear Space Zone", "Nicotine Warning Banner") NOT the internal rule ID
 - How to fix compliance issues with actionable design guidance
 - What the ZONNIC brand rules require (regulatory, logo, gradient, colour, content, typography)
-- Detailed explanations of any check result from the ai_evaluation_checklist (CHECK-01 through CHECK-15)
+- Detailed explanations of any check result
 - Bounding box locations and what was detected at those coordinates
 
-Be concise, actionable, and always reference specific rule IDs (e.g. REG-01, LOGO-03, GRAD-02). If the user asks about something not covered in the analysis results, say so clearly and suggest running a new analysis if needed."""
+Be concise, actionable, and use plain language with friendly check names instead of internal rule IDs. Do NOT reference rule IDs like REG-01, LOGO-03, GRAD-02, CHECK-01 etc. — these are internal codes that end users should not see. If the user asks about something not covered in the analysis results, say so clearly and suggest running a new analysis if needed."""
 
 
 def _build_user_content(text_message: str, image_bytes: Optional[bytes] = None) -> list | str:

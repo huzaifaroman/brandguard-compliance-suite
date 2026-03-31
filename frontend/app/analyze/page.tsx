@@ -38,6 +38,7 @@ import Link from "next/link";
 import { pollAnalysis, getChatMessages, streamChatMessage } from "@/lib/api";
 import type { JobStatus } from "@/lib/api";
 import type { ComplianceResult, Violation, ChatMessage, PassedDetail, CheckPerformed } from "@/lib/types";
+import { getFriendlyName } from "@/lib/rule-names";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -455,7 +456,7 @@ export default function AnalyzePage() {
                                   fontWeight="bold"
                                   className="drop-shadow-lg"
                                 >
-                                  {v.rule_id}
+                                  {getFriendlyName(v.rule_id)}
                                 </text>
                               </g>
                             ) : null
@@ -849,11 +850,12 @@ export default function AnalyzePage() {
                             <CardContent className="pt-0">
                               <div className="space-y-1.5">
                                 {items.map((pd, i) => (
-                                  <div key={`${pd.rule_id}-${i}`} className="flex items-start gap-2.5 rounded-md px-3 py-2 bg-green-500/5 border border-green-500/10">
-                                    <Badge variant="outline" className="mt-0.5 shrink-0 text-[10px] border-green-500/30 text-green-600 dark:text-green-500 font-mono">
-                                      {pd.rule_id}
-                                    </Badge>
-                                    <p className="text-xs text-muted-foreground leading-relaxed">{pd.detail}</p>
+                                  <div key={`${pd.rule_id}-${i}`} className="flex items-start gap-2.5 rounded-md px-3 py-2.5 bg-green-500/5 border border-green-500/10">
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" />
+                                    <div className="min-w-0">
+                                      <p className="text-xs font-medium text-foreground/90 mb-0.5">{getFriendlyName(pd.rule_id)}</p>
+                                      <p className="text-xs text-muted-foreground leading-relaxed">{pd.detail}</p>
+                                    </div>
                                   </div>
                                 ))}
                               </div>
@@ -880,18 +882,19 @@ export default function AnalyzePage() {
                                 <Info className="w-4 h-4" />
                                 {category}
                                 <Badge variant="outline" className="text-[10px] border-muted-foreground/30 text-muted-foreground ml-auto">
-                                  {items.length} not applicable
+                                  {items.length} skipped
                                 </Badge>
                               </CardTitle>
                             </CardHeader>
                             <CardContent className="pt-0">
                               <div className="space-y-1.5">
                                 {items.map((pd, i) => (
-                                  <div key={`${pd.rule_id}-${i}`} className="flex items-start gap-2.5 rounded-md px-3 py-2 bg-muted/30 border border-muted-foreground/10">
-                                    <Badge variant="outline" className="mt-0.5 shrink-0 text-[10px] border-muted-foreground/30 text-muted-foreground font-mono">
-                                      {pd.rule_id}
-                                    </Badge>
-                                    <p className="text-xs text-muted-foreground leading-relaxed">{pd.detail}</p>
+                                  <div key={`${pd.rule_id}-${i}`} className="flex items-start gap-2.5 rounded-md px-3 py-2.5 bg-muted/20 border border-muted-foreground/10">
+                                    <span className="text-xs text-muted-foreground/60 mt-0.5 shrink-0">—</span>
+                                    <div className="min-w-0">
+                                      <p className="text-xs font-medium text-muted-foreground mb-0.5">{getFriendlyName(pd.rule_id)}</p>
+                                      <p className="text-xs text-muted-foreground/70 leading-relaxed">{pd.detail}</p>
+                                    </div>
                                   </div>
                                 ))}
                               </div>
@@ -918,8 +921,7 @@ export default function AnalyzePage() {
                           return (
                             <div key={check.check_id} className={`px-4 py-3 rounded-lg ${sc.bg} border ${sc.border}`}>
                               <div className="flex items-center gap-3 mb-1">
-                                <code className="text-xs font-mono font-bold text-primary">{check.check_id}</code>
-                                <span className="text-sm font-medium flex-1">{check.check_name}</span>
+                                <span className="text-sm font-medium flex-1">{check.check_name || getFriendlyName(check.check_id)}</span>
                                 <Badge variant="outline" className={`text-[10px] ${sc.text} border-current`}>{sc.label}</Badge>
                               </div>
                               <p className="text-xs text-muted-foreground leading-relaxed">{check.detail}</p>
@@ -956,7 +958,7 @@ export default function AnalyzePage() {
                           <CardHeader className="pb-2">
                             <CardTitle className="text-sm flex items-center gap-2">
                               <BookOpen className="w-4 h-4 text-muted-foreground" />
-                              Violations by Rule
+                              Issues by Check
                             </CardTitle>
                           </CardHeader>
                           <CardContent className="pt-0">
@@ -969,10 +971,10 @@ export default function AnalyzePage() {
                                   return acc;
                                 }, {})
                               ).map(([ruleId, violations]) => (
-                                <div key={ruleId} className="flex items-center gap-3 px-3 py-2 rounded-lg bg-muted/20 border border-border/50">
-                                  <code className="text-xs font-mono font-bold text-primary shrink-0">{ruleId}</code>
+                                <div key={ruleId} className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-muted/20 border border-border/50">
+                                  <span className="text-xs font-medium text-foreground/90 shrink-0">{getFriendlyName(ruleId)}</span>
                                   <span className="text-xs text-muted-foreground flex-1 truncate">
-                                    {violations[0].rule_text || violations[0].issue}
+                                    {violations[0].issue}
                                   </span>
                                   <Badge variant="outline" className="text-[10px] shrink-0">
                                     {violations.length} issue{violations.length !== 1 ? "s" : ""}
@@ -1107,6 +1109,8 @@ function ViolationCard({
 }) {
   const sev = severityConfig[v.severity] || severityConfig.medium;
 
+  const friendly = getFriendlyName(v.rule_id);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -1119,35 +1123,25 @@ function ViolationCard({
           tabIndex={0}
           onClick={onToggle}
           onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle(); } }}
-          className="p-4 cursor-pointer hover:bg-accent/10 transition-colors"
+          className="p-4 cursor-pointer hover:bg-accent/5 transition-colors"
         >
           <div className="flex items-start gap-3">
-            <Badge variant="outline" className={`${sev.bg} ${sev.color} ${sev.border} text-[10px] px-2 py-0.5 shrink-0 mt-0.5`}>
-              {sev.label}
-            </Badge>
+            <div className={`w-1 self-stretch rounded-full shrink-0 ${sev.color === "text-red-600 dark:text-red-400" ? "bg-red-500" : sev.color === "text-orange-600 dark:text-orange-400" ? "bg-orange-500" : "bg-yellow-500"}`} />
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <code className="text-xs font-mono font-bold text-primary">{v.rule_id}</code>
-                {v.bbox && (
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <div className="text-[10px] text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded font-mono">
-                        bbox: {v.bbox.x},{v.bbox.y} {v.bbox.w}×{v.bbox.h}
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="text-xs">Bounding box location in the image</p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="text-sm font-semibold text-foreground">{friendly}</span>
+                <Badge variant="outline" className={`${sev.bg} ${sev.color} ${sev.border} text-[10px] px-2 py-0 shrink-0`}>
+                  {sev.label}
+                </Badge>
               </div>
-              <p className="text-sm text-foreground/90 leading-relaxed">{v.issue}</p>
+              <p className="text-sm text-foreground/70 leading-relaxed">{v.issue}</p>
             </div>
             <motion.div
               animate={{ rotate: expanded ? 90 : 0 }}
               transition={{ duration: 0.2 }}
+              className="mt-1"
             >
-              <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+              <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
             </motion.div>
           </div>
         </div>
@@ -1161,31 +1155,31 @@ function ViolationCard({
               className="overflow-hidden"
             >
               <Separator />
-              <div className="p-4 space-y-3 bg-muted/5">
+              <div className="p-4 space-y-4 bg-muted/5">
                 {v.rule_text && (
-                  <div className="flex items-start gap-2.5">
-                    <BookOpen className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" />
+                  <div className="flex items-start gap-3">
+                    <BookOpen className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                     <div>
-                      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-0.5">Rule Text</p>
-                      <p className="text-xs text-foreground/80 leading-relaxed italic">{v.rule_text}</p>
+                      <p className="text-[11px] font-medium text-muted-foreground mb-1">Brand Guideline</p>
+                      <p className="text-sm text-foreground/80 leading-relaxed">{v.rule_text}</p>
                     </div>
                   </div>
                 )}
                 {v.evidence && (
-                  <div className="flex items-start gap-2.5">
-                    <Eye className="w-3.5 h-3.5 text-muted-foreground mt-0.5 shrink-0" />
+                  <div className="flex items-start gap-3">
+                    <Eye className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                     <div>
-                      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-0.5">Evidence Found</p>
-                      <p className="text-xs text-foreground/80 leading-relaxed">{v.evidence}</p>
+                      <p className="text-[11px] font-medium text-muted-foreground mb-1">What Was Found</p>
+                      <p className="text-sm text-foreground/80 leading-relaxed">{v.evidence}</p>
                     </div>
                   </div>
                 )}
                 {v.fix_suggestion && (
-                  <div className="flex items-start gap-2.5">
-                    <Lightbulb className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" />
+                  <div className="flex items-start gap-3 rounded-lg bg-green-500/5 border border-green-500/15 p-3">
+                    <Lightbulb className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
                     <div>
-                      <p className="text-[10px] font-semibold text-green-600 dark:text-green-400 uppercase tracking-wider mb-0.5">How to Fix</p>
-                      <p className="text-xs text-green-700 dark:text-green-300/80 leading-relaxed">{v.fix_suggestion}</p>
+                      <p className="text-[11px] font-medium text-green-600 dark:text-green-400 mb-1">How to Fix</p>
+                      <p className="text-sm text-green-700 dark:text-green-300/90 leading-relaxed">{v.fix_suggestion}</p>
                     </div>
                   </div>
                 )}

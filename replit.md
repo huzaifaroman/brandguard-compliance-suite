@@ -50,6 +50,7 @@ frontend/
   lib/
     api.ts             # Fetch-based API client (analyze, batch, rules, history, chat streaming via SSE)
     types.ts           # TypeScript interfaces (Violation, PassedDetail, ComplianceResult, ChatMessage, etc.)
+    rule-names.ts      # Friendly name mapping for rule IDs → user-facing display names (shared across all pages)
   next.config.ts       # Rewrites /api/* → backend:8000, Azure Blob image remotePatterns
 ```
 
@@ -74,6 +75,7 @@ frontend/
 ## Key Design Decisions
 - `checks_passed` is a `string[]` (list of rule IDs) from LLM, converted to count for DB storage
 - Violation model includes: rule_id, rule_text, severity (critical/high/medium), issue, evidence, fix_suggestion, bbox
+- Rule IDs (LOGO-01, REG-01, etc.) are INTERNAL ONLY — never shown to end users. All user-facing surfaces use friendly check names from `frontend/lib/rule-names.ts`. LLM prompts explicitly instruct no rule IDs in summaries or chat responses.
 - Bounding boxes are pixel coordinates from Azure Vision, rendered as SVG overlay on the image
 - Chat sessions are linked to analysis records via chat_sessions table
 - All timestamps use TIMESTAMPTZ (PostgreSQL) for timezone awareness
