@@ -210,11 +210,42 @@ IMPORTANT BRAND DESIGN CONTEXT:
 - The HALO is a coloured ring that goes AROUND the C letter (rightmost). The halo should ONLY be on the C. No other letter has any circle or shape around it.
 - On white or grey backgrounds, the C halo MUST be a gradient (two colours), NOT a solid single colour.
 
+VIOLATION DETECTION — TWO CATEGORIES:
+A) MISSING ELEMENTS (something required is not there):
+   - No nicotine warning, no 18+ icon, no risk text, no halo on C, etc.
+B) PRESENT BUT WRONG (something IS there but violates the rules):
+   - Halo is on the wrong letter (Z instead of C)
+   - Halo is solid colour when it should be gradient on white/grey backgrounds
+   - Halo is oval/distorted instead of circular
+   - Halo is disproportionately sized (too large or too small)
+   - Halo has an outline/stroke when it shouldn't
+   - Halo colour doesn't match the flavour palette
+   - Logo text is the wrong colour for the background (e.g. navy on dark, white on light)
+   - Logo is distorted, stretched, or modified
+   - Logo has insufficient clear space around it
+   - Nicotine warning exists but is NOT at the top of the image
+   - Nicotine warning exists but is NOT bilingual (missing French or English)
+   - Risk communication exists but is NOT at the bottom
+   - Secondary colour is used as a dominant background instead of an accent
+   - Wrong font/typeface used (not Santral/sans-serif)
+   - Gradient goes in wrong direction or uses wrong colour pairing
+   BOTH types are equally important violations. Do NOT only flag missing elements.
+
 USING THE BRAND_DETECTION FACTS:
-- The brand detection has already identified which letter the halo is on, what colour it is, whether it's a gradient, etc.
-- If brand detection says halo_on_z=true and halo_on_c=false → that means the halo is on the WRONG letter → VIOLATION of LOGO-DONT-02
-- If brand detection says halo_is_gradient=false on a white background → VIOLATION of LOGO-05
-- If brand detection says nicotine_warning_present=false → VIOLATION of REG-01
+- The brand detection has already identified what's in the image — colours, positions, shapes, text.
+- Cross-reference EVERY detection fact against the rules. If something detected is wrong (wrong colour, wrong position, wrong shape, wrong size), flag it as a violation.
+- If brand detection says halo_on_z=true → VIOLATION (halo on wrong letter)
+- If brand detection says halo_is_gradient=false on a white/grey background → VIOLATION
+- If brand detection says halo_shape=oval or distorted → VIOLATION
+- If brand detection says halo_has_outline=true → VIOLATION (LOGO-DONT-03)
+- If brand detection says halo_proportional=false → VIOLATION (LOGO-DONT-04)
+- If brand detection says logo distorted_or_modified=true → VIOLATION (LOGO-13)
+- If brand detection says clear_space_sufficient=false → VIOLATION (LOGO-11)
+- If brand detection says nicotine_warning_present=true but position is NOT "top" → VIOLATION (REG-04)
+- If brand detection says nicotine_warning_bilingual=false → VIOLATION (REG-05)
+- If brand detection says risk_communication_present=true but position is NOT "bottom" → VIOLATION (REG-04)
+- If brand detection says logo text_colour is wrong for the background type → VIOLATION
+- If brand detection says secondary_colour_usage="dominant" → VIOLATION (COLOR-04)
 - Always cross-reference the detection facts with each rule. Do NOT override the detection facts with your own assumptions.
 
 RULE STATUS — EVERY RULE MUST BE ONE OF THREE:
@@ -781,6 +812,162 @@ def _enforce_detection_violations(result: dict, detection: dict):
                 "issue": "Risk communication text is missing from the bottom of the image.",
                 "fix_suggestion": "Add risk communication text at the bottom of the image.",
                 "evidence": "No risk communication text was found in the image.",
+                "bbox": None,
+            })
+
+    if logo.get("distorted_or_modified") is True:
+        if "LOGO-13" not in violation_ids:
+            logger.warning("CROSS-VALIDATION: Logo distorted/modified but LLM passed LOGO-13 — forcing violation")
+            forced_violations.append({
+                "rule_id": "LOGO-13",
+                "rule_text": "The ZONNIC logo must not be distorted, stretched, or modified in any way.",
+                "severity": "critical",
+                "issue": "The ZONNIC logo appears distorted, stretched, or otherwise modified from its original design.",
+                "fix_suggestion": "Use the original, unmodified ZONNIC logo file. Do not stretch, skew, or alter the logo.",
+                "evidence": "Brand detection confirmed the logo is distorted or modified.",
+                "bbox": None,
+            })
+
+    if logo.get("present") and logo.get("clear_space_sufficient") is False:
+        if "LOGO-11" not in violation_ids:
+            logger.warning("CROSS-VALIDATION: Insufficient clear space but LLM passed LOGO-11 — forcing violation")
+            forced_violations.append({
+                "rule_id": "LOGO-11",
+                "rule_text": "Maintain a minimum clear space zone around the logo equal to the height of the letter 'O'.",
+                "severity": "high",
+                "issue": "Other elements are too close to the ZONNIC logo — there is not enough clear space around it.",
+                "fix_suggestion": "Increase the spacing around the logo so no other elements intrude into the clear space zone.",
+                "evidence": "Brand detection confirmed insufficient clear space around the logo.",
+                "bbox": None,
+            })
+
+    if halo.get("any_halo_present") and halo.get("halo_shape", "circle").lower() in ("oval", "distorted", "irregular"):
+        if "LOGO-DONT-15" not in violation_ids:
+            shape = halo.get("halo_shape", "distorted")
+            logger.warning("CROSS-VALIDATION: Halo shape is '%s' but LLM passed LOGO-DONT-15 — forcing violation", shape)
+            forced_violations.append({
+                "rule_id": "LOGO-DONT-15",
+                "rule_text": "The C halo must be a perfect circle, not distorted or oval.",
+                "severity": "high",
+                "issue": f"The halo around the C is {shape} instead of a perfect circle.",
+                "fix_suggestion": "Redraw the halo as a perfect circle around the letter C.",
+                "evidence": f"Brand detection confirmed the halo shape is '{shape}'.",
+                "bbox": None,
+            })
+
+    if halo.get("any_halo_present") and halo.get("halo_proportional") is False:
+        if "LOGO-DONT-04" not in violation_ids:
+            logger.warning("CROSS-VALIDATION: Halo disproportionate but LLM passed LOGO-DONT-04 — forcing violation")
+            forced_violations.append({
+                "rule_id": "LOGO-DONT-04",
+                "rule_text": "Don't make the halo disproportionately large or small relative to the C.",
+                "severity": "high",
+                "issue": "The halo around the C is disproportionately sized — either too large or too small relative to the letter.",
+                "fix_suggestion": "Resize the halo so it is proportional to the letter C.",
+                "evidence": "Brand detection confirmed the halo is not proportional to the C letter.",
+                "bbox": None,
+            })
+
+    if halo.get("any_halo_present") and halo.get("halo_has_outline") is True:
+        if "LOGO-DONT-03" not in violation_ids:
+            outline_col = halo.get("halo_outline_colour", "unknown")
+            logger.warning("CROSS-VALIDATION: Halo has outline but LLM passed LOGO-DONT-03 — forcing violation")
+            forced_violations.append({
+                "rule_id": "LOGO-DONT-03",
+                "rule_text": "Don't add an outline over the halo.",
+                "severity": "high",
+                "issue": f"The halo around the C has an outline/stroke ({outline_col}) which should not be present.",
+                "fix_suggestion": "Remove the outline/stroke from the C halo. The halo should be a clean ring without any border.",
+                "evidence": f"Brand detection confirmed the halo has an outline in {outline_col}.",
+                "bbox": None,
+            })
+
+    if reg.get("nicotine_warning_present") and not reg.get("nicotine_warning_bilingual", True):
+        if "REG-05" not in violation_ids:
+            warning_text = reg.get("nicotine_warning_text", "")
+            logger.warning("CROSS-VALIDATION: Warning not bilingual but LLM passed REG-05 — forcing violation")
+            forced_violations.append({
+                "rule_id": "REG-05",
+                "rule_text": "The nicotine warning must be bilingual (English + French).",
+                "severity": "critical",
+                "issue": "The nicotine warning is present but not bilingual — it is missing either the English or French version.",
+                "fix_suggestion": "Add both English and French versions of the nicotine warning statement.",
+                "evidence": f"Brand detection confirmed the warning is not bilingual. Warning text found: '{warning_text[:100]}'.",
+                "bbox": None,
+            })
+
+    if reg.get("nicotine_warning_present"):
+        pos = reg.get("nicotine_warning_position", "").lower()
+        if pos and "top" not in pos:
+            if "REG-04" not in violation_ids:
+                logger.warning("CROSS-VALIDATION: Warning at '%s' not top — forcing REG-04 violation", pos)
+                forced_violations.append({
+                    "rule_id": "REG-04",
+                    "rule_text": "The nicotine warning banner must be at the TOP of the creative.",
+                    "severity": "critical",
+                    "issue": f"The nicotine warning is present but positioned at the {pos} instead of the top of the image.",
+                    "fix_suggestion": "Move the nicotine warning banner to the top of the image.",
+                    "evidence": f"Brand detection found the warning at position: {pos}.",
+                    "bbox": None,
+                })
+
+    if reg.get("risk_communication_present"):
+        pos = reg.get("risk_communication_position", "").lower()
+        if pos and "bottom" not in pos:
+            if "REG-04" not in violation_ids:
+                logger.warning("CROSS-VALIDATION: Risk text at '%s' not bottom — forcing REG-04 violation", pos)
+                forced_violations.append({
+                    "rule_id": "REG-04",
+                    "rule_text": "Risk communication text must be at the BOTTOM of the creative.",
+                    "severity": "critical",
+                    "issue": f"The risk communication text is present but positioned at the {pos} instead of the bottom of the image.",
+                    "fix_suggestion": "Move the risk communication text to the bottom of the image.",
+                    "evidence": f"Brand detection found risk text at position: {pos}.",
+                    "bbox": None,
+                })
+
+    bg_type_str = bg.get("type", "")
+    if logo.get("present"):
+        logo_colour = logo.get("text_colour", "").lower()
+        if bg_type_str in ("white", "solid_colour", "grey_gradient", "gradient") and "dark" not in bg_type_str:
+            if logo_colour and "navy" not in logo_colour and "blue" not in logo_colour and "dark" not in logo_colour and logo_colour not in ("not present", "unknown", ""):
+                if "LOGO-06" not in violation_ids:
+                    logger.warning("CROSS-VALIDATION: Logo colour '%s' on light background — forcing LOGO-06 violation", logo_colour)
+                    forced_violations.append({
+                        "rule_id": "LOGO-06",
+                        "rule_text": "On white or light backgrounds, the ZONNIC text must be navy blue.",
+                        "severity": "high",
+                        "issue": f"The logo text is {logo_colour} on a {bg_type_str} background — it should be navy blue.",
+                        "fix_suggestion": "Change the logo text colour to navy blue (#242c65) for light backgrounds.",
+                        "evidence": f"Brand detection found logo text colour is '{logo_colour}' on a '{bg_type_str}' background.",
+                        "bbox": None,
+                    })
+        elif bg_type_str in ("dark_image",):
+            if logo_colour and "white" not in logo_colour and logo_colour not in ("not present", "unknown", ""):
+                if "LOGO-10" not in violation_ids:
+                    logger.warning("CROSS-VALIDATION: Logo colour '%s' on dark background — forcing LOGO-10 violation", logo_colour)
+                    forced_violations.append({
+                        "rule_id": "LOGO-10",
+                        "rule_text": "On dark image backgrounds, the ZONNIC text must be white for visibility.",
+                        "severity": "high",
+                        "issue": f"The logo text is {logo_colour} on a dark background — it should be white.",
+                        "fix_suggestion": "Change the logo text colour to white (#FFFFFF) for dark backgrounds.",
+                        "evidence": f"Brand detection found logo text colour is '{logo_colour}' on a dark background.",
+                        "bbox": None,
+                    })
+
+    colours = detection.get("colours", {})
+    sec_usage = colours.get("secondary_colour_usage", "").lower()
+    if "dominant" in sec_usage or "background" in sec_usage:
+        if "COLOR-04" not in violation_ids:
+            logger.warning("CROSS-VALIDATION: Secondary colour used as dominant — forcing COLOR-04 violation")
+            forced_violations.append({
+                "rule_id": "COLOR-04",
+                "rule_text": "Secondary/accent colours must not be used as the dominant background colour.",
+                "severity": "high",
+                "issue": "A secondary/accent colour is being used as the main background colour instead of as a small accent.",
+                "fix_suggestion": "Use the secondary colour only for small accents (halo, icons). Use white, navy, or a brand gradient as the background.",
+                "evidence": f"Brand detection found secondary colour usage: '{sec_usage}'.",
                 "bbox": None,
             })
 
