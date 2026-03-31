@@ -818,6 +818,25 @@ def _enforce_detection_violations(result: dict, detection: dict):
     is_product_photo = any(kw in logo_position for kw in ["product", "tin", "can", "box", "pouch", "packaging"])
     if is_product_photo:
         logger.info("CROSS-VALIDATION: Logo detected on product packaging — skipping halo_on_z enforcement (product packaging logos are pre-approved)")
+        PRODUCT_EXEMPT_RULES = {
+            "LOGO-DONT-01", "LOGO-DONT-02", "LOGO-DONT-03", "LOGO-DONT-04",
+            "LOGO-DONT-11", "LOGO-DONT-14", "LOGO-05", "LOGO-07", "LOGO-09", "LOGO-13",
+        }
+        before_count = len(result.get("violations", []))
+        result["violations"] = [
+            v for v in result.get("violations", [])
+            if v.get("rule_id") not in PRODUCT_EXEMPT_RULES
+        ]
+        removed = before_count - len(result["violations"])
+        if removed > 0:
+            logger.info("CROSS-VALIDATION: Removed %d product-packaging-exempt halo/logo violations", removed)
+            for rid in PRODUCT_EXEMPT_RULES:
+                if rid not in {v.get("rule_id") for v in result.get("violations", [])} and rid not in {p.get("rule_id") for p in result.get("passed_details", [])}:
+                    result.setdefault("passed_details", []).append({
+                        "rule_id": rid,
+                        "rule_text": f"Exempt — logo on product packaging is pre-approved.",
+                    })
+        violation_ids = {v["rule_id"] for v in result.get("violations", []) if "rule_id" in v}
 
     if halo.get("halo_on_z") is True and not is_product_photo:
         if "LOGO-DONT-02" not in violation_ids:
