@@ -18,6 +18,7 @@ RUN pip install --no-cache-dir -r backend/requirements.txt
 
 COPY backend/ ./backend/
 
+COPY --from=frontend-build /usr/local/bin/node /usr/local/bin/node
 COPY --from=frontend-build /app/frontend/.next ./frontend/.next
 COPY --from=frontend-build /app/frontend/public ./frontend/public
 COPY --from=frontend-build /app/frontend/package.json ./frontend/package.json
