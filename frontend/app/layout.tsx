@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "BrandGuard | Compliance Suite",
   description: "AI-powered marketing compliance analysis for ZONNIC brand guidelines",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
