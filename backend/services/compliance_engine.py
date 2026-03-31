@@ -57,6 +57,31 @@ def _recalculate_verdict(llm_result: dict, short_hash: str = ""):
         llm_result["confidence"] = max(llm_result.get("confidence", 0), 99)
 
 
+LOGO_RULE_PREFIXES = ("LOGO-", "LOGO-DONT-")
+
+def _adjust_educational_content_severity(llm_result: dict, brand_detection: dict, short_hash: str):
+    content_type = llm_result.get("content_type_detected", "unknown")
+    if content_type != "educational":
+        return
+
+    logo_present = brand_detection.get("logo", {}).get("present", False)
+    if logo_present:
+        return
+
+    violations = llm_result.get("violations", [])
+    downgraded = []
+    for v in violations:
+        rule_id = v.get("rule_id", "")
+        if rule_id.startswith(LOGO_RULE_PREFIXES):
+            if v.get("severity") == "critical":
+                v["severity"] = "warning"
+                v["issue"] = v.get("issue", "") + " (Note: Educational/testimonial content may not require the logo per brand guidelines.)"
+                downgraded.append(rule_id)
+
+    if downgraded:
+        logger.info("[%s] Educational content: downgraded logo rules to warning: %s", short_hash, downgraded)
+
+
 def _save_debug(filename: str, image_hash: str, vision_signals: dict, brand_detection: dict, llm_result: dict):
     try:
         from backend.services.llm_service import _format_detection_summary
@@ -101,6 +126,7 @@ async def analyze_single_image(
 
     _save_debug(filename, image_hash, vision_signals, brand_detection, llm_result)
 
+    _adjust_educational_content_severity(llm_result, brand_detection, short_hash)
     _recalculate_verdict(llm_result, short_hash)
 
     session_id = str(uuid.uuid4())
@@ -218,6 +244,7 @@ async def analyze_single_image_streaming(
 
     _save_debug(filename, image_hash, vision_signals, brand_detection, llm_result)
 
+    _adjust_educational_content_severity(llm_result, brand_detection, short_hash)
     _recalculate_verdict(llm_result, short_hash)
 
     verdict = llm_result.get("verdict", "WARNING")

@@ -94,11 +94,11 @@ COLOUR ANALYSIS:
 - Do they match any ZONNIC flavour palette? (Grey/Neutral, Green/Mint, Blue)
 - Is the secondary/accent colour used sparingly or as a dominant element?
 
-CONTENT TYPE (classify carefully — this determines which background rules apply):
-- FLAVOUR-LED: The asset focuses on the product, a specific flavour, or flavour-related messaging. Product shots, flavour packaging, flavour profiles.
-- EDUCATIONAL: Testimonials, health information, how-to-use guides, convenience messaging, quitting smoking content, user quotes/stories. If the image features a person with a quote or testimonial, it is EDUCATIONAL.
-- BRAND PURPOSE: Lifestyle imagery, brand story, brand awareness, general brand messaging without specific flavour focus.
-- LOGO ONLY: Just the ZONNIC logo on a plain background with no other content.
+CONTENT TYPE:
+- Is this a flavour-led asset (focused on product/flavour)?
+- Is this educational content (health/information focused)?
+- Is this brand purpose content (lifestyle/brand story)?
+- Or is it just the logo on a simple background?
 
 Return ONLY valid JSON matching the schema. No extra text."""
 
@@ -228,24 +228,25 @@ IMPORTANT BRAND DESIGN CONTEXT:
 - On white or grey backgrounds, the C halo MUST be a gradient (two colours), NOT a solid single colour.
 
 ASSETS IN PRACTICE — CONTENT TYPE vs BACKGROUND (critical cross-check):
-You MUST first classify the content type, then verify the background matches:
+First classify the content type, then verify the background AND logo requirements match:
 
 1. FLAVOUR-LED content (product shots, flavour profiles, flavour-focused messaging):
-   → Background MUST be primary flavour colour (1) or full gradient (1 & 2)
-   → DON'T use solid white background for flavour-led visuals (GRAD-DONT-07)
-   → DON'T use grey background for flavour-led content
-   → Secondary colour should only be used as accent highlights, NEVER as full background (COLOR-04, GRAD-DONT-04)
+   - Background MUST be primary flavour colour (1) or full gradient (1 & 2)
+   - DON'T use solid white background for flavour-led visuals (GRAD-DONT-07)
+   - Secondary colour only as accent, NEVER as full background (COLOR-04, GRAD-DONT-04)
+   - Logo and halo ARE required
 
-2. EDUCATIONAL content (testimonials, health info, how-to-use, convenience messaging):
-   → Background MUST be grey (the signature grey gradient at 50% opacity on white)
-   → Secondary colours used ONLY as accents/highlights, not dominant
-   → DON'T use gradient backgrounds for educational content (GRAD-DONT-05)
+2. EDUCATIONAL content (testimonials, health info, how-to-use, convenience messaging, person with quote):
+   - Background MUST be grey (signature grey gradient at 50% opacity on white)
+   - Secondary colours used ONLY as accents/highlights, not dominant
+   - DON'T use gradient backgrounds for educational content (GRAD-DONT-05)
+   - CRITICAL EXCEPTION: Educational/testimonial assets MAY legitimately NOT include the ZONNIC logo or C halo. The brand guidelines show approved educational assets without any logo (e.g. testimonials with person photos and quotes). If the logo is missing from educational content, ALL logo-related rules (LOGO-01 through LOGO-13, LOGO-DONT-01 through LOGO-DONT-11) should be severity "warning" NOT "critical". Mark them as warnings with a note like "Logo is not present, which is acceptable for educational content but recommended for brand consistency."
+   - Regulatory elements (18+ icon, nicotine warning, risk text) are ALWAYS required regardless — these remain critical.
 
 3. BRAND PURPOSE content (lifestyle, brand story, awareness):
-   → Background should be grey & white, properly laid out
-   → DON'T use gradient backgrounds for brand purpose content (GRAD-DONT-05)
-
-If the content type and background don't match these rules, flag the appropriate violations.
+   - Background should be grey & white, properly laid out
+   - DON'T use gradient backgrounds for brand purpose content (GRAD-DONT-05)
+   - Logo IS required for brand purpose content
 
 VIOLATION DETECTION — TWO CATEGORIES:
 A) MISSING ELEMENTS (something required is not there):
