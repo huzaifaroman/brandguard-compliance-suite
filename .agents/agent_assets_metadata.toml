@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "vRlGTV6r57i3QV8J4bFyh"
+uri = "file://BrandGuard_Backend_Pipeline_Detail.md"
+type = "text"
+title = "BrandGuard Backend Pipeline — Detailed Activity Diagram Reference"
