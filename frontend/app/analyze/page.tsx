@@ -38,7 +38,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import Link from "next/link";
-import { pollAnalysis, getChatMessages, streamChatMessage } from "@/lib/api";
+import { pollAnalysis, getChatMessages, streamChatMessage, getAnalysis } from "@/lib/api";
 import type { JobStatus } from "@/lib/api";
 import type { ComplianceResult, Violation, ChatMessage, PassedDetail, CheckPerformed } from "@/lib/types";
 import { getFriendlyName } from "@/lib/rule-names";
@@ -137,6 +137,18 @@ export default function AnalyzePage() {
       if (saved.previewUrl) setPreview(saved.previewUrl);
       setRestoredFromSession(true);
       if (saved.result.session_id) {
+        getAnalysis(saved.result.session_id)
+          .then((fresh) => {
+            if (fresh.image_url) {
+              setPreview(fresh.image_url);
+              setResult((prev) => prev ? { ...prev, image_url: fresh.image_url } : prev);
+              saveSession(
+                { ...saved.result, image_url: fresh.image_url },
+                fresh.image_url
+              );
+            }
+          })
+          .catch(() => {});
         getChatMessages(saved.result.session_id).then((msgs) => {
           if (msgs.length > 0) setChatMessages(msgs);
         }).catch(() => {});
