@@ -9,7 +9,7 @@ logger = logging.getLogger("backend.routers.history")
 
 router = APIRouter(prefix="/api", tags=["history"])
 
-HISTORY_CACHE_TTL = 3600
+HISTORY_CACHE_TTL = 600
 
 
 @router.get("/history", response_model=HistoryResponse)

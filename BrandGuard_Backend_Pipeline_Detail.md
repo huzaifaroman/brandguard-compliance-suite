@@ -6,7 +6,7 @@
 
 ## 1. SYSTEM OVERVIEW
 
-**What it does**: Accepts a marketing image upload, runs it through a multi-stage AI pipeline (Azure Vision 4.0 + GPT-4.1), evaluates it against 79 ZONNIC brand compliance rules, and returns a structured Pass/Fail/Warning verdict with bounding boxes, fix suggestions, and evidence.
+**What it does**: Accepts a marketing image upload, runs it through a multi-stage AI pipeline (Azure Vision 4.0 + GPT-4.1), evaluates it against 62 ZONNIC brand compliance rules, and returns a structured Pass/Fail/Warning verdict with bounding boxes, fix suggestions, and evidence.
 
 **Tech Stack**:
 - **Framework**: FastAPI (Python) with Uvicorn (single worker)
@@ -133,11 +133,11 @@ Once validation passes, every analysis mode runs the same core pipeline via `ana
 - **Critical distinction**: If the only ZONNIC logo is on a physical product (tin/can), the logo and halo are pre-approved product packaging — not flagged as violations
 
 #### Pass 2: Rule Evaluation (`evaluate_rules()`)
-- **Purpose**: Evaluate every single one of the 79 brand rules against the detected brand elements
+- **Purpose**: Evaluate every single one of the 62 brand rules against the detected brand elements
 - **Input to GPT-4.1**:
   - The actual image (base64-encoded again at "high" detail)
   - The brand detection fact sheet from Pass 1 (formatted as readable text)
-  - All 79 rules from `rules.json` (structured by category)
+  - All 62 rules from `rules.json` (structured by category)
   - Image dimensions (for bounding box pixel coordinates)
   - Optional user prompt
 - **System Prompt**: Exhaustive instructions covering:
@@ -199,7 +199,7 @@ Checks performed (each forces a violation if Pass 1 facts show it but LLM didn't
 
 ### Stage 5c: RULE COVERAGE VALIDATION
 - **Service**: `_validate_rule_coverage()` in `llm_service.py`
-- Ensures every one of the 79 rule IDs appears in either `violations` or `passed_details`
+- Ensures every one of the 62 rule IDs appears in either `violations` or `passed_details`
 - If a rule ID appears in BOTH → removes from `passed_details` (violation takes precedence)
 - If a rule ID appears in NEITHER → adds to `passed_details` as `status: "not_applicable"`
 - Logs coverage stats
@@ -285,7 +285,7 @@ The final `ComplianceResult` returned to the frontend:
 - Returns: image_url (with fresh SAS token), verdict, confidence, timestamp, violation count
 
 ### 6c. Rules — `GET /api/rules`
-- Returns the full 79-rule set from `rules.json`
+- Returns the full 62-rule set from `rules.json`
 - Organized by category: regulatory, logo, logo_donts, gradients, colours, content, typography
 
 ### 6d. Health Check — `GET /health`
@@ -294,23 +294,23 @@ The final `ComplianceResult` returned to the frontend:
 
 ---
 
-## 7. THE 79 BRAND RULES (Organized by Category)
+## 7. THE 62 BRAND RULES (Organized by Category)
 
 The rules are loaded from `backend/data/rules.json` at startup and organized into these categories:
 
 | Category | Rule ID Prefix | Count | Examples |
 |---|---|---|---|
 | Regulatory | REG-01 to REG-05 | 5 | Nicotine warning banner, 18+ icon, risk communication, bilingual requirement |
-| Logo Usage | LOGO-01 to LOGO-13 | 13 | Logo colour on backgrounds, minimum size, clear space, proper usage |
+| Logo Usage | LOGO-01 to LOGO-13 | 15 | Logo colour on backgrounds, minimum size, clear space, proper usage |
 | Logo Don'ts | LOGO-DONT-01 to LOGO-DONT-15 | 15 | Don't add halo on Z, don't outline halo, don't distort, don't recolour |
-| Gradient Rules | GRAD-01 to GRAD-08 | 8 | Gradient direction, colour pairing, opacity |
-| Gradient Don'ts | GRAD-DONT-01 to GRAD-DONT-08 | 8 | Don't use wrong colours, don't reverse direction |
-| Colour Application | COLOR-01 to COLOR-07 | 7 | Primary/secondary usage, accent colours, flavour palette matching |
-| Content Type | CONTENT-01 to CONTENT-06 | 6 | Flavour-led vs educational vs brand purpose requirements |
-| Content Don'ts | CONTENT-DONT-01 to CONTENT-DONT-05 | 5 | Don't mix content types, don't use wrong background for content type |
-| Typography | TYPO-01 to TYPO-06 | 6 | Santral font family, sans-serif requirement, hierarchy |
+| Logo Don'ts (Gradients/BGs) | LOGO-DONT-GRAD | 8 | Halo colour rules per background type |
+| Gradient Rules | GRAD-01 to GRAD-05 | 5 | Gradient direction, colour pairing, opacity |
+| Colour Application | COLOR-01 to COLOR-04 | 4 | Primary/secondary usage, accent colours, flavour palette matching |
+| Content Type | CONTENT-01 to CONTENT-03 | 3 | Flavour-led vs educational vs brand purpose requirements |
+| Content Don'ts | CONTENT-DONT-01 to CONTENT-DONT-04 | 4 | Don't mix content types, don't use wrong background for content type |
+| Typography | TYPO-01 to TYPO-03 | 3 | Santral font family, sans-serif requirement, hierarchy |
 
-**Total: 79 rules** (some categories have sub-rules)
+**Total: 62 compliance rules** (plus 3 brand colour palette entries = 65 displayed on frontend)
 
 ---
 
@@ -400,7 +400,7 @@ chat_messages    — id, session_id, role, content, message_type, timestamp
         ▼                              │
 [GPT-4.1 Pass 2: Rule Evaluation]    │
    └─ Image + Detection Facts + Rules  │
-   └─ Evaluates all 79 rules          │
+   └─ Evaluates all 62 rules          │
    └─ Returns violations + passed      │
    └─ Bounding boxes for each          │
         │                              │
@@ -418,7 +418,7 @@ chat_messages    — id, session_id, role, content, message_type, timestamp
         │                              │
         ▼                              │
 [Rule Coverage Validation]            │
-   └─ Ensure all 79 rules accounted   │
+   └─ Ensure all 62 rules accounted   │
    └─ Remove duplicates               │
    └─ Add missing as not_applicable    │
         │                              │
