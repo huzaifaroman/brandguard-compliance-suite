@@ -22,3 +22,4 @@ out/
 .local/
 attached_assets/
 proxy3000.js
+backend/debug_raw_responses.json
