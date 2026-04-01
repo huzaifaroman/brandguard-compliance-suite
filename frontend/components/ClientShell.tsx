@@ -7,11 +7,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { AuroraBackground } from "@/components/AuroraBackground";
+import { Menu, X } from "lucide-react";
 
 function SidebarSkeleton() {
   return (
     <aside
-      className="fixed left-0 top-0 h-screen flex flex-col glass-strong z-50"
+      className="fixed left-0 top-0 h-screen hidden md:flex flex-col glass-strong z-50"
       style={{ width: "var(--sidebar-width)" }}
     >
       <div className="p-5 border-b border-border">
@@ -57,6 +58,7 @@ const ExtErrorFilter = dynamic(() => import("@/components/ExtErrorFilter"), { ss
 export default function ClientShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [navigating, setNavigating] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const prevPathRef = useRef(pathname);
 
   useEffect(() => {
@@ -68,6 +70,10 @@ export default function ClientShell({ children }: { children: React.ReactNode })
     }
   }, [pathname]);
 
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
   return (
     <>
       <ExtErrorFilter />
@@ -75,12 +81,45 @@ export default function ClientShell({ children }: { children: React.ReactNode })
       <TooltipProvider>
         <div className="relative z-10 flex min-h-screen">
           <Sidebar />
-          <main className="flex-1 overflow-auto" style={{ marginLeft: "var(--sidebar-width)" }}>
+
+          <AnimatePresence>
+            {mobileMenuOpen && (
+              <>
+                <motion.div
+                  className="fixed inset-0 bg-black/60 z-[60] md:hidden"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setMobileMenuOpen(false)}
+                />
+                <motion.div
+                  className="fixed left-0 top-0 h-full z-[70] md:hidden"
+                  initial={{ x: -260 }}
+                  animate={{ x: 0 }}
+                  exit={{ x: -260 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                >
+                  <Sidebar mobile onNavigate={() => setMobileMenuOpen(false)} />
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+
+          <button
+            className="fixed top-4 left-4 z-[55] md:hidden w-10 h-10 rounded-lg glass-strong flex items-center justify-center text-foreground"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+
+          <main
+            className="flex-1 overflow-auto ml-0 md:ml-[var(--sidebar-width)]"
+          >
             <AnimatePresence>
               {navigating && (
                 <motion.div
-                  className="fixed top-0 left-0 right-0 z-[100] h-0.5"
-                  style={{ marginLeft: "var(--sidebar-width)" }}
+                  className="fixed top-0 left-0 right-0 z-[100] h-0.5 md:ml-[var(--sidebar-width)]"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -98,6 +137,7 @@ export default function ClientShell({ children }: { children: React.ReactNode })
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.1 }}
+                  className="pt-14 md:pt-0"
                 >
                   {children}
                 </motion.div>

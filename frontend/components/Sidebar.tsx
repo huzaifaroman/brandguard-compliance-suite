@@ -30,14 +30,28 @@ const poweredByIcons = [
   { src: "/icons/upstash-icon-white-bg.png", alt: "Upstash Redis", tooltip: "Upstash Redis" },
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+  mobile?: boolean;
+  onNavigate?: () => void;
+}
+
+export default function Sidebar({ mobile, onNavigate }: SidebarProps) {
   const pathname = usePathname();
+
+  const handleNavClick = () => {
+    if (mobile && onNavigate) onNavigate();
+  };
+
   return (
     <aside
-      className="fixed left-0 top-0 h-screen flex flex-col glass-strong z-50"
-      style={{ width: "var(--sidebar-width)" }}
+      className={`flex flex-col glass-strong z-50 ${
+        mobile
+          ? "w-[260px] h-full"
+          : "fixed left-0 top-0 h-screen hidden md:flex"
+      }`}
+      style={mobile ? undefined : { width: "var(--sidebar-width)" }}
     >
-      <Link href="/analyze" className="block">
+      <Link href="/analyze" className="block" onClick={handleNavClick}>
         <motion.div
           className="p-5 border-b border-border group cursor-pointer"
           whileHover={{ backgroundColor: "rgba(99,102,241,0.04)" }}
@@ -86,6 +100,7 @@ export default function Sidebar() {
               className="relative block"
               onMouseEnter={() => prefetchRoute(item.href)}
               onFocus={() => prefetchRoute(item.href)}
+              onClick={handleNavClick}
             >
               <motion.div
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors duration-200 group relative z-10 ${
@@ -100,7 +115,7 @@ export default function Sidebar() {
                 <AnimatePresence>
                   {isActive && (
                     <motion.div
-                      layoutId="sidebar-active"
+                      layoutId={mobile ? "sidebar-active-mobile" : "sidebar-active"}
                       className="absolute inset-0 rounded-lg bg-primary/8 border border-primary/20"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -117,7 +132,7 @@ export default function Sidebar() {
                 {isActive && (
                   <motion.div
                     className="ml-auto w-1.5 h-1.5 rounded-full bg-primary relative z-10"
-                    layoutId="sidebar-dot"
+                    layoutId={mobile ? "sidebar-dot-mobile" : "sidebar-dot"}
                     transition={{ type: "spring", stiffness: 400, damping: 25 }}
                   />
                 )}
@@ -167,4 +182,3 @@ export default function Sidebar() {
     </aside>
   );
 }
-
